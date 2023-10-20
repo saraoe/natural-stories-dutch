@@ -1,0 +1,5 @@
+pypandoc==1.11
+pandas==2.1.1
+spacy==3.7.1
+https://huggingface.co/spacy/nl_core_news_sm/resolve/main/nl_core_news_sm-any-py3-none-any.whl
+textdescriptives==2.7.0
