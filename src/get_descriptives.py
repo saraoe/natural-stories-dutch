@@ -66,11 +66,11 @@ def rare_token_corpus(
         yield sum([1 for token in tokens if token in rare_tokens])
 
 
-def main(path: str):
+def main(text_path: str, index_path: str, out_path: str):
     descriptives_list = []
     token_counter = Counter()
     tokens_in_doc = {}
-    for text_path, text in read_texts(path):
+    for text_path, text in read_texts(text_path):
         doc = nlp(text)
         # from td
         counts = doc._.counts
@@ -106,7 +106,7 @@ def main(path: str):
     )
 
     # add type of text
-    stories_index = pd.read_csv("stories_index.csv")
+    stories_index = pd.read_excel(index_path)
     stories_index["file_name"] = [
         fix_filename(filename) for filename in stories_index["Filename"]
     ]
@@ -117,9 +117,11 @@ def main(path: str):
     descriptives = descriptives.merge(relevant_index, how="left", on="file_name")
 
     # save df
-    descriptives.to_csv("../data/corpus_descriptives.csv")
+    descriptives.to_csv(out_path)
 
 
 if __name__ == "__main__":
-    path = "../texts/*.txt"
-    main(path)
+    text_path = "texts/*.txt"
+    index_path = "data/stories_index.xlsx"
+    out_path = "data/corpus_descriptives.csv"
+    main(text_path, index_path, out_path)
