@@ -21,11 +21,13 @@ def read_texts(path: str):
         yield text_path, text
 
 
-def fix_filename(filename: str):
-    filename = re.sub("\s", "_", filename)
-    filename = re.sub("[^_]\W", "", filename)
-    filename = filename.lower()
-    return filename
+def fix_filename(file_name: str):
+    file_name = re.sub("texts", "", file_name)
+    file_name = re.sub("txt", "", file_name)
+    file_name = re.sub(r"[\s]", "_", file_name)
+    file_name = re.sub(r"[^_\w]", "", file_name)
+    file_name = file_name.lower()
+    return file_name
 
 
 def fix_types(text_type: list):
@@ -91,7 +93,7 @@ def main(text_path: str, index_path: str, out_path: str):
         tmp["dependency_depth_std"] = np.std(max_depth_sents)
 
         # add file_name
-        tmp["file_name"] = fix_filename(text_path[6:-4])
+        tmp["file_name"] = fix_filename(text_path)
 
         tokens_in_doc[tmp["file_name"]] = filter_tokens(doc)
         token_counter = token_counter + Counter(
