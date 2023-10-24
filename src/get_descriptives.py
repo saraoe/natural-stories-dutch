@@ -115,8 +115,7 @@ def main(text_path: str, index_path: str, out_path: str):
     stories_index["text_type"] = [
         fix_types(text_type) for text_type in stories_index["Type of text"]
     ]
-    relevant_index = stories_index[["text_type", "file_name", "Number"]]
-    descriptives = descriptives.merge(relevant_index, how="left", on="file_name")
+    descriptives = descriptives.merge(stories_index, how="left", on="file_name")
 
     # save df
     descriptives.to_csv(out_path)
