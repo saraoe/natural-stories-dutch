@@ -3,6 +3,8 @@ pandas==2.1.1
 spacy==3.7.1
 https://huggingface.co/spacy/nl_core_news_sm/resolve/main/nl_core_news_sm-any-py3-none-any.whl
 textdescriptives==2.7.0
+transformers==4.34.1
+torch==2.1.0
 gdown==4.7.1
 openpyxl==3.1.2
 matplotlib==3.8.0
