@@ -5,8 +5,16 @@ We are building a corpus of Dutch stories for a self-paced reading (SPR) EEG stu
 ### Texts in corpus
 | Number | Title | Author| Type |
 | --- | --- | --- | --- | 
-| 1 | --- | --- | Fairy tale |
-| 2 | --- | --- | Technical text |
+| 1 | Mijn Heer Zak met Rijst | --- | Fairy tale |
+| 2 | Waarom de reuzen in Limburg zijn uitgestorven | --- | Fairy tale |
+| 3 | De eerste opiumoorlog | --- | History |
+| 4 | Aspasia | --- | History |
+| 5 | De zilveren schaatsen | --- | Novel |
+| 6 | Carrie | --- | Synopsis roman |
+| 7 | Permafrost | --- | Technical text |
+| 8 | Nomadisch pastoralisme | --- | Technical text |
+| 9 | Kieming | --- | Technical text |
+| 10 | Vleermuizen | --- | Technical text |
 
 ## Syntactic features
 
