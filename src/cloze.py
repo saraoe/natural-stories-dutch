@@ -80,12 +80,16 @@ class BloomHeadModel:
         return word_probability
 
 
-def main(text_path: str, out_path: str):
+def main(text_path: str, out_path: str, include_only: list = None):
     model = BloomHeadModel("bigscience/bloom-560m")
     nlp = spacy.load("nl_core_news_sm")
 
     df_list = []
     for name, text in read_texts(text_path):
+        if include_only:
+            if fix_filename(name) not in text_names:
+                continue
+
         print(f"working on file: {name}")
         doc = nlp(text)
 
@@ -118,4 +122,19 @@ def main(text_path: str, out_path: str):
 if __name__ == "__main__":
     text_path = "texts/*"
     out_path = "data/cloze.csv"
-    main(text_path, out_path)
+
+    # only use relevant texts
+    text_names = [
+        "mijn_heer_zak_met_rijst",
+        "waarom_de_reuzen_in_limburg_zijn_uitgestorven",
+        "de_eerste_opiumoorlog",
+        "aspasia",
+        "de_zilveren_schaatsen",
+        "carrie",
+        "permafrost",
+        "nomadisch_pastoralisme",
+        "kieming",
+        "vleermuizen",
+    ]
+
+    main(text_path, out_path, include_only=text_names)
