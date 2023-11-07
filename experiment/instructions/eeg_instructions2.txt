@@ -1,0 +1,16 @@
+You will read 10 texts in total. The texts will be presented word by word in the middle of the screen. You will read the texts at your own pace. To view the next word, you press the spacebar. Make sure you have read the word before continuing, as you will not be able to go back.
+
+
+<to be decided> will appear before each text. A fixation point will appear before each paragraph in the text.
+
+
+After each text you will be asked a couple of questions with four possible answers (1, 2, 3, and 4). You pick your answer by pressing the corresponding number on the keyboard.
+
+
+If you have any questions, please contact the experimenter!
+
+
+The experiment begins with some practice rounds to familiarize yourself with the task.
+
+
+(Press a key to continue!)
