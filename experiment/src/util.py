@@ -1,8 +1,10 @@
 """
-Functions for reading txt files
+Util functions
 """
 import re
 from glob import glob
+import pandas as pd
+from typing import List
 
 
 def get_name_from_path(path: str):
@@ -22,3 +24,10 @@ def read_text(path: str, stories: bool = False):
             yield text_name, text
         else:
             yield text
+
+
+def list_to_csv(df_list: List[dict], out_path: str, extra_cols: dict = {}):
+    df = pd.DataFrame(df_list, index=range(len(df_list)))
+    for name, values in extra_cols.items():
+        df[name] = values
+    df.to_csv(out_path)

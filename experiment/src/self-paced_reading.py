@@ -2,10 +2,10 @@
 Self-paced reading experiment
 """
 
-from psychopy import visual, core
+from psychopy import visual, core, gui, data
 import os
 import pandas as pd
-from read_txt import read_text
+from util import read_text, list_to_csv
 from show_stim import (
     show_fixation,
     show_text,
@@ -18,14 +18,24 @@ from show_stim import (
 def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
     stopwatch = core.Clock()
 
-    # empty dfs
-    rt_df = pd.DataFrame()
+    # empty lists for dfs
+    rts = []
     responses = []
 
     # questions
     questions_df = pd.read_excel(paths["questions"])
 
     # GUI information
+    dlg = gui.Dlg(title = "Reading experiment") 
+    dlg.addField("Participant ID: ") 
+    dlg.addField("Age: ")
+    dlg.addField("Gender: ", choices=["Female", "Male", "Other" ]) 
+    dlg.show() 
+    
+    if dlg.OK:
+        gui_data = dlg.data
+    elif dlg.Cancel: 
+        core.quit() 
 
     # defining a window
     win = visual.Window(color="black", fullscr=False)
@@ -48,9 +58,8 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
             words = paragraph.split(" ")
             for word in words:
                 rt = show_word(word, text_stim, win, stopwatch)
-                rt_df = rt_df.append(
-                    {"reation_time": rt, "story": story_name, "word": word},
-                    ignore_index=True,
+                rts.append(
+                    {"reation_time": rt, "story": story_name, "word": word}
                 )
 
                 show_blackscreen(win, sec=blackscreen_time)
@@ -68,11 +77,25 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
     # saving data
     if not os.path.exists(paths["out_data"]):
         os.makedirs(paths["out_data"])
-    rt_df.to_csv(os.path.join(paths["out_data"], "rt.csv"))  # change path!
-    responses_df = pd.DataFrame(responses, index=range(len(responses)))
-    responses_df.to_csv(
-        os.path.join(paths["out_data"], "responses.csv")
-    )  # change path!
+    
+    date = data.getDateStr()
+    file_end = f"{gui_data[0]}_{date}"
+    gui_information = {
+        "participant_id": gui_data[0],
+        "age": gui_data[1],
+        "gender": gui_data[2]
+    }
+    
+    list_to_csv(
+        df_list = rts,
+        out_path = os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
+        extra_cols = gui_information
+    )
+    list_to_csv(
+        df_list = responses,
+        out_path = os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
+        extra_cols = gui_information
+    )
 
 
 if __name__ == "__main__":
