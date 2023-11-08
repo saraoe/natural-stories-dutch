@@ -26,16 +26,16 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
     questions_df = pd.read_excel(paths["questions"])
 
     # GUI information
-    dlg = gui.Dlg(title = "Reading experiment") 
-    dlg.addField("Participant ID: ") 
+    dlg = gui.Dlg(title="Reading experiment")
+    dlg.addField("Participant ID: ")
     dlg.addField("Age: ")
-    dlg.addField("Gender: ", choices=["Female", "Male", "Other" ]) 
-    dlg.show() 
-    
+    dlg.addField("Gender: ", choices=["Female", "Male", "Other"])
+    dlg.show()
+
     if dlg.OK:
         gui_data = dlg.data
-    elif dlg.Cancel: 
-        core.quit() 
+    elif dlg.Cancel:
+        core.quit()
 
     # defining a window
     win = visual.Window(color="black", fullscr=False)
@@ -58,9 +58,7 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
             words = paragraph.split(" ")
             for word in words:
                 rt = show_word(word, text_stim, win, stopwatch)
-                rts.append(
-                    {"reation_time": rt, "story": story_name, "word": word}
-                )
+                rts.append({"reation_time": rt, "story": story_name, "word": word})
 
                 show_blackscreen(win, sec=blackscreen_time)
 
@@ -77,24 +75,24 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
     # saving data
     if not os.path.exists(paths["out_data"]):
         os.makedirs(paths["out_data"])
-    
+
     date = data.getDateStr()
     file_end = f"{gui_data[0]}_{date}"
     gui_information = {
         "participant_id": gui_data[0],
         "age": gui_data[1],
-        "gender": gui_data[2]
+        "gender": gui_data[2],
     }
-    
+
     list_to_csv(
-        df_list = rts,
-        out_path = os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
-        extra_cols = gui_information
+        df_list=rts,
+        out_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
+        extra_cols=gui_information,
     )
     list_to_csv(
-        df_list = responses,
-        out_path = os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
-        extra_cols = gui_information
+        df_list=responses,
+        out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
+        extra_cols=gui_information,
     )
 
 
