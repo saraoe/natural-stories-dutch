@@ -9,7 +9,7 @@ from typing import List
 
 def get_name_from_path(path: str):
     path = path.replace("_", " ")
-    path = path.replace("stories", "")
+    path = path.replace("texts", "")
     path = path.replace("txt", "")
     path = re.sub(r"[^\w\s]", "", path)
     return path
