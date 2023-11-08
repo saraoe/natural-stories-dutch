@@ -50,6 +50,7 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
     for story_name, story in read_text(paths["stories"], stories=True):
         show_fixation(fix_cross, win, sec=fixation_time)
         show_text(story_name, text_stim, win)
+        document_id = 1  # fix this!
 
         paragraphs = story.split("\n\n")
 
@@ -58,12 +59,13 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
             words = paragraph.split(" ")
             for word in words:
                 rt = show_word(word, text_stim, win, stopwatch)
-                rts.append({"reation_time": rt, "story": story_name, "word": word})
+                rts.append(
+                    {"reation_time": rt, "document_id": document_id, "word": word}
+                )
 
                 show_blackscreen(win, sec=blackscreen_time)
 
         # questions
-        document_id = 1  # fix this!
         qs = questions_df[questions_df["document_id"] == document_id]
         tmp_responses = show_questions(qs, text_stim, win)
         responses += tmp_responses
