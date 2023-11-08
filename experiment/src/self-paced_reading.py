@@ -47,8 +47,11 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
         show_text(instruction, text_stim, win)
 
     # experiment start
-    for story_name, story in read_text(paths["stories"], stories=True):
+    stories = list(read_text(paths["stories"], stories=True))
+    n_stories = len(stories)
+    for n, (story_name, story) in enumerate(stories):
         show_fixation(fix_cross, win, sec=fixation_time)
+        show_text(f"Story {n} out of {n_stories}", text_stim, win)
         show_text(story_name, text_stim, win)
         document_id = 1  # fix this!
 
