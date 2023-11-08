@@ -59,7 +59,6 @@ def show_question(question: str, answers: dict, text_stim, win):
 def show_questions(questions_df: pd.DataFrame, text_stim, win):
     response_list = []
 
-    questions_df = questions_df.sample(frac=1)  # shuffle questions
     for index, row in questions_df.iterrows():
         ans_cols = ["a-correct", "b", "c", "d"]
         answers = {row[col]: col for col in ans_cols}
