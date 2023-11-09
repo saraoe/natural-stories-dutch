@@ -17,8 +17,8 @@ def show_blackscreen(win, sec):
     core.wait(sec)
 
 
-def show_text(word: str, text_stim, win, possible_keys=None):
-    text_stim.text = word
+def show_text(text: str, text_stim, win, possible_keys=None):
+    text_stim.text = text
     text_stim.draw()
     win.flip()
     key = event.waitKeys(keyList=possible_keys)[0]

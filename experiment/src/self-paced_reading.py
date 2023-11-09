@@ -15,7 +15,9 @@ from show_stim import (
 )
 
 
-def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
+def experiment(
+    paths: dict, fixation_time: int, blackscreen_time: int, fullscreen: bool = True
+):
     stopwatch = core.Clock()
 
     # empty lists for dfs
@@ -30,25 +32,35 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
     dlg.addField("Participant ID: ")
     dlg.addField("Age: ")
     dlg.addField("Gender: ", choices=["Female", "Male", "Other"])
+    dlg.addField("Hand: ", choices=["Left", "Right"])
     dlg.show()
 
     if dlg.OK:
         gui_data = dlg.data
+        gui_information = {
+            "participant_id": gui_data[0],
+            "age": gui_data[1],
+            "gender": gui_data[2],
+            "hand": gui_data[3].lower(),
+        }
     elif dlg.Cancel:
         core.quit()
 
     # defining a window
-    win = visual.Window(color="black", fullscr=False)
+    win = visual.Window(color="black", fullscr=fullscreen)
     text_stim = visual.TextStim(win=win)
     fix_cross = visual.TextStim(win=win, text="+", alignText="center")
 
     # show instruction:
-    for instruction in read_text(paths["instruction"]):
+    inst_path = os.path.join(paths["instructions"], "instruction*.txt")
+    for instruction in read_text(inst_path):
         show_text(instruction, text_stim, win)
 
     # experiment start
     stories = list(read_text(paths["stories"], stories=True))
     n_stories = len(stories)
+    pause_path = os.path.join(paths["instructions"], "pause.txt")
+    pause_text = list(read_text(pause_path))[0]
     for n, (story_name, story) in enumerate(stories):
         show_fixation(fix_cross, win, sec=fixation_time)
         show_text(f"Story {n} out of {n_stories}", text_stim, win)
@@ -73,8 +85,12 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
         tmp_responses = show_questions(qs, text_stim, win)
         responses += tmp_responses
 
+        # pause
+        show_text(pause_text, text_stim, win)
+
     # show ending
-    for end in read_text(paths["end"]):
+    end_path = os.path.join(paths["instructions"], "end.txt")
+    for end in read_text(end_path):
         show_text(end, text_stim, win)
 
     # saving data
@@ -82,12 +98,7 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
         os.makedirs(paths["out_data"])
 
     date = data.getDateStr()
-    file_end = f"{gui_data[0]}_{date}"
-    gui_information = {
-        "participant_id": gui_data[0],
-        "age": gui_data[1],
-        "gender": gui_data[2],
-    }
+    file_end = f"{gui_information['participant_id']}_{date}"
 
     list_to_csv(
         df_list=rts,
@@ -104,8 +115,7 @@ def experiment(paths: dict, fixation_time: int, blackscreen_time: int):
 if __name__ == "__main__":
     # paths
     paths = {
-        "instruction": os.path.join("..", "instructions", "instruction*.txt"),
-        "end": os.path.join("..", "instructions", "end.txt"),
+        "instructions": os.path.join("..", "instructions"),
         "stories": os.path.join("..", "..", "texts", "*"),
         "questions": os.path.join("..", "questions.xlsx"),
         "out_data": os.path.join("..", "data"),
@@ -115,4 +125,4 @@ if __name__ == "__main__":
     fixation_time = 0.5
     blackscreen_time = 0.2
 
-    experiment(paths, fixation_time, blackscreen_time)
+    experiment(paths, fixation_time, blackscreen_time, fullscreen=False)
