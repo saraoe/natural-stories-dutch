@@ -15,14 +15,42 @@ from show_stim import (
 )
 
 
+def self_paced_reading(
+    story,
+    document_id,
+    questions_df,
+    win,
+    fix_cross,
+    text_stim,
+    stopwatch,
+    blackscreen_time,
+):
+    rt_list = []
+    paragraphs = story.split("\n\n")
+
+    # show name of story!
+
+    for paragraph in paragraphs:
+        show_fixation(fix_cross, win, sec=fixation_time)
+        words = paragraph.split(" ")
+        for word in words:
+            rt = show_word(word, text_stim, win, stopwatch)
+            rt_list.append(
+                {"reation_time": rt, "document_id": document_id, "word": word}
+            )
+
+            show_blackscreen(win, sec=blackscreen_time)
+
+    # questions
+    qs = questions_df[questions_df["document_id"] == document_id]
+    response = show_questions(qs, text_stim, win)
+    return rt_list, response
+
+
 def experiment(
     paths: dict, fixation_time: int, blackscreen_time: int, fullscreen: bool = True
 ):
     stopwatch = core.Clock()
-
-    # empty lists for dfs
-    rts = []
-    responses = []
 
     # questions
     questions_df = pd.read_excel(paths["questions"])
@@ -52,8 +80,29 @@ def experiment(
     fix_cross = visual.TextStim(win=win, text="+", alignText="center")
 
     # show instruction:
-    inst_path = os.path.join(paths["instructions"], "instruction*.txt")
+    inst_path = os.path.join(paths["instructions"], "eeg_instruction*.txt")
     for instruction in read_text(inst_path):
+        show_text(instruction, text_stim, win)
+
+    # practice phase start
+    practice_info_path = os.path.join(paths["instructions"], "practice_info*.txt")
+    practice_text_path = os.path.join(paths["instructions"], "practice_text*.txt")
+    practice_end_path = os.path.join(paths["instructions"], "practice_end*.txt")
+    for info in read_text(practice_info_path):
+        show_text(info, text_stim, win)
+    for practice_story in read_text(practice_text_path):
+        document_id = 1  ## fix this!
+        rts, responses = self_paced_reading(
+            practice_story,
+            document_id,
+            questions_df,
+            win,
+            fix_cross,
+            text_stim,
+            stopwatch,
+            blackscreen_time,
+        )
+    for instruction in read_text(practice_end_path):
         show_text(instruction, text_stim, win)
 
     # experiment start
@@ -67,22 +116,17 @@ def experiment(
         show_text(story_name, text_stim, win)
         document_id = 1  # fix this!
 
-        paragraphs = story.split("\n\n")
-
-        for paragraph in paragraphs:
-            show_fixation(fix_cross, win, sec=fixation_time)
-            words = paragraph.split(" ")
-            for word in words:
-                rt = show_word(word, text_stim, win, stopwatch)
-                rts.append(
-                    {"reation_time": rt, "document_id": document_id, "word": word}
-                )
-
-                show_blackscreen(win, sec=blackscreen_time)
-
-        # questions
-        qs = questions_df[questions_df["document_id"] == document_id]
-        tmp_responses = show_questions(qs, text_stim, win)
+        tmp_rts, tmp_responses = self_paced_reading(
+            story,
+            document_id,
+            questions_df,
+            win,
+            fix_cross,
+            text_stim,
+            stopwatch,
+            blackscreen_time,
+        )
+        rts += tmp_rts
         responses += tmp_responses
 
         # pause
