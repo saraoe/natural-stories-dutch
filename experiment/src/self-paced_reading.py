@@ -4,6 +4,7 @@ Self-paced reading experiment
 
 from psychopy import visual, core, gui, data
 import os
+import re
 import pandas as pd
 from util import read_text, list_to_csv
 from show_stim import (
@@ -54,6 +55,12 @@ def experiment(
 
     # questions
     questions_df = pd.read_excel(paths["questions"])
+    questions_df["story"] = questions_df["Story"].apply(
+        lambda s: re.sub("[^a-zA-Z\s]+", "", s).lower()
+    )
+    doc_ids = pd.Series(
+        questions_df.document_id.values, index=questions_df.story
+    ).to_dict()
 
     # GUI information
     dlg = gui.Dlg(title="Reading experiment")
@@ -114,7 +121,7 @@ def experiment(
         show_fixation(fix_cross, win, sec=fixation_time)
         show_text(f"Story {n} out of {n_stories}", text_stim, win)
         show_text(story_name, text_stim, win)
-        document_id = 1  # fix this!
+        document_id = doc_ids[story_name]
 
         tmp_rts, tmp_responses = self_paced_reading(
             story,

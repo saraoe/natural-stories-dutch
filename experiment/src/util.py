@@ -1,18 +1,20 @@
 """
 Util functions
 """
-import re
+import re, os
 from glob import glob
 import pandas as pd
 from typing import List
 
 
 def get_name_from_path(path: str):
-    path = path.replace("_", " ")
-    path = path.replace("texts", "")
-    path = path.replace("txt", "")
-    path = re.sub(r"[^\w\s]", "", path)
-    return path
+    name = os.path.split(path)[1]
+    name = name.replace("_", " ")
+    name = name.replace("texts", "")
+    name = name.replace("edited", "")
+    name = name.replace("txt", "")
+    name = re.sub(r"[^\w\s]", "", name)
+    return name
 
 
 def read_text(path: str, stories: bool = False):
