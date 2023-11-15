@@ -151,7 +151,7 @@ def experiment(
     n_stories = len(stories)
     pause_path = os.path.join(paths["instructions"], "pause.txt")
     pause_text = list(read_text(pause_path))[0]
-    for n, (story_name, story) in enumerate(stories):
+    for n, (story_name, story) in enumerate(stories, start=1):
         show_fixation(fix_cross, win, sec=fixation_time)
         show_text(f"Story {n} out of {n_stories}", text_stim, win, escape_keys)
         document_id = doc_ids[story_name]
