@@ -92,6 +92,13 @@ def experiment(
     elif dlg.Cancel:
         core.quit()
 
+    # for saving data
+    if not os.path.exists(paths["out_data"]):
+        os.makedirs(paths["out_data"])
+
+    date = data.getDateStr()
+    file_end = f"{gui_information['participant_id']}_{date}"
+
     # defining a window
     win = visual.Window(color="black", fullscr=fullscreen)
     text_stim = visual.TextStim(win=win)
@@ -137,7 +144,7 @@ def experiment(
         show_text(f"Story {n} out of {n_stories}", text_stim, win, escape_keys)
         document_id = doc_ids[story_name]
 
-        tmp_rts, tmp_responses = self_paced_reading(
+        rts, responses = self_paced_reading(
             story,
             story_name,
             document_id,
@@ -150,8 +157,18 @@ def experiment(
             escape_keys,
             question_keys,
         )
-        rts += tmp_rts
-        responses += tmp_responses
+
+        # save
+        list_to_csv(
+            df_list=rts,
+            out_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
+            extra_cols=gui_information,
+        )
+        list_to_csv(
+            df_list=responses,
+            out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
+            extra_cols=gui_information,
+        )
 
         # pause
         show_text(pause_text, text_stim, win, escape_keys)
@@ -160,24 +177,6 @@ def experiment(
     end_path = os.path.join(paths["instructions"], "end.txt")
     for end in read_text(end_path):
         show_text(end, text_stim, win, escape_keys)
-
-    # saving data
-    if not os.path.exists(paths["out_data"]):
-        os.makedirs(paths["out_data"])
-
-    date = data.getDateStr()
-    file_end = f"{gui_information['participant_id']}_{date}"
-
-    list_to_csv(
-        df_list=rts,
-        out_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
-        extra_cols=gui_information,
-    )
-    list_to_csv(
-        df_list=responses,
-        out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
-        extra_cols=gui_information,
-    )
 
 
 if __name__ == "__main__":
