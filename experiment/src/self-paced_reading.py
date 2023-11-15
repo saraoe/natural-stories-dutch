@@ -131,6 +131,18 @@ def experiment(
             escape_keys,
             question_keys,
         )
+
+        # save
+        list_to_csv(
+            df_list=rts,
+            out_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
+            extra_cols=gui_information,
+        )
+        list_to_csv(
+            df_list=responses,
+            out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
+            extra_cols=gui_information,
+        )
     for end in read_text(practice_end_path):
         show_text(end, text_stim, win, escape_keys)
 
