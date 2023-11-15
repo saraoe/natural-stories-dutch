@@ -113,6 +113,7 @@ def experiment(
         document_id = 1  ## fix this!
         rts, responses = self_paced_reading(
             practice_story,
+            story_name,
             document_id,
             questions_df,
             win,

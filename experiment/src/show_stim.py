@@ -58,13 +58,17 @@ def show_question(
     return response_letter
 
 
-def show_questions(questions_df: pd.DataFrame, text_stim, win):
+def show_questions(
+    questions_df: pd.DataFrame, text_stim, win, escape_keys, question_keys
+):
     response_list = []
 
     for index, row in questions_df.iterrows():
         ans_cols = ["a-correct", "b", "c", "d"]
         answers = {row[col]: col for col in ans_cols}
-        response = show_question(row["Question"], answers, text_stim, win)
+        response = show_question(
+            row["Question"], answers, text_stim, win, escape_keys, question_keys
+        )
         correct = 1 if response == "a-correct" else 0
 
         response_list.append(
