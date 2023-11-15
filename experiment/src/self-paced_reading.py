@@ -124,8 +124,8 @@ def experiment(
             escape_keys,
             question_keys,
         )
-    for instruction in read_text(practice_end_path):
-        show_text(instruction, text_stim, win, escape_keys)
+    for end in read_text(practice_end_path):
+        show_text(end, text_stim, win, escape_keys)
 
     # experiment start
     stories = list(read_text(paths["stories"], stories=True))

@@ -10,8 +10,6 @@ from typing import List
 def get_name_from_path(path: str):
     name = os.path.split(path)[1]
     name = name.replace("_", " ")
-    name = name.replace("texts", "")
-    name = name.replace("edited", "")
     name = name.replace("txt", "")
     name = re.sub(r"[^\w\s]", "", name)
     return name
