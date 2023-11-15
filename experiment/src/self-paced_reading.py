@@ -18,6 +18,7 @@ from show_stim import (
 
 def self_paced_reading(
     story,
+    story_name,
     document_id,
     questions_df,
     win,
@@ -25,17 +26,19 @@ def self_paced_reading(
     text_stim,
     stopwatch,
     blackscreen_time,
+    escape_keys,
+    question_keys,
 ):
     rt_list = []
     paragraphs = story.split("\n\n")
 
-    # show name of story!
+    show_text(story_name, text_stim, win, escape_keys)
 
     for paragraph in paragraphs:
         show_fixation(fix_cross, win, sec=fixation_time)
         words = paragraph.split(" ")
         for word in words:
-            rt = show_word(word, text_stim, win, stopwatch)
+            rt = show_word(word, text_stim, win, stopwatch, escape_keys)
             rt_list.append(
                 {"reation_time": rt, "document_id": document_id, "word": word}
             )
@@ -44,14 +47,22 @@ def self_paced_reading(
 
     # questions
     qs = questions_df[questions_df["document_id"] == document_id]
-    response = show_questions(qs, text_stim, win)
+    response = show_questions(qs, text_stim, win, escape_keys, question_keys)
     return rt_list, response
 
 
 def experiment(
-    paths: dict, fixation_time: int, blackscreen_time: int, fullscreen: bool = True
+    paths: dict,
+    fixation_time: int,
+    blackscreen_time: int,
+    keys: str,
+    fullscreen: bool = True,
 ):
     stopwatch = core.Clock()
+
+    if keys == "computer":
+        escape_keys = ["escape", "q"]
+        question_keys = ["1", "2", "3", "4"]
 
     # questions
     questions_df = pd.read_excel(paths["questions"])
@@ -89,15 +100,16 @@ def experiment(
     # show instruction:
     inst_path = os.path.join(paths["instructions"], "eeg_instruction*.txt")
     for instruction in read_text(inst_path):
-        show_text(instruction, text_stim, win)
+        show_text(instruction, text_stim, win, escape_keys)
 
     # practice phase start
     practice_info_path = os.path.join(paths["instructions"], "practice_info*.txt")
     practice_text_path = os.path.join(paths["instructions"], "practice_text*.txt")
     practice_end_path = os.path.join(paths["instructions"], "practice_end*.txt")
     for info in read_text(practice_info_path):
-        show_text(info, text_stim, win)
+        show_text(info, text_stim, win, escape_keys)
     for practice_story in read_text(practice_text_path):
+        story_name = "Practice Story"
         document_id = 1  ## fix this!
         rts, responses = self_paced_reading(
             practice_story,
@@ -108,9 +120,11 @@ def experiment(
             text_stim,
             stopwatch,
             blackscreen_time,
+            escape_keys,
+            question_keys,
         )
     for instruction in read_text(practice_end_path):
-        show_text(instruction, text_stim, win)
+        show_text(instruction, text_stim, win, escape_keys)
 
     # experiment start
     stories = list(read_text(paths["stories"], stories=True))
@@ -119,12 +133,12 @@ def experiment(
     pause_text = list(read_text(pause_path))[0]
     for n, (story_name, story) in enumerate(stories):
         show_fixation(fix_cross, win, sec=fixation_time)
-        show_text(f"Story {n} out of {n_stories}", text_stim, win)
-        show_text(story_name, text_stim, win)
+        show_text(f"Story {n} out of {n_stories}", text_stim, win, escape_keys)
         document_id = doc_ids[story_name]
 
         tmp_rts, tmp_responses = self_paced_reading(
             story,
+            story_name,
             document_id,
             questions_df,
             win,
@@ -132,17 +146,19 @@ def experiment(
             text_stim,
             stopwatch,
             blackscreen_time,
+            escape_keys,
+            question_keys,
         )
         rts += tmp_rts
         responses += tmp_responses
 
         # pause
-        show_text(pause_text, text_stim, win)
+        show_text(pause_text, text_stim, win, escape_keys)
 
     # show ending
     end_path = os.path.join(paths["instructions"], "end.txt")
     for end in read_text(end_path):
-        show_text(end, text_stim, win)
+        show_text(end, text_stim, win, escape_keys)
 
     # saving data
     if not os.path.exists(paths["out_data"]):
@@ -176,4 +192,8 @@ if __name__ == "__main__":
     fixation_time = 0.5
     blackscreen_time = 0.2
 
-    experiment(paths, fixation_time, blackscreen_time, fullscreen=False)
+    # experimental device
+    keys = "computer"
+    fullscreen = False
+
+    experiment(paths, fixation_time, blackscreen_time, keys, fullscreen)

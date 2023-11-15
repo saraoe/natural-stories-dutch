@@ -17,31 +17,33 @@ def show_blackscreen(win, sec):
     core.wait(sec)
 
 
-def show_text(text: str, text_stim, win, possible_keys=None):
+def show_text(text: str, text_stim, win, escape_keys, possible_keys=None):
     text_stim.text = text
     text_stim.draw()
     win.flip()
     key = event.waitKeys(keyList=possible_keys)[0]
-    if key in ["escape", "q"]:
+    if key in escape_keys:
         win.close()
         core.quit()
     return key
 
 
-def show_word(word: str, text_stim, win, stopwatch):
+def show_word(word: str, text_stim, win, stopwatch, escape_keys):
     text_stim.text = word
     text_stim.draw()
     win.flip()
     stopwatch.reset()
     key = event.waitKeys()[0]
     rt = stopwatch.getTime()
-    if key in ["escape", "q"]:
+    if key in escape_keys:
         win.close()
         core.quit()
     return rt
 
 
-def show_question(question: str, answers: dict, text_stim, win):
+def show_question(
+    question: str, answers: dict, text_stim, win, escape_keys, question_keys
+):
     answers_list = list(answers.keys())
     shuffle(answers_list)
     q_str = f"{question} \n\n"
@@ -49,7 +51,7 @@ def show_question(question: str, answers: dict, text_stim, win):
         q_str += f"{i}: {answer} \n"
 
     key = show_text(
-        q_str, text_stim, win, possible_keys=["escape", "q", "1", "2", "3", "4"]
+        q_str, text_stim, win, escape_keys, possible_keys=escape_keys + question_keys
     )
     response_key = int(key)
     response_letter = answers[answers_list[response_key - 1]]
