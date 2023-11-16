@@ -33,7 +33,7 @@ def self_paced_reading(
     show_text(f"Title: {story_name}", text_stim, win, escape_keys)
 
     for paragraph in paragraphs:
-        show_fixation(fix_cross, win, sec=fixation_time)
+        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
         words = paragraph.split(" ")
         for word in words:
             rt = show_word(word, text_stim, win, stopwatch, escape_keys)
@@ -152,7 +152,7 @@ def experiment(
     pause_path = os.path.join(paths["instructions"], "pause.txt")
     pause_text = list(read_text(pause_path))[0]
     for n, (story_name, story) in enumerate(stories, start=1):
-        show_fixation(fix_cross, win, sec=fixation_time)
+        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
         show_text(f"Story {n} out of {n_stories}", text_stim, win, escape_keys)
         document_id = doc_ids[story_name]
 
