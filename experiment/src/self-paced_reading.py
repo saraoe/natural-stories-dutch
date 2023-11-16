@@ -98,14 +98,14 @@ def experiment(
     win = visual.Window(color="black", fullscr=fullscreen)
     text_stim = visual.TextStim(win=win)
     smalltext_stim = visual.TextStim(win=win)
-    smalltext_stim.size=0.05
+    smalltext_stim.size = 0.05
     fix_cross = visual.TextStim(win=win, text="+", alignText="center")
 
     # show instruction:
     inst_path = os.path.join(paths["instructions"], "eeg_instruction*.txt")
     for instruction in read_text(inst_path):
         show_text(instruction, smalltext_stim, win, escape_keys)
-    smalltext_stim.size=0.07
+    smalltext_stim.size = 0.07
 
     # practice phase start
     practice_info_path = os.path.join(paths["instructions"], "practice_info*.txt")
@@ -127,7 +127,7 @@ def experiment(
             blackscreen_time,
             escape_keys,
         )
-        
+
         # questions
         qs = questions_df[questions_df["document_id"] == document_id]
         responses = show_questions(qs, smalltext_stim, win, escape_keys, question_keys)
@@ -157,7 +157,7 @@ def experiment(
         document_id = doc_ids[story_name]
 
         rts = self_paced_reading(
-            practice_story,
+            story,
             story_name,
             document_id,
             win,
@@ -167,7 +167,7 @@ def experiment(
             blackscreen_time,
             escape_keys,
         )
-        
+
         # questions
         qs = questions_df[questions_df["document_id"] == document_id]
         responses = show_questions(qs, smalltext_stim, win, escape_keys, question_keys)
@@ -196,10 +196,10 @@ def experiment(
 if __name__ == "__main__":
     # paths
     paths = {
-        "instructions": os.path.join("..", "instructions"),
-        "stories": os.path.join("..", "..", "texts", "edited", "*"),
-        "questions": os.path.join("..", "questions.xlsx"),
-        "out_data": os.path.join("..", "data"),
+        "instructions": os.path.join("instructions"),
+        "stories": os.path.join("..", "texts", "edited", "*"),
+        "questions": os.path.join("questions.xlsx"),
+        "out_data": os.path.join("data"),
     }
 
     # experimental parameters
