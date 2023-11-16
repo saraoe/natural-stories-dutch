@@ -114,8 +114,8 @@ def experiment(
     for info in read_text(practice_info_path):
         show_text(info, text_stim, win, escape_keys)
     for practice_story in read_text(practice_text_path):
-        story_name = "Practice Story"
-        document_id = 1  ## fix this!
+        story_name = "Practice Story"  # fix this!
+        document_id = 0
         rts = self_paced_reading(
             practice_story,
             story_name,
