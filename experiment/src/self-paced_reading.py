@@ -28,13 +28,13 @@ def self_paced_reading(
     escape_keys,
 ):
     rt_list = []
-    paragraphs = story.split("\n\n")
+    paragraphs = re.split("\n\n", story)
 
     show_text(f"Title: {story_name}", text_stim, win, escape_keys)
 
     for paragraph in paragraphs:
         show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
-        words = paragraph.split(" ")
+        words = re.split(r"[\s]", paragraph)
         for word in words:
             rt = show_word(word, text_stim, win, stopwatch, escape_keys)
             rt_list.append(
