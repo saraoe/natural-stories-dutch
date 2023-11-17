@@ -30,7 +30,7 @@ def self_paced_reading(
     rt_list = []
     paragraphs = re.split("\n\n", story)
 
-    show_text(f"Title: {story_name}", text_stim, win, escape_keys)
+    show_text(f"Title: {story_name.title()}", text_stim, win, escape_keys)
 
     for paragraph in paragraphs:
         show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
@@ -208,6 +208,6 @@ if __name__ == "__main__":
 
     # experimental device
     keys = "computer"
-    fullscreen = True
+    fullscreen = False
 
     experiment(paths, fixation_time, blackscreen_time, keys, fullscreen)
