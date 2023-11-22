@@ -2,21 +2,53 @@
 Cloze task
 """
 
-from psychopy import visual, core, event
+from psychopy import visual, core, event, gui, data
 import os
 import pandas as pd
 import string
 from typing import List
-from read_txt import read_text
+from util import read_text
 from show_stim import show_text
 
 
-def type_response(characters: List[str], text_stim, win):
-    win.flip()
+def make_lines(current_lines: List[str], word: str, maxchar: int):
+    line = current_lines[-1]
+    tmp_line = line + f" {word}"
+    if len(tmp_line) > maxchar:
+        lines = current_lines + [word]
+    else:
+        lines = current_lines[:-1] + [tmp_line]
+    return lines
+
+
+def key_scroll(scroll: int, key: str, max_lines: int, n_lines: int):
+    if key == "up":
+        scroll -= 1
+        if scroll < 0:
+            scroll = 0
+    if key == "down":
+        scroll += 1
+        if max_lines + scroll > n_lines:
+            scroll = n_lines - max_lines
+    return scroll
+
+
+def type_response(characters: List[str], story_stim, lines, max_lines, text_stim, win):
+    n_lines = len(lines)
+    scroll = n_lines - max_lines
+    response_prefix = "Your response: "
     response = ""
 
     while True:
+        story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
+        text_stim.text = response_prefix + response
+        text_stim.draw()
+        story_stim.draw()
+        win.flip()
         key = event.waitKeys()[0]
+
+        # scroll through text
+        scroll = key_scroll(scroll, key, max_lines, n_lines)
 
         if key == "escape":
             win.close()
@@ -31,64 +63,89 @@ def type_response(characters: List[str], text_stim, win):
         elif key in characters:
             response += key
 
-        text_stim.text = response
-        text_stim.draw()
-        win.flip()
     return response
 
 
-def experiment(stories_path: str, instructions_path: dict, data_path: str):
-    df = pd.DataFrame()
+def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
+    df_list = []
     characters = list(string.ascii_lowercase)
+    escape_keys = ["escape", "q"]
 
-    # GUI
+    # GUI information
+    # dlg = gui.Dlg(title="Reading experiment")
+    # dlg.addField("Participant ID: ")
+    # dlg.addField("Age: ")
+    # dlg.addField("Gender: ", choices=["Female", "Male", "Other"])
+    # dlg.show()
+
+    # if dlg.OK:
+    #     gui_data = dlg.data
+    #     gui_information = {
+    #         "participant_id": gui_data[0],
+    #         "age": gui_data[1],
+    #         "gender": gui_data[2],
+    #     }
+    # elif dlg.Cancel:
+    #     core.quit()
+
+    # # for saving data
+    # if not os.path.exists(paths["out_data"]):
+    #     os.makedirs(paths["out_data"])
+
+    # date = data.getDateStr()
+    # file_end = f"{gui_information['participant_id']}_{date}"
 
     # defining a window
     win = visual.Window(color="black", fullscr=False)
     text_stim = visual.TextStim(win=win)
-
-    # show welcome text
-    for welcome in read_text(instructions_path["welcome"]):
-        show_text(welcome, text_stim, win)
+    storybox_stim = visual.TextBox2(
+        win=win,
+        text="",
+        borderColor="grey",
+        pos=(0, 0.1),
+        size=[1, 0.9],
+    )
+    writebox_stim = visual.TextBox2(win=win, text="", pos=(0, -0.8), size=[1, 0.1])
 
     # show instruction:
-    for instruction in read_text(instructions_path["instruction"]):
-        show_text(instruction, text_stim, win)
+    inst_path = os.path.join(paths["instructions"], "cloze_instruction*.txt")
+    for instruction in read_text(inst_path):
+        show_text(instruction, text_stim, win, escape_keys)
 
     # start experiment
-    for story_name, story in read_text(stories_path, stories=True):
-        words = story.split()
-        show_text(story_name, text_stim, win)
+    for story_name, story in read_text(paths["stories"], stories=True):
+        show_text(story_name, text_stim, win, escape_keys)
+        paragraphs = story.split("\n\n")
 
-        for n, word in enumerate(words):
-            show_text(word, text_stim, win)
-            response = type_response(characters, text_stim, win)
-            df = df.append(
-                {"response": response, "story": story_name, "prev_word": word},
-                ignore_index=True,
-            )
-
-            if n == 10:
-                break
+        lines = [""]
+        for paragraph in paragraphs:
+            words = paragraph.split(" ")
+            for word in words:
+                lines = make_lines(lines, word, maxchar_pr_line)
+                response = type_response(
+                    characters, storybox_stim, lines, max_lines, writebox_stim, win
+                )
+                # df_list.append(
+                #     {"response": response, "story": story_name, "prev_word": word}
+                # )
+            lines.append("\n")
 
     # show ending
-    for end in read_text(instructions_path["end"]):
-        show_text(end, text_stim, win)
-
-    # saving data
-    if not os.path.exists(data_path):
-        os.makedirs(data_path)
-    df.to_csv(os.path.join(data_path, "cloze_data.csv"))  # change path!
+    end_path = os.path.join(paths["instructions"], "end.txt")
+    for end in read_text(end_path):
+        show_text(end, text_stim, win, escape_keys)
 
 
 if __name__ == "__main__":
     # paths
-    stories_path = os.path.join("..", "stories", "*")
-    instructions_path = {
-        "welcome": os.path.join("..", "instructions", "welcome.txt"),
-        "instruction": os.path.join("..", "instructions", "instruction*.txt"),
-        "end": os.path.join("..", "instructions", "end.txt"),
+    paths = {
+        "instructions": os.path.join("instructions"),
+        "stories": os.path.join("..", "texts", "edited", "*"),
+        "out_data": os.path.join("data"),
     }
-    data_path = os.path.join("..", "data")
 
-    experiment(stories_path, instructions_path, data_path)
+    # experimental setup
+    maxchar_pr_line = 30
+    max_lines = 5
+
+    experiment(paths, max_lines, maxchar_pr_line)
