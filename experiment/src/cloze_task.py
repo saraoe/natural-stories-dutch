@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import string
 from typing import List
-from util import read_text
+from util import read_text, list_to_csv
 from show_stim import show_text
 
 
@@ -119,33 +119,32 @@ def type_response(
 
 
 def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
-    df_list = []
     characters = list(string.ascii_lowercase)
     escape_keys = ["escape", "q"]
 
     # GUI information
-    # dlg = gui.Dlg(title="Reading experiment")
-    # dlg.addField("Participant ID: ")
-    # dlg.addField("Age: ")
-    # dlg.addField("Gender: ", choices=["Female", "Male", "Other"])
-    # dlg.show()
+    dlg = gui.Dlg(title="Cloze Task")
+    dlg.addField("Participant ID: ")
+    dlg.addField("Age: ")
+    dlg.addField("Gender: ", choices=["Female", "Male", "Other"])
+    dlg.show()
 
-    # if dlg.OK:
-    #     gui_data = dlg.data
-    #     gui_information = {
-    #         "participant_id": gui_data[0],
-    #         "age": gui_data[1],
-    #         "gender": gui_data[2],
-    #     }
-    # elif dlg.Cancel:
-    #     core.quit()
+    if dlg.OK:
+        gui_data = dlg.data
+        gui_information = {
+            "participant_id": gui_data[0],
+            "age": gui_data[1],
+            "gender": gui_data[2],
+        }
+    elif dlg.Cancel:
+        core.quit()
 
-    # # for saving data
-    # if not os.path.exists(paths["out_data"]):
-    #     os.makedirs(paths["out_data"])
+    # for saving data
+    if not os.path.exists(paths["out_data"]):
+        os.makedirs(paths["out_data"])
 
-    # date = data.getDateStr()
-    # file_end = f"{gui_information['participant_id']}_{date}"
+    date = data.getDateStr()
+    file_end = f"{gui_information['participant_id']}_{date}"
 
     # defining a window
     win = visual.Window(color="black", fullscr=False)
@@ -153,11 +152,16 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
     storybox_stim = visual.TextBox2(
         win=win,
         text="",
-        borderColor="grey",
         pos=(0, 0.1),
         size=[1, 0.9],
     )
-    writebox_stim = visual.TextBox2(win=win, text="", pos=(0, -0.8), size=[1, 0.1])
+    writebox_stim = visual.TextBox2(
+        win=win,
+        text="",
+        pos=(0, -0.8),
+        size=[1, 0.1],
+        borderColor="grey",
+    )
     up = make_arrows("up", storybox_stim, win)
     down = make_arrows("down", storybox_stim, win)
 
@@ -172,9 +176,14 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
         paragraphs = story.split("\n\n")
 
         lines = [""]
+        response = "NA"
+        responses = []
         for paragraph in paragraphs:
             words = paragraph.split()
             for word in words:
+                responses.append(
+                    {"response": response, "story": story_name, "correct_word": word}
+                )
                 lines = make_lines(lines, word, maxchar_pr_line)
                 response = type_response(
                     characters,
@@ -186,10 +195,13 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
                     writebox_stim,
                     win,
                 )
-                # df_list.append(
-                #     {"response": response, "story": story_name, "prev_word": word}
-                # )
             lines.append("\n")
+        # save
+        list_to_csv(
+            df_list=responses,
+            out_path=os.path.join(paths["out_data"], f"cloze_{file_end}.csv"),
+            extra_cols=gui_information,
+        )
 
     # show ending
     end_path = os.path.join(paths["instructions"], "end.txt")
@@ -206,7 +218,7 @@ if __name__ == "__main__":
     }
 
     # experimental setup
-    maxchar_pr_line = 30
-    max_lines = 5
+    maxchar_pr_line = 35
+    max_lines = 7
 
     experiment(paths, max_lines, maxchar_pr_line)
