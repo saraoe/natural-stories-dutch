@@ -5,10 +5,34 @@ Cloze task
 from psychopy import visual, core, event, gui, data
 import os
 import pandas as pd
+import numpy as np
 import string
 from typing import List
 from util import read_text
 from show_stim import show_text
+
+
+def make_arrows(direction: str, textbox, win):
+    if direction == "up":
+        v = np.array([[0, 1], [-0.5, 0], [0.5, 0]])
+    if direction == "down":
+        v = np.array([[0, -1], [-0.5, 0], [0.5, 0]])
+    arrow = visual.ShapeStim(
+        win=win,
+        vertices=v,
+        size=textbox.size / 8,
+    )
+    if direction == "up":
+        arrow.pos = (
+            textbox.pos[0] + textbox.size[0] / 2 + arrow.size[0],
+            textbox.pos[1] + arrow.size[1],
+        )
+    else:
+        arrow.pos = (
+            textbox.pos[0] + textbox.size[0] / 2 + arrow.size[0],
+            textbox.pos[1] - arrow.size[1],
+        )
+    return arrow
 
 
 def make_lines(current_lines: List[str], word: str, maxchar: int):
@@ -33,22 +57,50 @@ def key_scroll(scroll: int, key: str, max_lines: int, n_lines: int):
     return scroll
 
 
-def type_response(characters: List[str], story_stim, lines, max_lines, text_stim, win):
-    n_lines = len(lines)
-    scroll = n_lines - max_lines
+def type_response(
+    characters: List[str],
+    story_stim,
+    lines,
+    max_lines,
+    up_stim,
+    down_stim,
+    text_stim,
+    win,
+):
     response_prefix = "Your response: "
     response = ""
 
+    # scroll if there a more lines than can be viewed
+    n_lines = len(lines)
+    if n_lines <= max_lines:
+        scroll = None
+        up_stim.fillColor = "grey"
+        down_stim.fillColor = "grey"
+    else:
+        scroll = n_lines - max_lines
+
     while True:
-        story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
+        if isinstance(scroll, int) == True:
+            story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
+            up_stim.fillColor = "white"
+            down_stim.fillColor = "white"
+            if scroll == 0:
+                up_stim.fillColor = "grey"
+            if scroll + max_lines == n_lines:
+                down_stim.fillColor = "grey"
+        else:
+            story_stim.text = "\n".join(lines)
         text_stim.text = response_prefix + response
         text_stim.draw()
         story_stim.draw()
+        up_stim.draw()
+        down_stim.draw()
         win.flip()
         key = event.waitKeys()[0]
 
         # scroll through text
-        scroll = key_scroll(scroll, key, max_lines, n_lines)
+        if isinstance(scroll, int) == True:
+            scroll = key_scroll(scroll, key, max_lines, n_lines)
 
         if key == "escape":
             win.close()
@@ -106,6 +158,8 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
         size=[1, 0.9],
     )
     writebox_stim = visual.TextBox2(win=win, text="", pos=(0, -0.8), size=[1, 0.1])
+    up = make_arrows("up", storybox_stim, win)
+    down = make_arrows("down", storybox_stim, win)
 
     # show instruction:
     inst_path = os.path.join(paths["instructions"], "cloze_instruction*.txt")
@@ -119,11 +173,18 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
 
         lines = [""]
         for paragraph in paragraphs:
-            words = paragraph.split(" ")
+            words = paragraph.split()
             for word in words:
                 lines = make_lines(lines, word, maxchar_pr_line)
                 response = type_response(
-                    characters, storybox_stim, lines, max_lines, writebox_stim, win
+                    characters,
+                    storybox_stim,
+                    lines,
+                    max_lines,
+                    up,
+                    down,
+                    writebox_stim,
+                    win,
                 )
                 # df_list.append(
                 #     {"response": response, "story": story_name, "prev_word": word}
