@@ -4,7 +4,6 @@ Cloze task
 
 from psychopy import visual, core, event, gui, data
 import os
-import pandas as pd
 import numpy as np
 import string
 from typing import List
@@ -65,6 +64,7 @@ def type_response(
     up_stim,
     down_stim,
     text_stim,
+    stopwatch,
     win,
 ):
     response_prefix = "Your response: "
@@ -96,16 +96,14 @@ def type_response(
         up_stim.draw()
         down_stim.draw()
         win.flip()
+        stopwatch.reset()
         key = event.waitKeys()[0]
-
-        # scroll through text
-        if isinstance(scroll, int) == True:
-            scroll = key_scroll(scroll, key, max_lines, n_lines)
 
         if key == "escape":
             win.close()
             core.quit()
         if key == "return":
+            rt = stopwatch.getTime()
             break
 
         if key == "space":
@@ -115,12 +113,17 @@ def type_response(
         elif key in characters:
             response += key
 
-    return response
+        # scroll through text
+        if isinstance(scroll, int) == True:
+            scroll = key_scroll(scroll, key, max_lines, n_lines)
+
+    return response, rt
 
 
 def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
     characters = list(string.ascii_lowercase)
     escape_keys = ["escape", "q"]
+    stopwatch = core.Clock()
 
     # GUI information
     dlg = gui.Dlg(title="Cloze Task")
@@ -176,16 +179,21 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
         paragraphs = story.split("\n\n")
 
         lines = [""]
-        response = "NA"
+        response, rt = "NA", "NA"
         responses = []
         for paragraph in paragraphs:
             words = paragraph.split()
             for word in words:
                 responses.append(
-                    {"response": response, "story": story_name, "correct_word": word}
+                    {
+                        "response": response,
+                        "reaction_time": rt,
+                        "story": story_name,
+                        "correct_word": word,
+                    }
                 )
                 lines = make_lines(lines, word, maxchar_pr_line)
-                response = type_response(
+                response, rt = type_response(
                     characters,
                     storybox_stim,
                     lines,
@@ -193,6 +201,7 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
                     up,
                     down,
                     writebox_stim,
+                    stopwatch,
                     win,
                 )
             lines.append("\n")
