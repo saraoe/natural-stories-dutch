@@ -3,7 +3,7 @@ Cloze task
 """
 
 from psychopy import visual, core, event, gui, data
-import os
+import os, re
 import numpy as np
 import string
 from typing import List
@@ -152,6 +152,8 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
     # defining a window
     win = visual.Window(color="black", fullscr=False)
     text_stim = visual.TextStim(win=win)
+    smalltext_stim = visual.TextStim(win=win)
+    smalltext_stim.size = 0.05
     storybox_stim = visual.TextBox2(
         win=win,
         text="",
@@ -171,18 +173,23 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
     # show instruction:
     inst_path = os.path.join(paths["instructions"], "cloze_instruction*.txt")
     for instruction in read_text(inst_path):
-        show_text(instruction, text_stim, win, escape_keys)
+        show_text(instruction, smalltext_stim, win, escape_keys)
 
     # start experiment
-    for story_name, story in read_text(paths["stories"], stories=True):
-        show_text(story_name, text_stim, win, escape_keys)
+    stories = list(read_text(paths["stories"], stories=True))
+    n_stories = len(stories)
+    pause_path = os.path.join(paths["instructions"], "pause.txt")
+    pause_text = list(read_text(pause_path))[0]
+    for n, (story_name, story) in enumerate(stories, start=1):
+        show_text(f"Story {n} out of {n_stories}", text_stim, win, escape_keys)
+        show_text(f"Title: {story_name.title()}", text_stim, win, escape_keys)
         paragraphs = story.split("\n\n")
 
         lines = [""]
         response, rt = "NA", "NA"
         responses = []
         for paragraph in paragraphs:
-            words = paragraph.split()
+            words = re.split(r"[\s]", paragraph)
             for word in words:
                 responses.append(
                     {
@@ -211,12 +218,13 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
             out_path=os.path.join(paths["out_data"], f"cloze_{file_end}.csv"),
             extra_cols=gui_information,
         )
+        # pause
+        show_text(pause_text, text_stim, win, escape_keys)
 
     # show ending
     end_path = os.path.join(paths["instructions"], "end.txt")
     for end in read_text(end_path):
         show_text(end, text_stim, win, escape_keys)
-
 
 
 if __name__ == "__main__":
@@ -226,7 +234,6 @@ if __name__ == "__main__":
         "stories": os.path.join("..", "texts", "edited", "*"),
         "out_data": os.path.join("data"),
     }
-
 
     # experimental setup
     maxchar_pr_line = 35
