@@ -1,0 +1,10 @@
+Welcome to our Cloze task experiment and thank you for your participation!
+
+
+In this task, you will encounter a total of 10 stories. 
+
+
+The stories will be presented word by word. After each word, you have to fill in what you believe to be the following word/words given the context.
+
+
+(Press a key to continue!)
