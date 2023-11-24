@@ -13,6 +13,7 @@ from show_stim import (
     show_word,
     show_blackscreen,
     show_questions,
+    make_gui,
 )
 
 
@@ -69,23 +70,13 @@ def experiment(
     ).to_dict()
 
     # GUI information
-    dlg = gui.Dlg(title="Reading experiment")
-    dlg.addField("Participant ID: ")
-    dlg.addField("Age: ")
-    dlg.addField("Gender: ", choices=["Female", "Male", "Other"])
-    dlg.addField("Hand: ", choices=["Left", "Right"])
-    dlg.show()
-
-    if dlg.OK:
-        gui_data = dlg.data
-        gui_information = {
-            "participant_id": gui_data[0],
-            "age": gui_data[1],
-            "gender": gui_data[2],
-            "hand": gui_data[3].lower(),
-        }
-    elif dlg.Cancel:
-        core.quit()
+    fields = {
+        "Participant ID": None,
+        "Age": None,
+        "Gender": ["Female", "Male", "Other"],
+        "Hand": ["Left", "Right"],
+    }
+    gui_information = make_gui(fields, title="Self-Paced Reading")
 
     # for saving data
     if not os.path.exists(paths["out_data"]):

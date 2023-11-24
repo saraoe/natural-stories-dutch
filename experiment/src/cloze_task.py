@@ -8,7 +8,7 @@ import numpy as np
 import string
 from typing import List
 from util import read_text, list_to_csv
-from show_stim import show_text
+from show_stim import show_text, make_gui
 
 
 def make_arrows(direction: str, textbox, win):
@@ -126,21 +126,12 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
     stopwatch = core.Clock()
 
     # GUI information
-    dlg = gui.Dlg(title="Cloze Task")
-    dlg.addField("Participant ID: ")
-    dlg.addField("Age: ")
-    dlg.addField("Gender: ", choices=["Female", "Male", "Other"])
-    dlg.show()
-
-    if dlg.OK:
-        gui_data = dlg.data
-        gui_information = {
-            "participant_id": gui_data[0],
-            "age": gui_data[1],
-            "gender": gui_data[2],
-        }
-    elif dlg.Cancel:
-        core.quit()
+    fields = {
+        "Participant ID": None,
+        "Age": None,
+        "Gender": ["Female", "Male", "Other"],
+    }
+    gui_information = make_gui(fields, title="Cloze Task")
 
     # for saving data
     if not os.path.exists(paths["out_data"]):

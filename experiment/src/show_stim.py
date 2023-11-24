@@ -1,7 +1,8 @@
 """
 functions for showing stimuli in psychopy scripts
 """
-from psychopy import core, event
+from psychopy import core, event, gui
+import re
 import pandas as pd
 from random import shuffle
 
@@ -84,3 +85,23 @@ def show_questions(
             }
         )
     return response_list
+
+
+def fix_name(name: str):
+    return re.sub(r"[\s]", "_", name).lower()
+
+
+def make_gui(fields: dict, title: str):
+    dlg = gui.Dlg(title=title)
+    for field, choices in fields.items():
+        dlg.addField(f"{field} :", choices=choices)
+    dlg.show()
+
+    if dlg.OK:
+        gui_data = dlg.data
+        gui_information = {
+            fix_name(field): gui_data[i] for i, field in enumerate(fields.keys())
+        }
+    else:
+        core.quit()
+    return gui_information
