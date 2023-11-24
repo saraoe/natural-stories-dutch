@@ -20,23 +20,21 @@ def self_paced_reading(
     story,
     story_name,
     document_id,
-    questions_df,
     win,
     fix_cross,
     text_stim,
     stopwatch,
     blackscreen_time,
     escape_keys,
-    question_keys,
 ):
     rt_list = []
-    paragraphs = story.split("\n\n")
+    paragraphs = re.split("\n\n", story)
 
-    show_text(story_name, text_stim, win, escape_keys)
+    show_text(f"Title: {story_name.title()}", text_stim, win, escape_keys)
 
     for paragraph in paragraphs:
-        show_fixation(fix_cross, win, sec=fixation_time)
-        words = paragraph.split(" ")
+        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
+        words = re.split(r"[\s]", paragraph)
         for word in words:
             rt = show_word(word, text_stim, win, stopwatch, escape_keys)
             rt_list.append(
@@ -45,10 +43,7 @@ def self_paced_reading(
 
             show_blackscreen(win, sec=blackscreen_time)
 
-    # questions
-    qs = questions_df[questions_df["document_id"] == document_id]
-    response = show_questions(qs, text_stim, win, escape_keys, question_keys)
-    return rt_list, response
+    return rt_list
 
 
 def experiment(
@@ -102,12 +97,15 @@ def experiment(
     # defining a window
     win = visual.Window(color="black", fullscr=fullscreen)
     text_stim = visual.TextStim(win=win)
+    smalltext_stim = visual.TextStim(win=win)
+    smalltext_stim.size = 0.05
     fix_cross = visual.TextStim(win=win, text="+", alignText="center")
 
     # show instruction:
     inst_path = os.path.join(paths["instructions"], "eeg_instruction*.txt")
     for instruction in read_text(inst_path):
-        show_text(instruction, text_stim, win, escape_keys)
+        show_text(instruction, smalltext_stim, win, escape_keys)
+    smalltext_stim.size = 0.07
 
     # practice phase start
     practice_info_path = os.path.join(paths["instructions"], "practice_info*.txt")
@@ -116,21 +114,23 @@ def experiment(
     for info in read_text(practice_info_path):
         show_text(info, text_stim, win, escape_keys)
     for practice_story in read_text(practice_text_path):
-        story_name = "Practice Story"
-        document_id = 1  ## fix this!
-        rts, responses = self_paced_reading(
+        story_name = "Practice Story"  # fix this!
+        document_id = 0
+        rts = self_paced_reading(
             practice_story,
             story_name,
             document_id,
-            questions_df,
             win,
             fix_cross,
             text_stim,
             stopwatch,
             blackscreen_time,
             escape_keys,
-            question_keys,
         )
+
+        # questions
+        qs = questions_df[questions_df["document_id"] == document_id]
+        responses = show_questions(qs, smalltext_stim, win, escape_keys, question_keys)
 
         # save
         list_to_csv(
@@ -144,31 +144,33 @@ def experiment(
             extra_cols=gui_information,
         )
     for end in read_text(practice_end_path):
-        show_text(end, text_stim, win, escape_keys)
+        show_text(end, smalltext_stim, win, escape_keys)
 
     # experiment start
     stories = list(read_text(paths["stories"], stories=True))
     n_stories = len(stories)
     pause_path = os.path.join(paths["instructions"], "pause.txt")
     pause_text = list(read_text(pause_path))[0]
-    for n, (story_name, story) in enumerate(stories):
-        show_fixation(fix_cross, win, sec=fixation_time)
+    for n, (story_name, story) in enumerate(stories, start=1):
+        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
         show_text(f"Story {n} out of {n_stories}", text_stim, win, escape_keys)
         document_id = doc_ids[story_name]
 
-        rts, responses = self_paced_reading(
+        rts = self_paced_reading(
             story,
             story_name,
             document_id,
-            questions_df,
             win,
             fix_cross,
             text_stim,
             stopwatch,
             blackscreen_time,
             escape_keys,
-            question_keys,
         )
+
+        # questions
+        qs = questions_df[questions_df["document_id"] == document_id]
+        responses = show_questions(qs, smalltext_stim, win, escape_keys, question_keys)
 
         # save
         list_to_csv(
@@ -183,7 +185,7 @@ def experiment(
         )
 
         # pause
-        show_text(pause_text, text_stim, win, escape_keys)
+        show_text(pause_text, smalltext_stim, win, escape_keys)
 
     # show ending
     end_path = os.path.join(paths["instructions"], "end.txt")
@@ -194,10 +196,10 @@ def experiment(
 if __name__ == "__main__":
     # paths
     paths = {
-        "instructions": os.path.join("..", "instructions"),
-        "stories": os.path.join("..", "..", "texts", "edited", "*"),
-        "questions": os.path.join("..", "questions.xlsx"),
-        "out_data": os.path.join("..", "data"),
+        "instructions": os.path.join("instructions"),
+        "stories": os.path.join("..", "texts", "edited", "*"),
+        "questions": os.path.join("questions.xlsx"),
+        "out_data": os.path.join("data"),
     }
 
     # experimental parameters
