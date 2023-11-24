@@ -5,7 +5,6 @@ import re, os
 from glob import glob
 import pandas as pd
 from typing import List
-from csv import writer
 
 
 def get_name_from_path(path: str):
