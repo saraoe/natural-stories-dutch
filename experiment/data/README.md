@@ -25,3 +25,14 @@ The **response** file are the responses to the questions in the ```../questions.
 - participant_id: (int)
 - age: (int)
 - gender: (character)
+
+## Cloze Task
+For each participant in the cloze task experiment, a single csv-file is saved with the prefix ```cloze_*.csv```. The subfix of the filename is created similarly to those for the SPR experiment (i.e. partipant id, date of data collection, and a random string of characters)
+
+The file includes the following columns:
+- response: (str) the two words the participant responded with (seperated by whitespace)
+- story: (str) name of the story
+- correct_word: (str) the correct word (i.e. i the participant responded correctly, this should correpond with the first of the words in the *response* column)
+- participant_id: (int)
+- age: (int)
+- gender: (character)
