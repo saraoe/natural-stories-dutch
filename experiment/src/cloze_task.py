@@ -218,6 +218,7 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
         show_text(end, text_stim, win, escape_keys)
 
 
+
 if __name__ == "__main__":
     # paths
     paths = {
@@ -225,6 +226,7 @@ if __name__ == "__main__":
         "stories": os.path.join("..", "texts", "edited", "*"),
         "out_data": os.path.join("data"),
     }
+
 
     # experimental setup
     maxchar_pr_line = 35

@@ -6,10 +6,14 @@ import pandas as pd
 from random import shuffle
 
 
-def show_fixation(stim, win, sec):
+def show_fixation(stim, win, sec, escape_keys):
     stim.draw()
     win.flip()
     core.wait(sec)
+    key = event.waitKeys()[0]
+    if key in escape_keys:
+        win.close()
+        core.quit()
 
 
 def show_blackscreen(win, sec):
