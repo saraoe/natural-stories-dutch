@@ -1,7 +1,7 @@
 """
 functions for showing stimuli in psychopy scripts
 """
-from psychopy import core, event, gui
+from psychopy import core, event, gui, visual
 import re
 import pandas as pd
 from random import shuffle
@@ -47,17 +47,25 @@ def show_word(word: str, text_stim, win, stopwatch, escape_keys):
 
 
 def show_question(
-    question: str, answers: dict, text_stim, win, escape_keys, question_keys
+    question: str, answers: dict, text_stim, win, escape_keys, question_keys, q_stim
 ):
     answers_list = list(answers.keys())
     shuffle(answers_list)
-    q_str = f"{question} \n\n"
-    for i, answer in enumerate(answers_list, start=1):
-        q_str += f"{i}: {answer} \n"
+    text_stim.text = f"{question}"
+    text_stim.pos = (0, 0.8)
+    text_stim.draw()
 
-    key = show_text(
-        q_str, text_stim, win, escape_keys, possible_keys=escape_keys + question_keys
-    )
+    pos_list = [(-0.5, 0.2), (0.5, 0.2), (-0.5, -0.6), (0.5, -0.6)]
+    for i, (answer, pos) in enumerate(zip(answers_list, pos_list), start=1):
+        # q_str += f"{i}: {answer} \n"
+        q_stim.pos = pos
+        q_stim.text = f"{i}: {answer}"
+        q_stim.draw()
+    win.flip()
+    # key = show_text(
+    #     q_str, text_stim, win, escape_keys, possible_keys=escape_keys + question_keys
+    # )
+    key = event.waitKeys(keyList=escape_keys + question_keys)[0]
     response_key = int(key)
     response_letter = answers[answers_list[response_key - 1]]
     return response_letter
@@ -66,13 +74,20 @@ def show_question(
 def show_questions(
     questions_df: pd.DataFrame, text_stim, win, escape_keys, question_keys
 ):
+    q_stim = visual.TextBox2(
+        win=win,
+        text="",
+        size=[0.85, 0.55],
+        letterHeight=0.05,
+        borderColor="grey",
+    )
     response_list = []
 
     for index, row in questions_df.iterrows():
         ans_cols = ["a-correct", "b", "c", "d"]
         answers = {row[col]: col for col in ans_cols}
         response = show_question(
-            row["Question"], answers, text_stim, win, escape_keys, question_keys
+            row["Question"], answers, text_stim, win, escape_keys, question_keys, q_stim
         )
         correct = 1 if response == "a-correct" else 0
 
