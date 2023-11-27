@@ -104,7 +104,7 @@ def experiment(
     smalltext_stim = visual.TextStim(win=win)
     smalltext_stim.size = 0.05
     fix_cross = visual.TextStim(win=win, text="+", alignText="center")
-    qtext_up = visual.TextStim(win=win, pos=(0, 0.8))
+    qtext_up = visual.TextStim(win=win)
     respond_stim = visual.TextStim(
         win=win, pos=(0, -0.8), text=f"Press {respond_key} to respond"
     )

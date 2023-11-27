@@ -104,6 +104,7 @@ def show_questions(
         letterHeight=0.05,
         borderColor="grey",
     )
+    qtext_stim.pos = (0, 0.8)
     response_list = []
 
     for index, row in questions_df.iterrows():
@@ -144,6 +145,7 @@ def show_scale(
     question_keys,
 ):
     qtext_stim.text = question
+    qtext_stim.pos = (0, 0.6)
     response = None
 
     while True:
