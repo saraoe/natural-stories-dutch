@@ -20,7 +20,6 @@ from show_stim import (
 
 def self_paced_reading(
     story,
-    story_name,
     document_id,
     win,
     fix_cross,
@@ -31,8 +30,6 @@ def self_paced_reading(
 ):
     rt_list = []
     paragraphs = re.split("\n\n", story)
-
-    show_text(f"Title: {story_name.title()}", text_stim, win, escape_keys)
 
     for paragraph in paragraphs:
         words = re.split(r"[\s]", paragraph)
@@ -137,11 +134,10 @@ def experiment(
     for info in read_text(practice_info_path):
         show_text(info, text_stim, win, escape_keys)
     for practice_story in read_text(practice_text_path):
-        story_name = "Practice Story"  # fix this!
+        story_name = "Practice Text"  # fix this
         document_id = 0
         rts = self_paced_reading(
             practice_story,
-            story_name,
             document_id,
             win,
             fix_cross,
@@ -189,12 +185,16 @@ def experiment(
     pause_path = os.path.join(paths["instructions"], "pause.txt")
     pause_text = list(read_text(pause_path))[0]
     for n, (story_name, story) in enumerate(stories, start=1):
-        show_text(f"Story {n} out of {n_stories}", text_stim, win, escape_keys)
+        show_text(
+            f"{story_name.title()}\n\nStory {n} out of {n_stories}",
+            text_stim,
+            win,
+            escape_keys,
+        )
         document_id = doc_ids[story_name]
 
         rts = self_paced_reading(
             story,
-            story_name,
             document_id,
             win,
             fix_cross,
