@@ -52,7 +52,6 @@ def show_question(
     answers_list = list(answers.keys())
     shuffle(answers_list)
     text_stim.text = f"{question}"
-    text_stim.pos = (0, 0.8)
     text_stim.draw()
 
     pos_list = [(-0.5, 0.2), (0.5, 0.2), (-0.5, -0.6), (0.5, -0.6)]
@@ -117,6 +116,7 @@ def show_scale(
     question_keys,
 ):
     qtext_stim.text = question
+    response = None
 
     while True:
         qtext_stim.draw()
@@ -126,8 +126,11 @@ def show_scale(
         if key in escape_keys:
             win.close()
             core.quit()
-        if key == "enter":
-            break
+        if key == question_keys[-1]:
+            if response:
+                break
+            else:
+                continue
         response = int(key)
         scale_stim.markerPos = response
         respondtext.draw()
