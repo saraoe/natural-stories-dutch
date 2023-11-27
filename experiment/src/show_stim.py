@@ -47,34 +47,55 @@ def show_word(word: str, text_stim, win, stopwatch, escape_keys):
 
 
 def show_question(
-    question: str, answers: dict, text_stim, win, escape_keys, question_keys, q_stim
+    question: str,
+    answers: dict,
+    qtext_stim,
+    respondtext,
+    win,
+    escape_keys,
+    question_keys,
+    q_stim,
 ):
     answers_list = list(answers.keys())
     shuffle(answers_list)
-    text_stim.text = f"{question}"
-    text_stim.draw()
+    qtext_stim.text = f"{question}"
 
-    pos_list = [(-0.5, 0.2), (0.5, 0.2), (-0.5, -0.6), (0.5, -0.6)]
-    for i, (answer, pos) in enumerate(zip(answers_list, pos_list), start=1):
-        # q_str += f"{i}: {answer} \n"
-        q_stim.pos = pos
-        q_stim.text = f"{i}: {answer}"
-        q_stim.draw()
-    win.flip()
-    # key = show_text(
-    #     q_str, text_stim, win, escape_keys, possible_keys=escape_keys + question_keys
-    # )
-    key = event.waitKeys(keyList=escape_keys + question_keys)[0]
-    if key in escape_keys:
-        win.close()
-        core.quit()
-    response_key = int(key)
+    pos_list = [(-0.5, 0.2), (0.5, 0.2), (-0.5, -0.5), (0.5, -0.5)]
+    response_key = None
+
+    while True:
+        qtext_stim.draw()
+        for i, (answer, pos) in enumerate(zip(answers_list, pos_list), start=1):
+            if i == response_key:
+                q_stim.borderColor = "green"
+            else:
+                q_stim.borderColor = "grey"
+            q_stim.pos = pos
+            q_stim.text = f"{i}: {answer}"
+            q_stim.draw()
+        win.flip()
+        key = event.waitKeys(keyList=escape_keys + question_keys)[0]
+        if key in escape_keys:
+            win.close()
+            core.quit()
+        if key == question_keys[-1]:
+            if response_key:
+                break
+            else:
+                continue
+        response_key = int(key)
+        respondtext.draw()
     response_letter = answers[answers_list[response_key - 1]]
     return response_letter
 
 
 def show_questions(
-    questions_df: pd.DataFrame, text_stim, win, escape_keys, question_keys
+    questions_df: pd.DataFrame,
+    qtext_stim,
+    respond_stim,
+    win,
+    escape_keys,
+    question_keys,
 ):
     q_stim = visual.TextBox2(
         win=win,
@@ -89,7 +110,14 @@ def show_questions(
         ans_cols = ["a-correct", "b", "c", "d"]
         answers = {row[col]: col for col in ans_cols}
         response = show_question(
-            row["Question"], answers, text_stim, win, escape_keys, question_keys, q_stim
+            row["Question"],
+            answers,
+            qtext_stim,
+            respond_stim,
+            win,
+            escape_keys,
+            question_keys,
+            q_stim,
         )
         correct = 1 if response == "a-correct" else 0
 

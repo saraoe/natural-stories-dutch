@@ -13,6 +13,7 @@ from show_stim import (
     show_word,
     show_blackscreen,
     show_questions,
+    show_scale,
     make_gui,
 )
 
@@ -47,6 +48,16 @@ def self_paced_reading(
     return rt_list
 
 
+def get_scale_question(document_id: int, story_name: str):
+    if document_id in [0, 1, 2]:
+        q = f"In hoeverre was je bekend met het sprookje {story_name} dat werd verteld in de vorige tekst?"
+    elif document_id in [5, 6]:
+        q = f"In hoeverre was je bekend met de roman/film {story_name} waarover werd verteld in de vorige tekst?"
+    elif document_id in [3, 4, 7, 8, 9, 10]:
+        q = "In hoeverre was je bekend met het onderwerp van de vorige tekst?"
+    return q
+
+
 def experiment(
     paths: dict,
     fixation_time: int,
@@ -57,8 +68,10 @@ def experiment(
     stopwatch = core.Clock()
 
     if keys == "computer":
+        respond_key = "return"
         escape_keys = ["escape", "q"]
         question_keys = ["1", "2", "3", "4"]
+        question_keys.append(respond_key)
 
     # questions
     questions_df = pd.read_excel(paths["questions"])
@@ -91,6 +104,25 @@ def experiment(
     smalltext_stim = visual.TextStim(win=win)
     smalltext_stim.size = 0.05
     fix_cross = visual.TextStim(win=win, text="+", alignText="center")
+    qtext_up = visual.TextStim(win=win, pos=(0, 0.8))
+    respond_stim = visual.TextStim(
+        win=win, pos=(0, -0.8), text=f"Press {respond_key} to respond"
+    )
+    scale = visual.Slider(
+        win=win,
+        font="Open Sans",
+        labelHeight=0.05,
+        ticks=(1, 2, 3, 4, 5),
+        labels=[
+            "1\nIk heb er nog nooit van gehoord",
+            "2\nIk ben er een heel klein beetje bekend meel",
+            "3\nIk ben er tot op zekere hoogte bekend mee",
+            "4\nIk ben er bekend mee",
+            "5\nIk ben er heel bekend mee",
+        ],
+    )
+    scale_keys = [str(tick) for tick in scale.ticks]
+    scale_keys.append(respond_key)
 
     # show instruction:
     inst_path = os.path.join(paths["instructions"], "eeg_instruction*.txt")
@@ -120,8 +152,22 @@ def experiment(
         )
 
         # questions
+        scale_question = get_scale_question(document_id, story_name)
+        response_scale = show_scale(
+            scale_question,
+            document_id,
+            question_id=0,
+            qtext_stim=qtext_up,
+            respondtext=respond_stim,
+            scale_stim=scale,
+            win=win,
+            escape_keys=escape_keys,
+            question_keys=scale_keys,
+        )
         qs = questions_df[questions_df["document_id"] == document_id]
-        responses = show_questions(qs, smalltext_stim, win, escape_keys, question_keys)
+        responses = show_questions(
+            qs, qtext_up, respond_stim, win, escape_keys, question_keys
+        )
 
         # save
         list_to_csv(
@@ -160,8 +206,22 @@ def experiment(
         )
 
         # questions
+        scale_question = get_scale_question(document_id, story_name)
+        response_scale = show_scale(
+            scale_question,
+            document_id,
+            question_id=0,
+            qtext_stim=qtext_up,
+            respondtext=respond_stim,
+            scale_stim=scale,
+            win=win,
+            escape_keys=escape_keys,
+            question_keys=scale_keys,
+        )
         qs = questions_df[questions_df["document_id"] == document_id]
-        responses = show_questions(qs, smalltext_stim, win, escape_keys, question_keys)
+        responses = show_questions(
+            qs, qtext_up, respond_stim, win, escape_keys, question_keys
+        )
 
         # save
         list_to_csv(
@@ -170,7 +230,7 @@ def experiment(
             extra_cols=gui_information,
         )
         list_to_csv(
-            df_list=responses,
+            df_list=response_scale + responses,
             out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
             extra_cols=gui_information,
         )
