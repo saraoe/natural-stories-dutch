@@ -66,6 +66,9 @@ def show_question(
     #     q_str, text_stim, win, escape_keys, possible_keys=escape_keys + question_keys
     # )
     key = event.waitKeys(keyList=escape_keys + question_keys)[0]
+    if key in escape_keys:
+        win.close()
+        core.quit()
     response_key = int(key)
     response_letter = answers[answers_list[response_key - 1]]
     return response_letter
@@ -99,6 +102,44 @@ def show_questions(
                 "question_id": row["question_id"],
             }
         )
+    return response_list
+
+
+def show_scale(
+    question: str,
+    document_id: int,
+    question_id,
+    qtext_stim,
+    respondtext,
+    scale_stim,
+    win,
+    escape_keys,
+    question_keys,
+):
+    qtext_stim.text = question
+
+    while True:
+        qtext_stim.draw()
+        scale_stim.draw()
+        win.flip()
+        key = event.waitKeys(keyList=escape_keys + question_keys)[0]
+        if key in escape_keys:
+            win.close()
+            core.quit()
+        if key == "enter":
+            break
+        response = int(key)
+        scale_stim.markerPos = response
+        respondtext.draw()
+
+    response_list = [
+        {
+            "response": response,
+            "correct": "NA",
+            "document_id": document_id,
+            "question_id": question_id,
+        }
+    ]
     return response_list
 
 
