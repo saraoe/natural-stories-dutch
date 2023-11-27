@@ -8,9 +8,13 @@ from random import shuffle
 
 
 def show_fixation(stim, win, sec, escape_keys):
+    stim.fontColor = "grey"
     stim.draw()
     win.flip()
     core.wait(sec)
+    stim.fontColor = "white"
+    stim.draw()
+    win.flip()
     key = event.waitKeys()[0]
     if key in escape_keys:
         win.close()
