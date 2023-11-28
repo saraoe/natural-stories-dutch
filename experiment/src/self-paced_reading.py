@@ -2,7 +2,7 @@
 Self-paced reading experiment
 """
 
-from psychopy import visual, core, data, event
+from psychopy import visual, core, data
 import os
 import re
 import pandas as pd

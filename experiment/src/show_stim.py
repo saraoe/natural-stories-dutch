@@ -188,14 +188,6 @@ def show_scale(
         scale_stim.markerPos = response
         respondtext.draw()
 
-    response_list = [
-        {
-            "response": response,
-            "correct": "NA",
-            "document_id": document_id,
-            "question_id": question_id,
-        }
-    ]
     list_to_csv(
         df_list=[
             {
