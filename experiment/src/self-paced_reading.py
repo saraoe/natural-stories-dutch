@@ -81,6 +81,65 @@ def get_scale_question(document_id: int, story_name: str):
     return q
 
 
+def text_questions(
+    story_name,
+    document_id,
+    questions_df,
+    win,
+    respond_key,
+    escape_keys,
+    question_keys,
+    save_path,
+    extra_cols,
+):
+    # define stim
+    qtext_up = visual.TextStim(win=win)
+    respond_stim = visual.TextStim(
+        win=win, pos=(0, -0.8), text=f"Press {respond_key} to respond"
+    )
+    scale = visual.Slider(
+        win=win,
+        font="Open Sans",
+        labelHeight=0.05,
+        ticks=(1, 2, 3, 4, 5),
+        labels=[
+            "1\nIk heb er nog nooit van gehoord",
+            "2\nIk ben er een heel klein beetje bekend meel",
+            "3\nIk ben er tot op zekere hoogte bekend mee",
+            "4\nIk ben er bekend mee",
+            "5\nIk ben er heel bekend mee",
+        ],
+    )
+    scale_keys = [str(tick) for tick in scale.ticks]
+    scale_keys.append(respond_key)
+
+    scale_question = get_scale_question(document_id, story_name)
+    show_scale(
+        scale_question,
+        document_id,
+        question_id=0,
+        qtext_stim=qtext_up,
+        respondtext=respond_stim,
+        scale_stim=scale,
+        win=win,
+        escape_keys=escape_keys,
+        question_keys=scale_keys,
+        save_path=save_path,
+        extra_cols=extra_cols,
+    )
+    qs = questions_df[questions_df["document_id"] == document_id]
+    show_questions(
+        qs,
+        qtext_up,
+        respond_stim,
+        win,
+        escape_keys,
+        question_keys,
+        save_path=save_path,
+        extra_cols=extra_cols,
+    )
+
+
 def experiment(
     paths: dict,
     fixation_time: int,
@@ -130,25 +189,6 @@ def experiment(
     smalltext_stim = visual.TextStim(win=win)
     smalltext_stim.size = 0.05
     fix_cross = visual.TextStim(win=win, text="+", alignText="center")
-    qtext_up = visual.TextStim(win=win)
-    respond_stim = visual.TextStim(
-        win=win, pos=(0, -0.8), text=f"Press {respond_key} to respond"
-    )
-    scale = visual.Slider(
-        win=win,
-        font="Open Sans",
-        labelHeight=0.05,
-        ticks=(1, 2, 3, 4, 5),
-        labels=[
-            "1\nIk heb er nog nooit van gehoord",
-            "2\nIk ben er een heel klein beetje bekend meel",
-            "3\nIk ben er tot op zekere hoogte bekend mee",
-            "4\nIk ben er bekend mee",
-            "5\nIk ben er heel bekend mee",
-        ],
-    )
-    scale_keys = [str(tick) for tick in scale.ticks]
-    scale_keys.append(respond_key)
 
     # show instruction:
     inst_path = os.path.join(paths["instructions"], "eeg_instruction*.txt")
@@ -180,28 +220,18 @@ def experiment(
         )
 
         # questions
-        scale_question = get_scale_question(document_id, story_name)
-        response_scale = show_scale(
-            scale_question,
+        text_questions(
+            story_name,
             document_id,
-            question_id=0,
-            qtext_stim=qtext_up,
-            respondtext=respond_stim,
-            scale_stim=scale,
-            win=win,
-            escape_keys=escape_keys,
-            question_keys=scale_keys,
-        )
-        qs = questions_df[questions_df["document_id"] == document_id]
-        responses = show_questions(
-            qs, qtext_up, respond_stim, win, escape_keys, question_keys
-        )
-
-        list_to_csv(
-            df_list=responses,
-            out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
+            questions_df,
+            win,
+            respond_key,
+            escape_keys,
+            question_keys,
+            save_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
             extra_cols=gui_information,
         )
+
     for end in read_text(practice_end_path):
         show_text(end, smalltext_stim, win, escape_keys)
 
@@ -238,26 +268,15 @@ def experiment(
             )
 
         # questions
-        scale_question = get_scale_question(document_id, story_name)
-        response_scale = show_scale(
-            scale_question,
+        text_questions(
+            story_name,
             document_id,
-            question_id=0,
-            qtext_stim=qtext_up,
-            respondtext=respond_stim,
-            scale_stim=scale,
-            win=win,
-            escape_keys=escape_keys,
-            question_keys=scale_keys,
-        )
-        qs = questions_df[questions_df["document_id"] == document_id]
-        responses = show_questions(
-            qs, qtext_up, respond_stim, win, escape_keys, question_keys
-        )
-
-        list_to_csv(
-            df_list=response_scale + responses,
-            out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
+            questions_df,
+            win,
+            respond_key,
+            escape_keys,
+            question_keys,
+            save_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
             extra_cols=gui_information,
         )
 

@@ -5,6 +5,7 @@ from psychopy import core, event, gui, visual
 import re
 import pandas as pd
 from random import shuffle
+from util import list_to_csv
 
 
 def show_fixation(stim, win, sec, escape_keys):
@@ -112,6 +113,8 @@ def show_questions(
     win,
     escape_keys,
     question_keys,
+    save_path,
+    extra_cols,
 ):
     q_stim = visual.TextBox2(
         win=win,
@@ -121,7 +124,6 @@ def show_questions(
         borderColor="grey",
     )
     qtext_stim.pos = (0, 0.8)
-    response_list = []
 
     for index, row in questions_df.iterrows():
         ans_cols = ["a-correct", "b", "c", "d"]
@@ -138,15 +140,18 @@ def show_questions(
         )
         correct = 1 if response == "a-correct" else 0
 
-        response_list.append(
-            {
-                "response": response,
-                "correct": correct,
-                "document_id": row["document_id"],
-                "question_id": row["question_id"],
-            }
+        list_to_csv(
+            df_list=[
+                {
+                    "response": response,
+                    "correct": correct,
+                    "document_id": row["document_id"],
+                    "question_id": row["question_id"],
+                }
+            ],
+            out_path=save_path,
+            extra_cols=extra_cols,
         )
-    return response_list
 
 
 def show_scale(
@@ -159,6 +164,8 @@ def show_scale(
     win,
     escape_keys,
     question_keys,
+    save_path,
+    extra_cols,
 ):
     qtext_stim.text = question
     qtext_stim.pos = (0, 0.6)
@@ -189,7 +196,18 @@ def show_scale(
             "question_id": question_id,
         }
     ]
-    return response_list
+    list_to_csv(
+        df_list=[
+            {
+                "response": response,
+                "correct": "NA",
+                "document_id": document_id,
+                "question_id": question_id,
+            }
+        ],
+        out_path=save_path,
+        extra_cols=extra_cols,
+    )
 
 
 def fix_name(name: str):
