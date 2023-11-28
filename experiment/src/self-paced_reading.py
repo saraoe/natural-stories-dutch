@@ -2,7 +2,7 @@
 Self-paced reading experiment
 """
 
-from psychopy import visual, core, gui, data
+from psychopy import visual, core, data, event
 import os
 import re
 import pandas as pd
@@ -11,54 +11,150 @@ from show_stim import (
     show_fixation,
     show_text,
     show_word,
+    show_word_fixed,
     show_blackscreen,
     show_questions,
+    show_scale,
     make_gui,
 )
 
 
-def self_paced_reading(
+def spr(
     story,
-    story_name,
     document_id,
     win,
     fix_cross,
     text_stim,
     stopwatch,
     blackscreen_time,
+    fixation_time,
     escape_keys,
+    save_path,
+    extra_cols,
 ):
     rt_list = []
     paragraphs = re.split("\n\n", story)
 
-    show_text(f"Title: {story_name.title()}", text_stim, win, escape_keys)
-
     for paragraph in paragraphs:
-        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
         words = re.split(r"[\s]", paragraph)
         for word in words:
             rt = show_word(word, text_stim, win, stopwatch, escape_keys)
             rt_list.append(
                 {"reation_time": rt, "document_id": document_id, "word": word}
             )
+            list_to_csv(
+                df_list=[
+                    {"reation_time": rt, "document_id": document_id, "word": word}
+                ],
+                out_path=save_path,
+                extra_cols=extra_cols,
+            )
 
             show_blackscreen(win, sec=blackscreen_time)
+        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
 
-    return rt_list
+
+def rsvp(
+    story,
+    sec,
+    win,
+    text_stim,
+    escape_keys,
+):
+    paragraphs = re.split("\n\n", story)
+
+    for paragraph in paragraphs:
+        words = re.split(r"[\s]", paragraph)
+        for word in words:
+            show_word_fixed(word, sec, text_stim, win, escape_keys)
+
+        show_word_fixed("+", sec, text_stim, win, escape_keys)
+
+
+def get_scale_question(document_id: int, story_name: str):
+    if document_id in [0, 1, 2]:
+        q = f"In hoeverre was je bekend met het sprookje {story_name} dat werd verteld in de vorige tekst?"
+    elif document_id in [5, 6]:
+        q = f"In hoeverre was je bekend met de roman/film {story_name} waarover werd verteld in de vorige tekst?"
+    elif document_id in [3, 4, 7, 8, 9, 10]:
+        q = "In hoeverre was je bekend met het onderwerp van de vorige tekst?"
+    return q
+
+
+def text_questions(
+    story_name,
+    document_id,
+    questions_df,
+    win,
+    respond_key,
+    escape_keys,
+    question_keys,
+    save_path,
+    extra_cols,
+):
+    # define stim
+    qtext_up = visual.TextStim(win=win)
+    respond_stim = visual.TextStim(
+        win=win, pos=(0, -0.8), text=f"Press {respond_key} to respond"
+    )
+    scale = visual.Slider(
+        win=win,
+        font="Open Sans",
+        labelHeight=0.05,
+        ticks=(1, 2, 3, 4, 5),
+        labels=[
+            "1\nIk heb er nog nooit van gehoord",
+            "2\nIk ben er een heel klein beetje bekend meel",
+            "3\nIk ben er tot op zekere hoogte bekend mee",
+            "4\nIk ben er bekend mee",
+            "5\nIk ben er heel bekend mee",
+        ],
+    )
+    scale_keys = [str(tick) for tick in scale.ticks]
+    scale_keys.append(respond_key)
+
+    scale_question = get_scale_question(document_id, story_name)
+    show_scale(
+        scale_question,
+        document_id,
+        question_id=0,
+        qtext_stim=qtext_up,
+        respondtext=respond_stim,
+        scale_stim=scale,
+        win=win,
+        escape_keys=escape_keys,
+        question_keys=scale_keys,
+        save_path=save_path,
+        extra_cols=extra_cols,
+    )
+    qs = questions_df[questions_df["document_id"] == document_id]
+    show_questions(
+        qs,
+        qtext_up,
+        respond_stim,
+        win,
+        escape_keys,
+        question_keys,
+        save_path=save_path,
+        extra_cols=extra_cols,
+    )
 
 
 def experiment(
     paths: dict,
     fixation_time: int,
     blackscreen_time: int,
+    rsvp_time: int,
     keys: str,
     fullscreen: bool = True,
 ):
     stopwatch = core.Clock()
 
     if keys == "computer":
+        respond_key = "return"
         escape_keys = ["escape", "q"]
         question_keys = ["1", "2", "3", "4"]
+        question_keys.append(respond_key)
 
     # questions
     questions_df = pd.read_excel(paths["questions"])
@@ -75,8 +171,10 @@ def experiment(
         "Age": None,
         "Gender": ["Female", "Male", "Other"],
         "Hand": ["Left", "Right"],
+        "Condition": [1, 2],
     }
     gui_information = make_gui(fields, title="Self-Paced Reading")
+    rsvp_text = 1 if gui_information["condition"] == 1 else 7
 
     # for saving data
     if not os.path.exists(paths["out_data"]):
@@ -105,35 +203,35 @@ def experiment(
     for info in read_text(practice_info_path):
         show_text(info, text_stim, win, escape_keys)
     for practice_story in read_text(practice_text_path):
-        story_name = "Practice Story"  # fix this!
+        story_name = "Practice Text"  # fix this
         document_id = 0
-        rts = self_paced_reading(
+        spr(
             practice_story,
-            story_name,
             document_id,
             win,
             fix_cross,
             text_stim,
             stopwatch,
             blackscreen_time,
+            fixation_time,
             escape_keys,
+            save_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
+            extra_cols=gui_information,
         )
 
         # questions
-        qs = questions_df[questions_df["document_id"] == document_id]
-        responses = show_questions(qs, smalltext_stim, win, escape_keys, question_keys)
+        text_questions(
+            story_name,
+            document_id,
+            questions_df,
+            win,
+            respond_key,
+            escape_keys,
+            question_keys,
+            save_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
+            extra_cols=gui_information,
+        )
 
-        # save
-        list_to_csv(
-            df_list=rts,
-            out_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
-            extra_cols=gui_information,
-        )
-        list_to_csv(
-            df_list=responses,
-            out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
-            extra_cols=gui_information,
-        )
     for end in read_text(practice_end_path):
         show_text(end, smalltext_stim, win, escape_keys)
 
@@ -143,35 +241,42 @@ def experiment(
     pause_path = os.path.join(paths["instructions"], "pause.txt")
     pause_text = list(read_text(pause_path))[0]
     for n, (story_name, story) in enumerate(stories, start=1):
-        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
-        show_text(f"Story {n} out of {n_stories}", text_stim, win, escape_keys)
-        document_id = doc_ids[story_name]
-
-        rts = self_paced_reading(
-            story,
-            story_name,
-            document_id,
-            win,
-            fix_cross,
+        show_text(
+            f"{story_name.title()}\n\nStory {n} out of {n_stories}",
             text_stim,
-            stopwatch,
-            blackscreen_time,
+            win,
             escape_keys,
         )
+        document_id = doc_ids[story_name]
+
+        if document_id == rsvp_text:
+            # show instructions for rsvp!!
+            rsvp(story, rsvp_time, win, text_stim, escape_keys)
+        else:
+            spr(
+                story,
+                document_id,
+                win,
+                fix_cross,
+                text_stim,
+                stopwatch,
+                blackscreen_time,
+                fixation_time,
+                escape_keys,
+                save_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
+                extra_cols=gui_information,
+            )
 
         # questions
-        qs = questions_df[questions_df["document_id"] == document_id]
-        responses = show_questions(qs, smalltext_stim, win, escape_keys, question_keys)
-
-        # save
-        list_to_csv(
-            df_list=rts,
-            out_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
-            extra_cols=gui_information,
-        )
-        list_to_csv(
-            df_list=responses,
-            out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
+        text_questions(
+            story_name,
+            document_id,
+            questions_df,
+            win,
+            respond_key,
+            escape_keys,
+            question_keys,
+            save_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
             extra_cols=gui_information,
         )
 
@@ -196,9 +301,10 @@ if __name__ == "__main__":
     # experimental parameters
     fixation_time = 0.5
     blackscreen_time = 0.2
+    rsvp_time = 0.6
 
     # experimental device
     keys = "computer"
     fullscreen = False
 
-    experiment(paths, fixation_time, blackscreen_time, keys, fullscreen)
+    experiment(paths, fixation_time, blackscreen_time, rsvp_time, keys, fullscreen)
