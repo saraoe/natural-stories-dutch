@@ -29,6 +29,8 @@ def spr(
     blackscreen_time,
     fixation_time,
     escape_keys,
+    save_path,
+    extra_cols,
 ):
     rt_list = []
     paragraphs = re.split("\n\n", story)
@@ -40,11 +42,16 @@ def spr(
             rt_list.append(
                 {"reation_time": rt, "document_id": document_id, "word": word}
             )
+            list_to_csv(
+                df_list=[
+                    {"reation_time": rt, "document_id": document_id, "word": word}
+                ],
+                out_path=save_path,
+                extra_cols=extra_cols,
+            )
 
             show_blackscreen(win, sec=blackscreen_time)
         show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
-
-    return rt_list
 
 
 def rsvp(
@@ -78,6 +85,7 @@ def experiment(
     paths: dict,
     fixation_time: int,
     blackscreen_time: int,
+    rsvp_time: int,
     keys: str,
     fullscreen: bool = True,
 ):
@@ -104,8 +112,10 @@ def experiment(
         "Age": None,
         "Gender": ["Female", "Male", "Other"],
         "Hand": ["Left", "Right"],
+        "Condition": [1, 2],
     }
     gui_information = make_gui(fields, title="Self-Paced Reading")
+    rsvp_text = 1 if gui_information["condition"] == 1 else 7
 
     # for saving data
     if not os.path.exists(paths["out_data"]):
@@ -155,7 +165,7 @@ def experiment(
     for practice_story in read_text(practice_text_path):
         story_name = "Practice Text"  # fix this
         document_id = 0
-        rts = spr(
+        spr(
             practice_story,
             document_id,
             win,
@@ -165,6 +175,8 @@ def experiment(
             blackscreen_time,
             fixation_time,
             escape_keys,
+            save_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
+            extra_cols=gui_information,
         )
 
         # questions
@@ -185,12 +197,6 @@ def experiment(
             qs, qtext_up, respond_stim, win, escape_keys, question_keys
         )
 
-        # save
-        list_to_csv(
-            df_list=rts,
-            out_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
-            extra_cols=gui_information,
-        )
         list_to_csv(
             df_list=responses,
             out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
@@ -213,17 +219,23 @@ def experiment(
         )
         document_id = doc_ids[story_name]
 
-        rts = spr(
-            story,
-            document_id,
-            win,
-            fix_cross,
-            text_stim,
-            stopwatch,
-            blackscreen_time,
-            fixation_time,
-            escape_keys,
-        )
+        if document_id == rsvp_text:
+            # show instructions for rsvp!!
+            rsvp(story, rsvp_time, win, text_stim, escape_keys)
+        else:
+            spr(
+                story,
+                document_id,
+                win,
+                fix_cross,
+                text_stim,
+                stopwatch,
+                blackscreen_time,
+                fixation_time,
+                escape_keys,
+                save_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
+                extra_cols=gui_information,
+            )
 
         # questions
         scale_question = get_scale_question(document_id, story_name)
@@ -243,12 +255,6 @@ def experiment(
             qs, qtext_up, respond_stim, win, escape_keys, question_keys
         )
 
-        # save
-        list_to_csv(
-            df_list=rts,
-            out_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
-            extra_cols=gui_information,
-        )
         list_to_csv(
             df_list=response_scale + responses,
             out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
@@ -276,9 +282,10 @@ if __name__ == "__main__":
     # experimental parameters
     fixation_time = 0.5
     blackscreen_time = 0.2
+    rsvp_time = 0.6
 
     # experimental device
     keys = "computer"
     fullscreen = False
 
-    experiment(paths, fixation_time, blackscreen_time, keys, fullscreen)
+    experiment(paths, fixation_time, blackscreen_time, rsvp_time, keys, fullscreen)
