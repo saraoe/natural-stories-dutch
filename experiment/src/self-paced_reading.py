@@ -2,7 +2,7 @@
 Self-paced reading experiment
 """
 
-from psychopy import visual, core, gui, data
+from psychopy import visual, core, data, event
 import os
 import re
 import pandas as pd
@@ -11,6 +11,7 @@ from show_stim import (
     show_fixation,
     show_text,
     show_word,
+    show_word_fixed,
     show_blackscreen,
     show_questions,
     show_scale,
@@ -18,7 +19,7 @@ from show_stim import (
 )
 
 
-def self_paced_reading(
+def spr(
     story,
     document_id,
     win,
@@ -26,6 +27,7 @@ def self_paced_reading(
     text_stim,
     stopwatch,
     blackscreen_time,
+    fixation_time,
     escape_keys,
 ):
     rt_list = []
@@ -43,6 +45,23 @@ def self_paced_reading(
         show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
 
     return rt_list
+
+
+def rsvp(
+    story,
+    sec,
+    win,
+    text_stim,
+    escape_keys,
+):
+    paragraphs = re.split("\n\n", story)
+
+    for paragraph in paragraphs:
+        words = re.split(r"[\s]", paragraph)
+        for word in words:
+            show_word_fixed(word, sec, text_stim, win, escape_keys)
+
+        show_word_fixed("+", sec, text_stim, win, escape_keys)
 
 
 def get_scale_question(document_id: int, story_name: str):
@@ -136,7 +155,7 @@ def experiment(
     for practice_story in read_text(practice_text_path):
         story_name = "Practice Text"  # fix this
         document_id = 0
-        rts = self_paced_reading(
+        rts = spr(
             practice_story,
             document_id,
             win,
@@ -144,6 +163,7 @@ def experiment(
             text_stim,
             stopwatch,
             blackscreen_time,
+            fixation_time,
             escape_keys,
         )
 
@@ -193,7 +213,7 @@ def experiment(
         )
         document_id = doc_ids[story_name]
 
-        rts = self_paced_reading(
+        rts = spr(
             story,
             document_id,
             win,
@@ -201,6 +221,7 @@ def experiment(
             text_stim,
             stopwatch,
             blackscreen_time,
+            fixation_time,
             escape_keys,
         )
 

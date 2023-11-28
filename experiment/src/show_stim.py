@@ -50,6 +50,18 @@ def show_word(word: str, text_stim, win, stopwatch, escape_keys):
     return rt
 
 
+def show_word_fixed(word: str, sec, text_stim, win, escape_keys):
+    text_stim.text = word
+    text_stim.draw()
+    win.flip()
+    core.wait(sec)
+
+    pressed_escape_keys = event.getKeys(keyList=escape_keys)
+    if pressed_escape_keys:
+        win.close()
+        core.quit()
+
+
 def show_question(
     question: str,
     answers: dict,
