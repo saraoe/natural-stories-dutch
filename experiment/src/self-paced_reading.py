@@ -6,79 +6,14 @@ from psychopy import visual, core, data
 import os
 import re
 import pandas as pd
-from util import read_text, list_to_csv
+from util import read_text, get_scale_question
+from reading_funcs import spr, rsvp
 from show_stim import (
-    show_fixation,
     show_text,
-    show_word,
-    show_word_fixed,
-    show_blackscreen,
     show_questions,
     show_scale,
     make_gui,
 )
-
-
-def spr(
-    story,
-    document_id,
-    win,
-    fix_cross,
-    text_stim,
-    stopwatch,
-    blackscreen_time,
-    fixation_time,
-    escape_keys,
-    save_path,
-    extra_cols,
-):
-    rt_list = []
-    paragraphs = re.split("\n\n", story)
-
-    for paragraph in paragraphs:
-        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
-        words = re.split(r"[\s]", paragraph)
-        for word in words:
-            rt = show_word(word, text_stim, win, stopwatch, escape_keys)
-            rt_list.append(
-                {"reation_time": rt, "document_id": document_id, "word": word}
-            )
-            list_to_csv(
-                df_list=[
-                    {"reation_time": rt, "document_id": document_id, "word": word}
-                ],
-                out_path=save_path,
-                extra_cols=extra_cols,
-            )
-
-            show_blackscreen(win, sec=blackscreen_time)
-
-
-def rsvp(
-    story,
-    sec,
-    win,
-    text_stim,
-    escape_keys,
-):
-    paragraphs = re.split("\n\n", story)
-
-    for paragraph in paragraphs:
-        words = re.split(r"[\s]", paragraph)
-        for word in words:
-            show_word_fixed(word, sec, text_stim, win, escape_keys)
-
-        show_word_fixed("+", sec, text_stim, win, escape_keys)
-
-
-def get_scale_question(document_id: int, story_name: str):
-    if document_id in [0, 1, 2]:
-        q = f"In hoeverre was je bekend met het sprookje {story_name} dat werd verteld in de vorige tekst?"
-    elif document_id in [5, 6]:
-        q = f"In hoeverre was je bekend met de roman/film {story_name} waarover werd verteld in de vorige tekst?"
-    elif document_id in [3, 4, 7, 8, 9, 10]:
-        q = "In hoeverre was je bekend met het onderwerp van de vorige tekst?"
-    return q
 
 
 def text_questions(
@@ -142,9 +77,7 @@ def text_questions(
 
 def experiment(
     paths: dict,
-    fixation_time: int,
-    blackscreen_time: int,
-    rsvp_time: int,
+    times: dict,
     keys: str,
     fullscreen: bool = True,
 ):
@@ -212,8 +145,9 @@ def experiment(
             fix_cross,
             text_stim,
             stopwatch,
-            blackscreen_time,
-            fixation_time,
+            times["blackscreen_time_short"],
+            times["blackscreen_time_long"],
+            times["fixation_time"],
             escape_keys,
             save_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
             extra_cols=gui_information,
@@ -251,7 +185,7 @@ def experiment(
 
         if document_id == rsvp_text:
             # show instructions for rsvp!!
-            rsvp(story, rsvp_time, win, text_stim, escape_keys)
+            rsvp(story, times["rsvp_time"], win, text_stim, escape_keys)
         else:
             spr(
                 story,
@@ -260,8 +194,9 @@ def experiment(
                 fix_cross,
                 text_stim,
                 stopwatch,
-                blackscreen_time,
-                fixation_time,
+                times["blackscreen_time_short"],
+                times["blackscreen_time_long"],
+                times["fixation_time"],
                 escape_keys,
                 save_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
                 extra_cols=gui_information,
@@ -299,12 +234,20 @@ if __name__ == "__main__":
     }
 
     # experimental parameters
-    fixation_time = 0.5
-    blackscreen_time = 0.2
-    rsvp_time = 0.6
+    times = {
+        "fixation_time": 0.5,
+        "blackscreen_time_short": 0.2,
+        "blackscreen_time_long": 0.75,
+        "rsvp_time": 0.6,
+    }
 
     # experimental device
     keys = "computer"
     fullscreen = False
 
-    experiment(paths, fixation_time, blackscreen_time, rsvp_time, keys, fullscreen)
+    experiment(
+        paths,
+        times,
+        keys,
+        fullscreen,
+    )
