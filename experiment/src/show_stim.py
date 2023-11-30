@@ -9,7 +9,7 @@ from util import list_to_csv
 
 
 def show_fixation(stim, win, sec, escape_keys):
-    stim.fontColor = "grey"
+    stim.fontColor = "darkgrey"
     stim.draw()
     win.flip()
     core.wait(sec)
@@ -86,7 +86,7 @@ def show_question(
             if i == response_key:
                 q_stim.borderColor = "green"
             else:
-                q_stim.borderColor = "grey"
+                q_stim.borderColor = "darkgrey"
             q_stim.pos = pos
             q_stim.text = f"{i}: {answer}"
             q_stim.draw()
@@ -121,7 +121,7 @@ def show_questions(
         text="",
         size=[0.85, 0.55],
         letterHeight=0.05,
-        borderColor="grey",
+        borderColor="darkgrey",
     )
     qtext_stim.pos = (0, 0.8)
 

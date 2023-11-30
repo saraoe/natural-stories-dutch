@@ -36,6 +36,7 @@ def spr(
     paragraphs = re.split("\n\n", story)
 
     for paragraph in paragraphs:
+        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
         words = re.split(r"[\s]", paragraph)
         for word in words:
             rt = show_word(word, text_stim, win, stopwatch, escape_keys)
@@ -51,7 +52,6 @@ def spr(
             )
 
             show_blackscreen(win, sec=blackscreen_time)
-        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
 
 
 def rsvp(
@@ -184,7 +184,7 @@ def experiment(
     file_end = f"{gui_information['participant_id']}_{date}"
 
     # defining a window
-    win = visual.Window(color="black", fullscr=fullscreen)
+    win = visual.Window(color="grey", fullscr=fullscreen)
     text_stim = visual.TextStim(win=win)
     smalltext_stim = visual.TextStim(win=win)
     smalltext_stim.size = 0.05
