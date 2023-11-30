@@ -6,6 +6,7 @@ from psychopy import visual, core, data
 import os
 import re
 import pandas as pd
+from random import shuffle
 from util import read_text, get_scale_question
 from reading_funcs import spr, rsvp
 from show_stim import (
@@ -171,6 +172,7 @@ def experiment(
 
     # experiment start
     stories = list(read_text(paths["stories"], stories=True))
+    shuffle(stories)
     n_stories = len(stories)
     pause_path = os.path.join(paths["instructions"], "pause.txt")
     pause_text = list(read_text(pause_path))[0]
