@@ -74,8 +74,8 @@ def type_response(
     n_lines = len(lines)
     if n_lines <= max_lines:
         scroll = None
-        up_stim.fillColor = "grey"
-        down_stim.fillColor = "grey"
+        up_stim.fillColor = "darkgrey"
+        down_stim.fillColor = "darkgrey"
     else:
         scroll = n_lines - max_lines
 
@@ -85,9 +85,9 @@ def type_response(
             up_stim.fillColor = "white"
             down_stim.fillColor = "white"
             if scroll == 0:
-                up_stim.fillColor = "grey"
+                up_stim.fillColor = "darkgrey"
             if scroll + max_lines == n_lines:
-                down_stim.fillColor = "grey"
+                down_stim.fillColor = "darkgrey"
         else:
             story_stim.text = "\n".join(lines)
         text_stim.text = response_prefix + response
@@ -120,10 +120,18 @@ def type_response(
     return response, rt
 
 
-def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
+def experiment(paths: dict, fullscreen: bool):
     characters = list(string.ascii_lowercase)
     escape_keys = ["escape", "q"]
     stopwatch = core.Clock()
+
+    # text size
+    if fullscreen:
+        maxchar_pr_line = 90
+        max_lines = 10
+    else:
+        maxchar_pr_line = 35
+        max_lines = 7
 
     # GUI information
     fields = {
@@ -141,7 +149,7 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
     file_end = f"{gui_information['participant_id']}_{date}"
 
     # defining a window
-    win = visual.Window(color="black", fullscr=False)
+    win = visual.Window(color="grey", fullscr=fullscreen)
     text_stim = visual.TextStim(win=win)
     smalltext_stim = visual.TextStim(win=win)
     smalltext_stim.size = 0.05
@@ -156,7 +164,7 @@ def experiment(paths: dict, max_lines: int, maxchar_pr_line: int):
         text="",
         pos=(0, -0.8),
         size=[1, 0.1],
-        borderColor="grey",
+        borderColor="darkgrey",
     )
     up = make_arrows("up", storybox_stim, win)
     down = make_arrows("down", storybox_stim, win)
@@ -227,7 +235,6 @@ if __name__ == "__main__":
     }
 
     # experimental setup
-    maxchar_pr_line = 35
-    max_lines = 7
+    fullscreen = True
 
-    experiment(paths, max_lines, maxchar_pr_line)
+    experiment(paths, fullscreen)
