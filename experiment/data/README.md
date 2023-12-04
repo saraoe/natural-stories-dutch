@@ -1,5 +1,14 @@
 # Data collected during experiment
 
+```
+├── README.md
+├── SPR
+│   └── ...     <- csv-files from SPR EEG experiment
+├── cloze
+│   └── ...     <- csv-files from Cloze Task
+
+```
+
 ## SPR EEG
 
 For each participant, two seperate csv-files are saved during the SPR-experiment:
@@ -7,7 +16,7 @@ For each participant, two seperate csv-files are saved during the SPR-experiment
 - reaction times: ```rt_*.csv```
 - responses: ```responses_*.csv```
 
-Both files have the same ending in the filename, indicating the partipant id, date of data collection, and a random string of characters (that are the same for the same participant). 
+Both files have the same subfix of filename, indicating the partipant id, date of data collection, and a random string of characters (that are the same for the same participant). 
 
 The **reation times** file include the following columns:
 - reation_time: (numeric) in seconds
@@ -27,12 +36,25 @@ The **response** file are the responses to the questions in the ```../questions.
 - gender: (character)
 
 ## Cloze Task
-For each participant in the cloze task experiment, a single csv-file is saved with the prefix ```cloze_*.csv```. The subfix of the filename is created similarly to those for the SPR experiment (i.e. partipant id, date of data collection, and a random string of characters)
+For each participant in the cloze task experiment, two csv-file are saved 
 
-The file includes the following columns:
+- The main file (with responded word and reaction times): ```cloze_*.csv```
+- Responses of scale questions: ```responses_*.csv```
+
+The subfix of the filename is created similarly to those for the SPR experiment (i.e. partipant id, date of data collection, and a random string of characters)
+
+The main **cloze** file includes the following columns:
 - response: (str) the two words the participant responded with (seperated by whitespace)
 - story: (str) name of the story
-- correct_word: (str) the correct word (i.e. i the participant responded correctly, this should correpond with the first of the words in the *response* column)
+- correct_word: (str) the correct word (i.e. if the participant responded correctly, this should correpond with the first of the words in the *response* column)
+- participant_id: (int)
+- age: (int)
+- gender: (character)
+
+The **responses** files includes the following columns:
+- response: (int) the response on a 5-scale
+- question: (str) the formulation of the question they were asked
+- document_id: (int)
 - participant_id: (int)
 - age: (int)
 - gender: (character)

@@ -264,7 +264,6 @@ def experiment(paths: dict, fullscreen: bool):
                     stopwatch,
                     win,
                 )
-                break
             lines.append("\n")
         show_scale_question(1, story_name, win, file_end, gui_information)
         # save

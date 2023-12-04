@@ -7,7 +7,7 @@ import os
 import re
 import pandas as pd
 from random import shuffle
-from util import read_text, get_scale_question
+from util import read_text, get_scale_question, list_to_csv
 from reading_funcs import spr, rsvp
 from show_stim import (
     show_text,
@@ -50,21 +50,29 @@ def text_questions(
     scale_keys.append(respond_key)
 
     scale_question = get_scale_question(document_id, story_name)
-    show_scale(
+    scale_response = show_scale(
         scale_question,
-        document_id,
-        question_id=0,
         qtext_stim=qtext_up,
         respondtext=respond_stim,
         scale_stim=scale,
         win=win,
         escape_keys=escape_keys,
         question_keys=scale_keys,
-        save_path=save_path,
+    )
+    list_to_csv(
+        df_list=[
+            {
+                "response": scale_response,
+                "correct": "NA",
+                "document_id": document_id,
+                "question_id": 0,
+            }
+        ],
+        out_path=save_path,
         extra_cols=extra_cols,
     )
     qs = questions_df[questions_df["document_id"] == document_id]
-    show_questions(
+    q_responses = show_questions(
         qs,
         qtext_up,
         respond_stim,
@@ -74,6 +82,7 @@ def text_questions(
         save_path=save_path,
         extra_cols=extra_cols,
     )
+    list_to_csv(df_list=q_responses, out_path=save_path, extra_cols=extra_cols)
 
 
 def experiment(
@@ -232,7 +241,7 @@ if __name__ == "__main__":
         "instructions": os.path.join("instructions"),
         "stories": os.path.join("..", "texts", "edited", "*"),
         "questions": os.path.join("questions.xlsx"),
-        "out_data": os.path.join("data"),
+        "out_data": os.path.join("data", "SPR"),
     }
 
     # experimental parameters
