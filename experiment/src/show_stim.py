@@ -3,9 +3,10 @@ functions for showing stimuli in psychopy scripts
 """
 from psychopy import core, event, gui, visual
 import re
+import string
 import pandas as pd
 from random import shuffle
-from util import list_to_csv
+from util import key_scroll, get_punct_dict
 
 
 def show_fixation(stim, win, sec, escape_keys):
@@ -202,3 +203,73 @@ def make_gui(fields: dict, title: str):
     else:
         core.quit()
     return gui_information
+
+
+def type_response(
+    story_stim,
+    lines,
+    max_lines,
+    up_stim,
+    down_stim,
+    text_stim,
+    stopwatch,
+    win,
+):
+    # possible characters
+    letters = list(string.ascii_lowercase)
+    punct = get_punct_dict()
+
+    response_prefix = "Your response: "
+    response = ""
+
+    # scroll if there a more lines than can be viewed
+    n_lines = len(lines)
+    if n_lines <= max_lines:
+        scroll = None
+        up_stim.fillColor = "darkgrey"
+        down_stim.fillColor = "darkgrey"
+    else:
+        scroll = n_lines - max_lines
+
+    while True:
+        if isinstance(scroll, int) == True:
+            story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
+            up_stim.fillColor = "white"
+            down_stim.fillColor = "white"
+            if scroll == 0:
+                up_stim.fillColor = "darkgrey"
+            if scroll + max_lines == n_lines:
+                down_stim.fillColor = "darkgrey"
+        else:
+            story_stim.text = "\n".join(lines)
+        text_stim.text = response_prefix + response
+        text_stim.draw()
+        story_stim.draw()
+        up_stim.draw()
+        down_stim.draw()
+        win.flip()
+        stopwatch.reset()
+        key = event.waitKeys()[0]
+        print(key)
+
+        if key == "escape":
+            win.close()
+            core.quit()
+        if key == "return" and response != "":
+            rt = stopwatch.getTime()
+            break
+
+        if key == "space":
+            response += " "
+        elif key == "backspace":
+            response = response[:-1]
+        elif key in letters:
+            response += key
+        elif key in punct.keys():
+            response += punct[key]
+
+        # scroll through text
+        if isinstance(scroll, int) == True:
+            scroll = key_scroll(scroll, key, max_lines, n_lines)
+
+    return response, rt

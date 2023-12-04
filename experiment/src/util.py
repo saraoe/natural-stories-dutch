@@ -53,3 +53,25 @@ def get_punct_dict():
         "1": "!",
     }
     return punct_dict
+
+
+def make_lines(current_lines: List[str], word: str, maxchar: int):
+    line = current_lines[-1]
+    tmp_line = line + f" {word}"
+    if len(tmp_line) > maxchar:
+        lines = current_lines + [word]
+    else:
+        lines = current_lines[:-1] + [tmp_line]
+    return lines
+
+
+def key_scroll(scroll: int, key: str, max_lines: int, n_lines: int):
+    if key == "up":
+        scroll -= 1
+        if scroll < 0:
+            scroll = 0
+    if key == "down":
+        scroll += 1
+        if max_lines + scroll > n_lines:
+            scroll = n_lines - max_lines
+    return scroll

@@ -2,13 +2,14 @@
 Cloze task
 """
 
-from psychopy import visual, core, event, gui, data
+from psychopy import visual, core, event, data
 import os, re
+from random import shuffle
 import numpy as np
-import string
-from typing import List
-from util import read_text, list_to_csv, get_scale_question, get_punct_dict
+import pandas as pd
+from util import read_text, list_to_csv, get_scale_question
 from show_stim import show_text, make_gui, show_scale
+from reading_funcs import cloze_task
 
 
 def make_arrows(direction: str, textbox, win):
@@ -32,98 +33,6 @@ def make_arrows(direction: str, textbox, win):
             textbox.pos[1] - arrow.size[1],
         )
     return arrow
-
-
-def make_lines(current_lines: List[str], word: str, maxchar: int):
-    line = current_lines[-1]
-    tmp_line = line + f" {word}"
-    if len(tmp_line) > maxchar:
-        lines = current_lines + [word]
-    else:
-        lines = current_lines[:-1] + [tmp_line]
-    return lines
-
-
-def key_scroll(scroll: int, key: str, max_lines: int, n_lines: int):
-    if key == "up":
-        scroll -= 1
-        if scroll < 0:
-            scroll = 0
-    if key == "down":
-        scroll += 1
-        if max_lines + scroll > n_lines:
-            scroll = n_lines - max_lines
-    return scroll
-
-
-def type_response(
-    story_stim,
-    lines,
-    max_lines,
-    up_stim,
-    down_stim,
-    text_stim,
-    stopwatch,
-    win,
-):
-    # possible characters
-    letters = list(string.ascii_lowercase)
-    punct = get_punct_dict()
-
-    response_prefix = "Your response: "
-    response = ""
-
-    # scroll if there a more lines than can be viewed
-    n_lines = len(lines)
-    if n_lines <= max_lines:
-        scroll = None
-        up_stim.fillColor = "darkgrey"
-        down_stim.fillColor = "darkgrey"
-    else:
-        scroll = n_lines - max_lines
-
-    while True:
-        if isinstance(scroll, int) == True:
-            story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
-            up_stim.fillColor = "white"
-            down_stim.fillColor = "white"
-            if scroll == 0:
-                up_stim.fillColor = "darkgrey"
-            if scroll + max_lines == n_lines:
-                down_stim.fillColor = "darkgrey"
-        else:
-            story_stim.text = "\n".join(lines)
-        text_stim.text = response_prefix + response
-        text_stim.draw()
-        story_stim.draw()
-        up_stim.draw()
-        down_stim.draw()
-        win.flip()
-        stopwatch.reset()
-        key = event.waitKeys()[0]
-        print(key)
-
-        if key == "escape":
-            win.close()
-            core.quit()
-        if key == "return" and response != "":
-            rt = stopwatch.getTime()
-            break
-
-        if key == "space":
-            response += " "
-        elif key == "backspace":
-            response = response[:-1]
-        elif key in letters:
-            response += key
-        elif key in punct.keys():
-            response += punct[key]
-
-        # scroll through text
-        if isinstance(scroll, int) == True:
-            scroll = key_scroll(scroll, key, max_lines, n_lines)
-
-    return response, rt
 
 
 def show_scale_question(
@@ -184,6 +93,15 @@ def experiment(paths: dict, fullscreen: bool):
     escape_keys = ["escape", "q"]
     stopwatch = core.Clock()
 
+    # get document_ids
+    questions_df = pd.read_excel(paths["questions"])
+    questions_df["story"] = questions_df["Story"].apply(
+        lambda s: re.sub("[^a-zA-Z\s]+", "", s).lower()
+    )
+    doc_ids = pd.Series(
+        questions_df.document_id.values, index=questions_df.story
+    ).to_dict()
+
     # text size
     if fullscreen:
         maxchar_pr_line = 90
@@ -235,47 +153,32 @@ def experiment(paths: dict, fullscreen: bool):
 
     # start experiment
     stories = list(read_text(paths["stories"], stories=True))
+    shuffle(stories)
     n_stories = len(stories)
     pause_path = os.path.join(paths["instructions"], "pause.txt")
     pause_text = list(read_text(pause_path))[0]
     for n, (story_name, story) in enumerate(stories, start=1):
         show_text(f"Story {n} out of {n_stories}", text_stim, win, escape_keys)
         show_text(f"Title: {story_name.title()}", text_stim, win, escape_keys)
-        paragraphs = story.split("\n\n")
+        document_id = doc_ids[story_name]
 
-        lines = [""]
-        response, rt = "NA", "NA"
-        responses = []
-        for paragraph in paragraphs:
-            words = re.split(r"[\s]", paragraph)
-            for word in words:
-                responses.append(
-                    {
-                        "response": response,
-                        "reaction_time": rt,
-                        "story": story_name,
-                        "correct_word": word,
-                    }
-                )
-                lines = make_lines(lines, word, maxchar_pr_line)
-                response, rt = type_response(
-                    storybox_stim,
-                    lines,
-                    max_lines,
-                    up,
-                    down,
-                    writebox_stim,
-                    stopwatch,
-                    win,
-                )
-            lines.append("\n")
-        show_scale_question(1, story_name, win, file_end, gui_information)
-        # save
-        list_to_csv(
-            df_list=responses,
-            out_path=os.path.join(paths["out_data"], f"cloze_{file_end}.csv"),
+        cloze_task(
+            story,
+            document_id,
+            maxchar_pr_line,
+            max_lines,
+            storybox_stim,
+            writebox_stim,
+            up,
+            down,
+            stopwatch,
+            win,
+            save_path=os.path.join(paths["out_data"], f"cloze_{file_end}.csv"),
             extra_cols=gui_information,
         )
+
+        show_scale_question(document_id, story_name, win, file_end, gui_information)
+
         # pause
         show_text(pause_text, text_stim, win, escape_keys)
 
@@ -288,6 +191,7 @@ def experiment(paths: dict, fullscreen: bool):
 if __name__ == "__main__":
     # paths
     paths = {
+        "questions": os.path.join("questions.xlsx"),
         "instructions": os.path.join("instructions"),
         "stories": os.path.join("..", "texts", "edited", "*"),
         "out_data": os.path.join("data", "cloze"),
