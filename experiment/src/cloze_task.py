@@ -102,7 +102,7 @@ def type_response(
         if key == "escape":
             win.close()
             core.quit()
-        if key == "return":
+        if key == "return" and response != "":
             rt = stopwatch.getTime()
             break
 
