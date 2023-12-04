@@ -125,6 +125,8 @@ def show_questions(
     )
     qtext_stim.pos = (0, 0.8)
 
+    responses = []
+
     for index, row in questions_df.iterrows():
         ans_cols = ["a-correct", "b", "c", "d"]
         answers = {row[col]: col for col in ans_cols}
@@ -140,32 +142,25 @@ def show_questions(
         )
         correct = 1 if response == "a-correct" else 0
 
-        list_to_csv(
-            df_list=[
-                {
-                    "response": response,
-                    "correct": correct,
-                    "document_id": row["document_id"],
-                    "question_id": row["question_id"],
-                }
-            ],
-            out_path=save_path,
-            extra_cols=extra_cols,
+        responses.append(
+            {
+                "response": response,
+                "correct": correct,
+                "document_id": row["document_id"],
+                "question_id": row["question_id"],
+            }
         )
+    return responses
 
 
 def show_scale(
     question: str,
-    document_id: int,
-    question_id,
     qtext_stim,
     respondtext,
     scale_stim,
     win,
     escape_keys,
     question_keys,
-    save_path,
-    extra_cols,
 ):
     qtext_stim.text = question
     qtext_stim.pos = (0, 0.6)
@@ -187,19 +182,6 @@ def show_scale(
         response = int(key)
         scale_stim.markerPos = response
         respondtext.draw()
-
-    list_to_csv(
-        df_list=[
-            {
-                "response": response,
-                "correct": "NA",
-                "document_id": document_id,
-                "question_id": question_id,
-            }
-        ],
-        out_path=save_path,
-        extra_cols=extra_cols,
-    )
 
 
 def fix_name(name: str):

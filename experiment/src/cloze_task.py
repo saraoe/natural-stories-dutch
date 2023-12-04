@@ -7,8 +7,8 @@ import os, re
 import numpy as np
 import string
 from typing import List
-from util import read_text, list_to_csv
-from show_stim import show_text, make_gui
+from util import read_text, list_to_csv, get_scale_question
+from show_stim import show_text, make_gui, show_scale
 
 
 def make_arrows(direction: str, textbox, win):
@@ -120,6 +120,60 @@ def type_response(
     return response, rt
 
 
+def show_scale_question(
+    document_id,
+    story_name,
+    win,
+    file_end,
+    extra_cols,
+    respond_key="return",
+    escape_keys=["escape"],
+):
+    # define stim
+    qtext_up = visual.TextStim(win=win)
+    respond_stim = visual.TextStim(
+        win=win, pos=(0, -0.8), text=f"Press {respond_key} to respond"
+    )
+    scale = visual.Slider(
+        win=win,
+        font="Open Sans",
+        labelHeight=0.05,
+        ticks=(1, 2, 3, 4, 5),
+        labels=[
+            "1\nIk heb er nog nooit van gehoord",
+            "2\nIk ben er een heel klein beetje bekend meel",
+            "3\nIk ben er tot op zekere hoogte bekend mee",
+            "4\nIk ben er bekend mee",
+            "5\nIk ben er heel bekend mee",
+        ],
+    )
+    scale_keys = [str(tick) for tick in scale.ticks]
+    scale_keys.append(respond_key)
+
+    scale_question = get_scale_question(document_id, story_name)
+    scale_response = show_scale(
+        scale_question,
+        document_id,
+        qtext_stim=qtext_up,
+        respondtext=respond_stim,
+        scale_stim=scale,
+        win=win,
+        escape_keys=escape_keys,
+        question_keys=scale_keys,
+    )
+    list_to_csv(
+        df_list=[
+            {
+                "response": scale_response,
+                "question": scale_question,
+                "document_id": document_id,
+            }
+        ],
+        out_path=os.path.join(paths["out_data"], f"responses_{file_end}.csv"),
+        extra_cols=extra_cols,
+    )
+
+
 def experiment(paths: dict, fullscreen: bool):
     characters = list(string.ascii_lowercase)
     escape_keys = ["escape", "q"]
@@ -210,7 +264,9 @@ def experiment(paths: dict, fullscreen: bool):
                     stopwatch,
                     win,
                 )
+                break
             lines.append("\n")
+        show_scale_question(1, story_name, win, file_end, gui_information)
         # save
         list_to_csv(
             df_list=responses,
@@ -231,7 +287,7 @@ if __name__ == "__main__":
     paths = {
         "instructions": os.path.join("instructions"),
         "stories": os.path.join("..", "texts", "edited", "*"),
-        "out_data": os.path.join("data"),
+        "out_data": os.path.join("data", "cloze"),
     }
 
     # experimental setup
