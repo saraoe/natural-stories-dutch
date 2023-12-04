@@ -52,7 +52,9 @@ def spr(
 
 def rsvp(
     story,
-    sec,
+    pr_char_sec,
+    min_sec,
+    fixation_sec,
     win,
     text_stim,
     escape_keys,
@@ -62,9 +64,10 @@ def rsvp(
     for paragraph in paragraphs:
         words = re.split(r"[\s]", paragraph)
         for word in words:
-            show_word_fixed(word, sec, text_stim, win, escape_keys)
+            show_word_fixed(word, pr_char_sec, min_sec, text_stim, win, escape_keys)
+            show_blackscreen(win, min_sec)
 
-        show_word_fixed("+", sec, text_stim, win, escape_keys)
+        show_word_fixed("+", fixation_sec, text_stim, win, escape_keys)
 
 
 def cloze_task(

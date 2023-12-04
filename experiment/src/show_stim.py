@@ -52,7 +52,9 @@ def show_word(word: str, text_stim, win, stopwatch, escape_keys):
     return rt
 
 
-def show_word_fixed(word: str, sec, text_stim, win, escape_keys):
+def show_word_fixed(word: str, pr_char_sec, min_sec, text_stim, win, escape_keys):
+    char_time = pr_char_sec * len(word) + 0.02
+    sec = char_time if char_time >= min_sec else min_sec
     text_stim.text = word
     text_stim.draw()
     win.flip()
