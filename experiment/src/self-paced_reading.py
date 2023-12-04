@@ -195,8 +195,20 @@ def experiment(
         document_id = doc_ids[story_name]
 
         if document_id == rsvp_text:
-            # show instructions for rsvp!!
-            rsvp(story, times["rsvp_time"], win, text_stim, escape_keys)
+            rsvp_inst_path = os.path.join(
+                paths["instructions"], "rsvp_instructions*.txt"
+            )
+            for inst in read_text(rsvp_inst_path):
+                show_text(inst, smalltext_stim, win, escape_keys)
+            rsvp(
+                story,
+                times["rsvp_prchar_time"],
+                times["rsvp_min_time"],
+                times["fixation_time"],
+                win,
+                text_stim,
+                escape_keys,
+            )
         else:
             spr(
                 story,
@@ -249,7 +261,8 @@ if __name__ == "__main__":
         "fixation_time": 0.5,
         "blackscreen_time_short": 0.2,
         "blackscreen_time_long": 0.75,
-        "rsvp_time": 0.6,
+        "rsvp_prchar_time": 0.19,
+        "rsvp_min_time": 0.25,
     }
 
     # experimental device
