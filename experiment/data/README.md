@@ -2,7 +2,7 @@
 
 ```
 ├── README.md
-├── SPR
+├── spr
 │   └── ...     <- csv-files from SPR EEG experiment
 ├── cloze
 │   └── ...     <- csv-files from Cloze Task

@@ -241,7 +241,7 @@ if __name__ == "__main__":
         "instructions": os.path.join("instructions"),
         "stories": os.path.join("..", "texts", "edited", "*"),
         "questions": os.path.join("questions.xlsx"),
-        "out_data": os.path.join("data", "SPR"),
+        "out_data": os.path.join("data", "spr"),
     }
 
     # experimental parameters
