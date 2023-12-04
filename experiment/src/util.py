@@ -41,3 +41,15 @@ def get_scale_question(document_id: int, story_name: str):
     elif document_id in [3, 4, 7, 8, 9, 10]:
         q = "In hoeverre was je bekend met het onderwerp van de vorige tekst?"
     return q
+
+
+def get_punct_dict():
+    punct_dict = {
+        "period": ".",
+        "comma": ",",
+        "minus": "-",
+        "slash": "?",
+        "semicolon": ":",
+        "1": "!",
+    }
+    return punct_dict

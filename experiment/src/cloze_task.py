@@ -7,7 +7,7 @@ import os, re
 import numpy as np
 import string
 from typing import List
-from util import read_text, list_to_csv, get_scale_question
+from util import read_text, list_to_csv, get_scale_question, get_punct_dict
 from show_stim import show_text, make_gui, show_scale
 
 
@@ -57,7 +57,6 @@ def key_scroll(scroll: int, key: str, max_lines: int, n_lines: int):
 
 
 def type_response(
-    characters: List[str],
     story_stim,
     lines,
     max_lines,
@@ -67,6 +66,10 @@ def type_response(
     stopwatch,
     win,
 ):
+    # possible characters
+    letters = list(string.ascii_lowercase)
+    punct = get_punct_dict()
+
     response_prefix = "Your response: "
     response = ""
 
@@ -98,6 +101,7 @@ def type_response(
         win.flip()
         stopwatch.reset()
         key = event.waitKeys()[0]
+        print(key)
 
         if key == "escape":
             win.close()
@@ -110,8 +114,10 @@ def type_response(
             response += " "
         elif key == "backspace":
             response = response[:-1]
-        elif key in characters:
+        elif key in letters:
             response += key
+        elif key in punct.keys():
+            response += punct[key]
 
         # scroll through text
         if isinstance(scroll, int) == True:
@@ -175,7 +181,6 @@ def show_scale_question(
 
 
 def experiment(paths: dict, fullscreen: bool):
-    characters = list(string.ascii_lowercase)
     escape_keys = ["escape", "q"]
     stopwatch = core.Clock()
 
@@ -254,7 +259,6 @@ def experiment(paths: dict, fullscreen: bool):
                 )
                 lines = make_lines(lines, word, maxchar_pr_line)
                 response, rt = type_response(
-                    characters,
                     storybox_stim,
                     lines,
                     max_lines,
