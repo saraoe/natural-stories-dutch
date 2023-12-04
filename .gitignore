@@ -5,4 +5,5 @@ pandoc*
 stories/*
 texts/*
 
-experiment/data/*.csv
+experiment/data/cloze/*.csv
+experiment/data/spr/*.csv

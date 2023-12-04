@@ -3,9 +3,10 @@ functions for showing stimuli in psychopy scripts
 """
 from psychopy import core, event, gui, visual
 import re
+import string
 import pandas as pd
 from random import shuffle
-from util import list_to_csv
+from util import key_scroll, get_punct_dict
 
 
 def show_fixation(stim, win, sec, escape_keys):
@@ -125,6 +126,8 @@ def show_questions(
     )
     qtext_stim.pos = (0, 0.8)
 
+    responses = []
+
     for index, row in questions_df.iterrows():
         ans_cols = ["a-correct", "b", "c", "d"]
         answers = {row[col]: col for col in ans_cols}
@@ -140,32 +143,25 @@ def show_questions(
         )
         correct = 1 if response == "a-correct" else 0
 
-        list_to_csv(
-            df_list=[
-                {
-                    "response": response,
-                    "correct": correct,
-                    "document_id": row["document_id"],
-                    "question_id": row["question_id"],
-                }
-            ],
-            out_path=save_path,
-            extra_cols=extra_cols,
+        responses.append(
+            {
+                "response": response,
+                "correct": correct,
+                "document_id": row["document_id"],
+                "question_id": row["question_id"],
+            }
         )
+    return responses
 
 
 def show_scale(
     question: str,
-    document_id: int,
-    question_id,
     qtext_stim,
     respondtext,
     scale_stim,
     win,
     escape_keys,
     question_keys,
-    save_path,
-    extra_cols,
 ):
     qtext_stim.text = question
     qtext_stim.pos = (0, 0.6)
@@ -188,19 +184,6 @@ def show_scale(
         scale_stim.markerPos = response
         respondtext.draw()
 
-    list_to_csv(
-        df_list=[
-            {
-                "response": response,
-                "correct": "NA",
-                "document_id": document_id,
-                "question_id": question_id,
-            }
-        ],
-        out_path=save_path,
-        extra_cols=extra_cols,
-    )
-
 
 def fix_name(name: str):
     return re.sub(r"[\s]", "_", name).lower()
@@ -220,3 +203,73 @@ def make_gui(fields: dict, title: str):
     else:
         core.quit()
     return gui_information
+
+
+def type_response(
+    story_stim,
+    lines,
+    max_lines,
+    up_stim,
+    down_stim,
+    text_stim,
+    stopwatch,
+    win,
+):
+    # possible characters
+    letters = list(string.ascii_lowercase)
+    punct = get_punct_dict()
+
+    response_prefix = "Your response: "
+    response = ""
+
+    # scroll if there a more lines than can be viewed
+    n_lines = len(lines)
+    if n_lines <= max_lines:
+        scroll = None
+        up_stim.fillColor = "darkgrey"
+        down_stim.fillColor = "darkgrey"
+    else:
+        scroll = n_lines - max_lines
+
+    while True:
+        if isinstance(scroll, int) == True:
+            story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
+            up_stim.fillColor = "white"
+            down_stim.fillColor = "white"
+            if scroll == 0:
+                up_stim.fillColor = "darkgrey"
+            if scroll + max_lines == n_lines:
+                down_stim.fillColor = "darkgrey"
+        else:
+            story_stim.text = "\n".join(lines)
+        text_stim.text = response_prefix + response
+        text_stim.draw()
+        story_stim.draw()
+        up_stim.draw()
+        down_stim.draw()
+        win.flip()
+        stopwatch.reset()
+        key = event.waitKeys()[0]
+        print(key)
+
+        if key == "escape":
+            win.close()
+            core.quit()
+        if key == "return" and response != "":
+            rt = stopwatch.getTime()
+            break
+
+        if key == "space":
+            response += " "
+        elif key == "backspace":
+            response = response[:-1]
+        elif key in letters:
+            response += key
+        elif key in punct.keys():
+            response += punct[key]
+
+        # scroll through text
+        if isinstance(scroll, int) == True:
+            scroll = key_scroll(scroll, key, max_lines, n_lines)
+
+    return response, rt
