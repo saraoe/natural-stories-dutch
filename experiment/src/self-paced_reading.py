@@ -195,7 +195,11 @@ def experiment(
         document_id = doc_ids[story_name]
 
         if document_id == rsvp_text:
-            # show instructions for rsvp!!
+            rsvp_inst_path = os.path.join(
+                paths["instructions"], "rsvp_instructions*.txt"
+            )
+            for inst in read_text(rsvp_inst_path):
+                show_text(inst, smalltext_stim, win, escape_keys)
             rsvp(
                 story,
                 times["rsvp_prchar_time"],
