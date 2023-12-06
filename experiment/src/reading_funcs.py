@@ -15,6 +15,7 @@ from show_stim import (
 # for SPR exp
 def spr(
     story,
+    story_name,
     document_id,
     win,
     fix_cross,
@@ -27,7 +28,6 @@ def spr(
     save_path,
     extra_cols,
 ):
-    rt_list = []
     paragraphs = re.split("\n\n", story)
 
     for paragraph in paragraphs:
@@ -35,12 +35,14 @@ def spr(
         words = re.split(r"[\s]", paragraph)
         for word in words:
             rt = show_word(word, text_stim, win, stopwatch, escape_keys)
-            rt_list.append(
-                {"reation_time": rt, "document_id": document_id, "word": word}
-            )
             list_to_csv(
                 df_list=[
-                    {"reation_time": rt, "document_id": document_id, "word": word}
+                    {
+                        "reation_time": rt,
+                        "story_name": story_name,
+                        "document_id": document_id,
+                        "word": word,
+                    }
                 ],
                 out_path=save_path,
                 extra_cols=extra_cols,
