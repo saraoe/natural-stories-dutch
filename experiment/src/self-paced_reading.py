@@ -153,10 +153,11 @@ def experiment(
     if not os.path.exists(paths["out_data"]):
         os.makedirs(paths["out_data"])
 
-    date = data.getDateStr()
-    file_end = f"{gui_information['participant_id']}_{date}"
     if cont_crash:
-        file_end += "_s2"
+        file_end = old_file_end + "_s2"
+    else:
+        date = data.getDateStr()
+        file_end = f"{gui_information['participant_id']}_{date}"
 
     # defining a window
     win = visual.Window(color="grey", fullscr=fullscreen)
