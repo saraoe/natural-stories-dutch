@@ -171,6 +171,8 @@ def experiment(
     practice_text_path = os.path.join(paths["instructions"], "practice_text*.txt")
     practice_end_path = os.path.join(paths["instructions"], "practice_end*.txt")
     pause_path = os.path.join(paths["instructions"], "pause.txt")
+    rsvp_inst_path = os.path.join(paths["instructions"], "rsvp_instructions*.txt")
+    spr_inst_path = os.path.join(paths["instructions"], "spr_instructions*.txt")
 
     # read in stories
     if cont_crash:
@@ -216,6 +218,9 @@ def experiment(
                 show_text(info, text_stim, win, escape_keys)
             document_id = 0
         else:
+            inst_path = rsvp_inst_path if document_id == rsvp_text else spr_inst_path
+            for inst in read_text(inst_path):
+                show_text(inst, smalltext_stim, win, escape_keys)
             show_text(
                 f"{story_name.title()}\n\nStory {n} out of {n_stories}",
                 text_stim,
@@ -225,11 +230,6 @@ def experiment(
             document_id = doc_ids[story_name]
 
         if document_id == rsvp_text:
-            rsvp_inst_path = os.path.join(
-                paths["instructions"], "rsvp_instructions*.txt"
-            )
-            for inst in read_text(rsvp_inst_path):
-                show_text(inst, smalltext_stim, win, escape_keys)
             rsvp(
                 story,
                 times["rsvp_prchar_time"],
