@@ -28,8 +28,15 @@ def show_blackscreen(win, sec):
     core.wait(sec)
 
 
-def show_text(text: str, text_stim, win, escape_keys, possible_keys=None):
-    text_stim.text = text
+def show_text(
+    text: str,
+    text_stim,
+    win,
+    escape_keys,
+    possible_keys=None,
+    text_ending="(Druk op een toets om verder te gaan!)",
+):
+    text_stim.text = text + f"\n\n{text_ending}"
     text_stim.draw()
     win.flip()
     key = event.waitKeys(keyList=possible_keys)[0]
