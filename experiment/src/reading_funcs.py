@@ -2,12 +2,13 @@
 Functions for self-paced reading (SPR) and rapid series visual representation (RSVP)
 """
 import re
-from util import list_to_csv, make_lines
+from util import list_to_csv, make_lines, read_text
 from show_stim import (
     show_blackscreen,
     show_fixation,
     show_word,
     show_word_fixed,
+    show_text,
     type_response,
 )
 
@@ -52,6 +53,71 @@ def spr(
     show_blackscreen(win, sec=blackscreen_time_long)
 
 
+def spr_w_practice(
+    story,
+    story_name,
+    document_id,
+    n,
+    n_stories,
+    win,
+    fix_cross,
+    text_stim,
+    smalltext_stim,
+    stopwatch,
+    blackscreen_time_short,
+    blackscreen_time_long,
+    fixation_time,
+    escape_keys,
+    save_path,
+    extra_cols,
+    practice_story,
+    practice_info_path,
+    practice_end_path,
+):
+    if practice_story:
+        for info in read_text(practice_info_path):
+            show_text(info, smalltext_stim, win, escape_keys)
+        spr(
+            practice_story,
+            "practice story",
+            0,
+            win,
+            fix_cross,
+            text_stim,
+            stopwatch,
+            blackscreen_time_short,
+            blackscreen_time_long,
+            fixation_time,
+            escape_keys,
+            save_path,
+            extra_cols,
+        )
+        for end in read_text(practice_end_path):
+            show_text(end, smalltext_stim, win, escape_keys)
+
+    show_text(
+        f"{story_name.title()}\n\nStory {n} out of {n_stories}",
+        text_stim,
+        win,
+        escape_keys,
+    )
+    spr(
+        story,
+        story_name,
+        document_id,
+        win,
+        fix_cross,
+        text_stim,
+        stopwatch,
+        blackscreen_time_short,
+        blackscreen_time_long,
+        fixation_time,
+        escape_keys,
+        save_path,
+        extra_cols,
+    )
+
+
 def rsvp(
     story,
     pr_char_sec,
@@ -64,12 +130,62 @@ def rsvp(
     paragraphs = re.split("\n\n", story)
 
     for paragraph in paragraphs:
+        show_word_fixed(
+            "+", fixation_sec - 0.02, fixation_sec, text_stim, win, escape_keys
+        )
+
         words = re.split(r"[\s]", paragraph)
         for word in words:
             show_word_fixed(word, pr_char_sec, min_sec, text_stim, win, escape_keys)
             show_blackscreen(win, min_sec)
 
-        show_word_fixed("+", fixation_sec, text_stim, win, escape_keys)
+
+def rsvp_w_practice(
+    story,
+    story_name,
+    pr_char_sec,
+    min_sec,
+    fixation_sec,
+    n,
+    n_stories,
+    win,
+    text_stim,
+    smalltext_stim,
+    escape_keys,
+    practice_story,
+    practice_info_path,
+    practice_end_path,
+):
+    if practice_story:
+        for info in read_text(practice_info_path):
+            show_text(info, smalltext_stim, win, escape_keys)
+        rsvp(
+            practice_story,
+            pr_char_sec,
+            min_sec,
+            fixation_sec,
+            win,
+            text_stim,
+            escape_keys,
+        )
+        for end in read_text(practice_end_path):
+            show_text(end, smalltext_stim, win, escape_keys)
+
+    show_text(
+        f"{story_name.title()}\n\nStory {n} out of {n_stories}",
+        text_stim,
+        win,
+        escape_keys,
+    )
+    rsvp(
+        story,
+        pr_char_sec,
+        min_sec,
+        fixation_sec,
+        win,
+        text_stim,
+        escape_keys,
+    )
 
 
 def cloze_task(

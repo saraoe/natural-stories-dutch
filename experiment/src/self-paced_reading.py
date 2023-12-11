@@ -8,7 +8,7 @@ import re
 import pandas as pd
 from random import shuffle
 from util import read_text, get_scale_question, list_to_csv
-from reading_funcs import spr, rsvp
+from reading_funcs import spr_w_practice, rsvp_w_practice
 from show_stim import (
     show_text,
     show_questions,
@@ -168,7 +168,6 @@ def experiment(
 
     # text paths for experiment
     practice_info_path = os.path.join(paths["instructions"], "practice_info*.txt")
-    practice_text_path = os.path.join(paths["instructions"], "practice_text*.txt")
     practice_end_path = os.path.join(paths["instructions"], "practice_end*.txt")
     pause_path = os.path.join(paths["instructions"], "pause.txt")
     rsvp_inst_path = os.path.join(paths["instructions"], "rsvp_instructions*.txt")
@@ -186,8 +185,13 @@ def experiment(
         stories = list(read_text(paths["stories"], stories=True))
         shuffle(stories)
         n_stories = len(stories)
-        practice_story = list(read_text(practice_text_path))[0]
-        stories = [("practice story", practice_story)] + stories
+
+    practice_story = {}
+    for reading_task in ["spr", "rsvp"]:
+        practice_text_path = os.path.join(
+            paths["instructions"], f"practice_text_{reading_task}.txt"
+        )
+        practice_story[reading_task] = list(read_text(practice_text_path))[0]
     pause_text = list(read_text(pause_path))[0]
 
     # save info in tmp file
@@ -213,40 +217,40 @@ def experiment(
         if cont_crash and story_name in finished_texts:
             continue
 
-        if n == 0:  # practice text
-            for info in read_text(practice_info_path):
-                show_text(info, text_stim, win, escape_keys)
-            document_id = 0
-        else:
-            inst_path = rsvp_inst_path if document_id == rsvp_text else spr_inst_path
-            for inst in read_text(inst_path):
-                show_text(inst, smalltext_stim, win, escape_keys)
-            show_text(
-                f"{story_name.title()}\n\nStory {n} out of {n_stories}",
-                text_stim,
-                win,
-                escape_keys,
-            )
-            document_id = doc_ids[story_name]
+        document_id = doc_ids[story_name]
+        inst_path = rsvp_inst_path if document_id == rsvp_text else spr_inst_path
+        for inst in read_text(inst_path):
+            show_text(inst, smalltext_stim, win, escape_keys)
 
         if document_id == rsvp_text:
-            rsvp(
+            rsvp_w_practice(
                 story,
+                story_name,
                 times["rsvp_prchar_time"],
                 times["rsvp_min_time"],
                 times["fixation_time"],
+                n,
+                n_stories,
                 win,
                 text_stim,
+                smalltext_stim,
                 escape_keys,
+                practice_story["rsvp"],
+                practice_info_path=practice_info_path,
+                practice_end_path=practice_end_path,
             )
+            practice_story["rsvp"] = None
         else:
-            spr(
+            spr_w_practice(
                 story,
                 story_name,
                 document_id,
+                n,
+                n_stories,
                 win,
                 fix_cross,
                 text_stim,
+                smalltext_stim,
                 stopwatch,
                 times["blackscreen_time_short"],
                 times["blackscreen_time_long"],
@@ -254,7 +258,11 @@ def experiment(
                 escape_keys,
                 save_path=os.path.join(paths["out_data"], f"rt_{file_end}.csv"),
                 extra_cols=gui_information,
+                practice_story=practice_story["spr"],
+                practice_info_path=practice_info_path,
+                practice_end_path=practice_end_path,
             )
+            practice_story["spr"] = None
 
         # questions
         text_questions(
@@ -269,12 +277,8 @@ def experiment(
             extra_cols=gui_information,
         )
 
-        if n == 0:
-            for end in read_text(practice_end_path):
-                show_text(end, smalltext_stim, win, escape_keys)
-        else:
-            # pause
-            show_text(pause_text, smalltext_stim, win, escape_keys)
+        # pause
+        show_text(pause_text, smalltext_stim, win, escape_keys)
 
     # show ending
     end_path = os.path.join(paths["instructions"], "end.txt")
