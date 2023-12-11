@@ -225,8 +225,8 @@ def type_response(
     win,
 ):
     # possible characters
-    letters = list(string.ascii_lowercase)
-    punct = get_punct_dict()
+    char = list(string.ascii_lowercase + string.digits)
+    punct, shift_punct = get_punct_dict()
 
     response_prefix = "Your response: "
     response = ""
@@ -258,8 +258,8 @@ def type_response(
         down_stim.draw()
         win.flip()
         stopwatch.reset()
+
         key = event.waitKeys()[0]
-        print(key)
 
         if key == "escape":
             win.close()
@@ -272,10 +272,16 @@ def type_response(
             response += " "
         elif key == "backspace":
             response = response[:-1]
-        elif key in letters:
+        elif key in char:
             response += key
         elif key in punct.keys():
             response += punct[key]
+        elif key in ["lshift", "rshift"]:
+            second_key = event.waitKeys()[0]
+            if second_key in shift_punct.keys():
+                response += shift_punct[second_key]
+            elif second_key in char:
+                response += second_key.upper()
 
         # scroll through text
         if isinstance(scroll, int) == True:
