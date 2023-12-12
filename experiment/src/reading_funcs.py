@@ -120,8 +120,6 @@ def text_questions(
         config.win,
         config.escape_keys,
         config.question_keys + [config.respond_key],
-        save_path=save_path,
-        extra_cols=extra_cols,
     )
     list_to_csv(df_list=q_responses, out_path=save_path, extra_cols=extra_cols)
 
