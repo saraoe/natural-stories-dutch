@@ -2,12 +2,12 @@
 Cloze task
 """
 
-from psychopy import data
-import os, re
+import os, re, json
 from random import shuffle
 import pandas as pd
 from util import read_text
-from show_stim import show_text, show_text_from_path, make_gui
+from show_stim import show_text, show_text_from_path
+from experiment_questionnaire import exp_questionnaire
 from reading_funcs import cloze_task, cloze_scale_question
 from config import exp_config, exp_paths
 
@@ -23,36 +23,56 @@ def experiment(paths: dict, fullscreen: bool):
     ).to_dict()
 
     # GUI information
-    fields = {
-        "Participant ID": None,
-        "Age": None,
-        "Gender": ["Female", "Male", "Other"],
-    }
-    gui_information = make_gui(fields, title="Cloze Task")
+    gui_information, tmp_file = exp_questionnaire(paths["out_data"])
+    cont_crash = True if tmp_file else None
 
     # for saving data
     if not os.path.exists(paths["out_data"]):
         os.makedirs(paths["out_data"])
 
-    date = data.getDateStr()
-    participant_subfix = f"{gui_information['participant_id']}_{date}"
+    if tmp_file:
+        old_participant_subfix = tmp_file["participant_subfix"]
+        participant_subfix = old_participant_subfix + "_s2"
+    else:
+        participant_subfix = gui_information["participant_subfix"]
 
     # defining a window
     config = exp_config(fullscreen, keys="computer", cloze=True)
     full_paths = exp_paths(paths, experiment="cloze", save_subfix=participant_subfix)
 
     # read in stories
-    stories = list(read_text(full_paths.stories, stories=True))
-    shuffle(stories)
-    n_stories = len(stories)
-    practice_story = list(read_text(full_paths.practice_text))[0]
-    stories = [("practice story", practice_story)] + stories
+    if cont_crash:
+        stories = tmp_file["stories"]
+        n_stories = len(stories)
+        finished_texts = pd.read_csv(
+            os.path.join(paths["out_data"], f"cloze_{old_participant_subfix}.csv")
+        )["story_name"].unique()
+    else:
+        stories = list(read_text(full_paths.stories, stories=True))
+        shuffle(stories)
+        n_stories = len(stories)
+        practice_story = list(read_text(full_paths.practice_text))[0]
+        stories = [("practice story", practice_story)] + stories
+
+    # save info in tmp file
+    if not cont_crash:
+        tmp_info = {
+            "gui_information": gui_information,
+            "stories": stories,
+            "participant_subfix": participant_subfix,
+        }
+        with open(full_paths.tmp_path, "w") as fp:
+            json.dump(tmp_info, fp)
 
     # show instruction:
-    show_text_from_path(full_paths.inst, config)
+    if not cont_crash:
+        show_text_from_path(full_paths.inst, config)
 
     # start experiment
     for n, (story_name, story) in enumerate(stories):
+        if cont_crash and story_name in finished_texts:
+            continue
+
         if n == 0:  # practice text
             show_text_from_path(full_paths.practice_info, config)
             document_id = 0
@@ -66,9 +86,10 @@ def experiment(paths: dict, fullscreen: bool):
             document_id = doc_ids[story_name]
 
         cloze_task(
-            story,
-            document_id,
-            config,
+            story=story,
+            story_name=story_name,
+            document_id=document_id,
+            config=config,
             save_path=full_paths.save_cloze,
             extra_cols=gui_information,
         )

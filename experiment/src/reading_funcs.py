@@ -179,6 +179,7 @@ def rsvp_w_questions(
 # cloze task
 def cloze_task(
     story,
+    story_name,
     document_id,
     config,
     save_path,
@@ -199,18 +200,11 @@ def cloze_task(
                         "reaction_time": rt,
                         "correct_word": word,
                         "document_id": document_id,
+                        "story_name": story_name,
                     }
                 ],
                 out_path=save_path,
                 extra_cols=extra_cols,
-            )
-            responses.append(
-                {
-                    "response": response,
-                    "reaction_time": rt,
-                    "correct_word": word,
-                    "document_id": document_id,
-                }
             )
             lines = make_lines(lines, word, config.maxchar_pr_line)
             response, rt = type_response(
@@ -249,6 +243,7 @@ def cloze_scale_question(
                 "response": scale_response,
                 "question": scale_question,
                 "document_id": document_id,
+                "story_name": story_name,
             }
         ],
         out_path=save_path,

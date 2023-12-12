@@ -96,6 +96,7 @@ class exp_config:
 class exp_paths:
     def __init__(self, paths: dict, experiment: str, save_subfix: str) -> None:
         # general paths
+        self.tmp_path = os.path.join(paths["out_data"], f"tmp_{save_subfix}.json")
         self.practice_info = os.path.join(paths["instructions"], "practice_info*.txt")
         self.practice_end = os.path.join(paths["instructions"], "practice_end*.txt")
         self.pause = os.path.join(paths["instructions"], "pause.txt")
@@ -114,8 +115,6 @@ class exp_paths:
             self.practice_text_spr = os.path.join(
                 paths["instructions"], f"practice_text_spr.txt"
             )
-
-            self.tmp_path = os.path.join(paths["out_data"], f"tmp_{save_subfix}.json")
 
             self.save_rt = os.path.join(paths["out_data"], f"rt_{save_subfix}.csv")
             self.save_response = os.path.join(
