@@ -180,14 +180,7 @@ def rsvp_w_questions(
 def cloze_task(
     story,
     document_id,
-    maxchar_pr_line,
-    max_lines,
-    storybox_stim,
-    writebox_stim,
-    up,
-    down,
-    stopwatch,
-    win,
+    config,
     save_path,
     extra_cols,
 ):
@@ -219,15 +212,45 @@ def cloze_task(
                     "document_id": document_id,
                 }
             )
-            lines = make_lines(lines, word, maxchar_pr_line)
+            lines = make_lines(lines, word, config.maxchar_pr_line)
             response, rt = type_response(
-                storybox_stim,
+                config.storybox_stim,
                 lines,
-                max_lines,
-                up,
-                down,
-                writebox_stim,
-                stopwatch,
-                win,
+                config.max_lines,
+                config.up_arrow,
+                config.down_arrow,
+                config.writebox_stim,
+                config.stopwatch,
+                config.win,
             )
         lines.append("\n")
+
+
+def cloze_scale_question(
+    document_id,
+    story_name,
+    config,
+    save_path,
+    extra_cols,
+):
+    scale_question = get_scale_question(document_id, story_name)
+    scale_response = show_scale(
+        scale_question,
+        qtext_stim=config.qtext_stim,
+        respondtext=config.respond_stim,
+        scale_stim=config.scale_stim,
+        win=config.win,
+        escape_keys=config.escape_keys,
+        question_keys=config.scale_keys + [config.respond_key],
+    )
+    list_to_csv(
+        df_list=[
+            {
+                "response": scale_response,
+                "question": scale_question,
+                "document_id": document_id,
+            }
+        ],
+        out_path=save_path,
+        extra_cols=extra_cols,
+    )

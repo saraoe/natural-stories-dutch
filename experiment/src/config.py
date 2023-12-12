@@ -30,7 +30,7 @@ def make_arrows(direction: str, textbox, win):
 
 
 class exp_config:
-    def __init__(self, fullscreen: bool, keys: str) -> None:
+    def __init__(self, fullscreen: bool, keys: str, cloze: bool = None) -> None:
         self.win = visual.Window(color="grey", fullscr=fullscreen)
         self.stopwatch = core.Clock()
 
@@ -67,6 +67,31 @@ class exp_config:
         self.scale_keys = [str(tick) for tick in self.scale_stim.ticks]
         self.scale_keys.append(self.respond_key)
 
+        # extra config only for cloze
+        if cloze:
+            self.storybox_stim = visual.TextBox2(
+                win=self.win,
+                text="",
+                pos=(0, 0.1),
+                size=[1, 0.9],
+            )
+            self.writebox_stim = visual.TextBox2(
+                win=self.win,
+                text="",
+                pos=(0, -0.8),
+                size=[1, 0.1],
+                borderColor="darkgrey",
+            )
+            self.up_arrow = make_arrows("up", self.storybox_stim, self.win)
+            self.down_arrow = make_arrows("down", self.storybox_stim, self.win)
+            # text size
+            if fullscreen:
+                self.maxchar_pr_line = 90
+                self.max_lines = 10
+            else:
+                self.maxchar_pr_line = 35
+                self.max_lines = 7
+
 
 class exp_paths:
     def __init__(self, paths: dict, experiment: str, save_subfix: str) -> None:
@@ -78,7 +103,7 @@ class exp_paths:
         self.stories = paths["stories"]
 
         if experiment == "spr":
-            self.inst_path = os.path.join(paths["instructions"], "eeg_instruction*.txt")
+            self.inst = os.path.join(paths["instructions"], "eeg_instruction*.txt")
             self.rsvp_inst = os.path.join(
                 paths["instructions"], "rsvp_instructions*.txt"
             )
@@ -98,4 +123,14 @@ class exp_paths:
             )
 
         if experiment == "cloze":
-            pass
+            self.inst = os.path.join(paths["instructions"], "cloze_instruction*.txt")
+            self.practice_text = os.path.join(
+                paths["instructions"], f"practice_text_spr.txt"
+            )
+
+            self.save_cloze = os.path.join(
+                paths["out_data"], f"cloze_{save_subfix}.csv"
+            )
+            self.save_responses = os.path.join(
+                paths["out_data"], f"responses_{save_subfix}.csv"
+            )

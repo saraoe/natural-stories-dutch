@@ -77,7 +77,7 @@ def experiment(
 
     # show instruction:
     if not cont_crash:
-        show_text_from_path(full_paths.inst_path, config)
+        show_text_from_path(full_paths.inst, config)
 
     # experiment start
     spr_practice = False if cont_crash else True
