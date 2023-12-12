@@ -6,7 +6,7 @@ import re
 import string
 import pandas as pd
 from random import shuffle
-from util import key_scroll, get_punct_dict
+from util import key_scroll, get_punct_dict, read_text
 
 
 def show_fixation(stim, win, sec, escape_keys):
@@ -44,6 +44,11 @@ def show_text(
         win.close()
         core.quit()
     return key
+
+
+def show_text_from_path(path: str, config):
+    for t in read_text(path):
+        show_text(t, config.smalltext_stim, config.win, config.escape_keys)
 
 
 def show_word(word: str, text_stim, win, stopwatch, escape_keys):

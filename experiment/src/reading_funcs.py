@@ -2,7 +2,7 @@
 Functions for self-paced reading (SPR) and rapid series visual representation (RSVP)
 """
 import re
-from util import list_to_csv, make_lines, read_text
+from util import list_to_csv, make_lines, read_text, get_scale_question
 from show_stim import (
     show_blackscreen,
     show_fixation,
@@ -10,32 +10,35 @@ from show_stim import (
     show_word_fixed,
     show_text,
     type_response,
+    show_scale,
+    show_questions,
 )
 
 
 # for SPR exp
 def spr(
-    story,
-    story_name,
-    document_id,
-    win,
-    fix_cross,
-    text_stim,
-    stopwatch,
-    blackscreen_time_short,
-    blackscreen_time_long,
-    fixation_time,
-    escape_keys,
-    save_path,
-    extra_cols,
+    story: str,
+    story_name: str,
+    document_id: int,
+    config,
+    times: dict,
+    save_path: str,
+    extra_cols: dict,
 ):
     paragraphs = re.split("\n\n", story)
 
     for paragraph in paragraphs:
-        show_fixation(fix_cross, win, sec=fixation_time, escape_keys=escape_keys)
+        show_fixation(
+            config.fix_cross,
+            config.win,
+            sec=times["fixation"],
+            escape_keys=config.escape_keys,
+        )
         words = re.split(r"[\s]", paragraph)
         for word in words:
-            rt = show_word(word, text_stim, win, stopwatch, escape_keys)
+            rt = show_word(
+                word, config.text_stim, config.win, config.stopwatch, config.escape_keys
+            )
             list_to_csv(
                 df_list=[
                     {
@@ -49,145 +52,133 @@ def spr(
                 extra_cols=extra_cols,
             )
 
-            show_blackscreen(win, sec=blackscreen_time_short)
-    show_blackscreen(win, sec=blackscreen_time_long)
+            show_blackscreen(config.win, sec=times["blackscreen_short"])
+    show_blackscreen(config.win, sec=times["blackscreen_long"])
 
 
-def spr_w_practice(
-    story,
-    story_name,
-    document_id,
-    n,
-    n_stories,
-    win,
-    fix_cross,
-    text_stim,
-    smalltext_stim,
-    stopwatch,
-    blackscreen_time_short,
-    blackscreen_time_long,
-    fixation_time,
-    escape_keys,
-    save_path,
-    extra_cols,
-    practice_story,
-    practice_info_path,
-    practice_end_path,
-):
-    if practice_story:
-        for info in read_text(practice_info_path):
-            show_text(info, smalltext_stim, win, escape_keys)
-        spr(
-            practice_story,
-            "practice story",
-            0,
-            win,
-            fix_cross,
-            text_stim,
-            stopwatch,
-            blackscreen_time_short,
-            blackscreen_time_long,
-            fixation_time,
-            escape_keys,
-            save_path,
-            extra_cols,
-        )
-        for end in read_text(practice_end_path):
-            show_text(end, smalltext_stim, win, escape_keys)
-
-    show_text(
-        f"{story_name.title()}\n\nStory {n} out of {n_stories}",
-        text_stim,
-        win,
-        escape_keys,
-    )
-    spr(
-        story,
-        story_name,
-        document_id,
-        win,
-        fix_cross,
-        text_stim,
-        stopwatch,
-        blackscreen_time_short,
-        blackscreen_time_long,
-        fixation_time,
-        escape_keys,
-        save_path,
-        extra_cols,
-    )
-
-
-def rsvp(
-    story,
-    pr_char_sec,
-    min_sec,
-    fixation_sec,
-    win,
-    text_stim,
-    escape_keys,
-):
+def rsvp(story: str, times, config):
     paragraphs = re.split("\n\n", story)
 
     for paragraph in paragraphs:
         show_word_fixed(
-            "+", fixation_sec - 0.02, fixation_sec, text_stim, win, escape_keys
+            "+",
+            times["fixation"] - 0.02,
+            times["fixation"],
+            config.text_stim,
+            config.win,
+            config.escape_keys,
         )
 
         words = re.split(r"[\s]", paragraph)
         for word in words:
-            show_word_fixed(word, pr_char_sec, min_sec, text_stim, win, escape_keys)
-            show_blackscreen(win, min_sec)
+            show_word_fixed(
+                word,
+                times["rsvp_pr_char"],
+                times["rsvp_min"],
+                config.text_stim,
+                config.win,
+                config.escape_keys,
+            )
+            show_blackscreen(config.win, times["rsvp_min"])
 
 
-def rsvp_w_practice(
-    story,
-    story_name,
-    pr_char_sec,
-    min_sec,
-    fixation_sec,
-    n,
-    n_stories,
-    win,
-    text_stim,
-    smalltext_stim,
-    escape_keys,
-    practice_story,
-    practice_info_path,
-    practice_end_path,
+def text_questions(
+    story_name: str,
+    document_id: int,
+    questions_df,
+    config,
+    save_path: str,
+    extra_cols: dict,
 ):
-    if practice_story:
-        for info in read_text(practice_info_path):
-            show_text(info, smalltext_stim, win, escape_keys)
-        rsvp(
-            practice_story,
-            pr_char_sec,
-            min_sec,
-            fixation_sec,
-            win,
-            text_stim,
-            escape_keys,
-        )
-        for end in read_text(practice_end_path):
-            show_text(end, smalltext_stim, win, escape_keys)
-
-    show_text(
-        f"{story_name.title()}\n\nStory {n} out of {n_stories}",
-        text_stim,
-        win,
-        escape_keys,
+    scale_question = get_scale_question(document_id, story_name)
+    scale_response = show_scale(
+        scale_question,
+        qtext_stim=config.qtext_stim,
+        respondtext=config.respond_stim,
+        scale_stim=config.scale_stim,
+        win=config.win,
+        escape_keys=config.escape_keys,
+        question_keys=config.scale_keys + [config.respond_key],
     )
-    rsvp(
+    list_to_csv(
+        df_list=[
+            {
+                "response": scale_response,
+                "correct": "NA",
+                "document_id": document_id,
+                "question_id": 0,
+            }
+        ],
+        out_path=save_path,
+        extra_cols=extra_cols,
+    )
+    qs = questions_df[questions_df["document_id"] == document_id]
+    q_responses = show_questions(
+        qs,
+        config.qtext_stim,
+        config.respond_stim,
+        config.win,
+        config.escape_keys,
+        config.question_keys + [config.respond_key],
+        save_path=save_path,
+        extra_cols=extra_cols,
+    )
+    list_to_csv(df_list=q_responses, out_path=save_path, extra_cols=extra_cols)
+
+
+def spr_w_questions(
+    story: str,
+    story_name: str,
+    document_id: int,
+    questions_df,
+    config,
+    times: dict,
+    full_paths,
+    extra_cols: dict,
+):
+    spr(
         story,
-        pr_char_sec,
-        min_sec,
-        fixation_sec,
-        win,
-        text_stim,
-        escape_keys,
+        story_name,
+        document_id,
+        config,
+        times,
+        full_paths.save_rt,
+        extra_cols,
+    )
+
+    text_questions(
+        story_name,
+        document_id,
+        questions_df,
+        config,
+        full_paths.save_response,
+        extra_cols,
     )
 
 
+def rsvp_w_questions(
+    story: str,
+    story_name: str,
+    document_id: int,
+    questions_df,
+    config,
+    times: dict,
+    full_paths,
+    extra_cols: dict,
+):
+    rsvp(story, times, config)
+
+    text_questions(
+        story_name,
+        document_id,
+        questions_df,
+        config,
+        full_paths.save_response,
+        extra_cols,
+    )
+
+
+# cloze task
 def cloze_task(
     story,
     document_id,
