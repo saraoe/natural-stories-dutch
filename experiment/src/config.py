@@ -3,6 +3,30 @@ Define config used in the experiments
 """
 from psychopy import visual, core
 import os
+import numpy as np
+
+
+def make_arrows(direction: str, textbox, win):
+    if direction == "up":
+        v = np.array([[0, 1], [-0.5, 0], [0.5, 0]])
+    if direction == "down":
+        v = np.array([[0, -1], [-0.5, 0], [0.5, 0]])
+    arrow = visual.ShapeStim(
+        win=win,
+        vertices=v,
+        size=textbox.size / 8,
+    )
+    if direction == "up":
+        arrow.pos = (
+            textbox.pos[0] + textbox.size[0] / 2 + arrow.size[0],
+            textbox.pos[1] + arrow.size[1],
+        )
+    else:
+        arrow.pos = (
+            textbox.pos[0] + textbox.size[0] / 2 + arrow.size[0],
+            textbox.pos[1] - arrow.size[1],
+        )
+    return arrow
 
 
 class exp_config:

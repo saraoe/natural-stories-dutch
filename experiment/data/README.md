@@ -3,39 +3,59 @@
 ```
 ├── README.md
 ├── spr
-│   └── ...     <- csv-files from SPR EEG experiment
+│   └── ...     <- files from SPR EEG experiment
 ├── cloze
-│   └── ...     <- csv-files from Cloze Task
+│   └── ...     <- files from Cloze Task
 
 ```
 
 ## SPR EEG
 
-For each participant, two seperate csv-files are saved during the SPR-experiment:
+For each participant, two seperate csv-files and one json-file are saved during the SPR-experiment:
 
 - reaction times: ```rt_*.csv```
 - responses: ```responses_*.csv```
+- participant information: ```participant_info_*.json```
 
-Both files have the same subfix of filename, indicating the partipant id, date of data collection, and a random string of characters (that are the same for the same participant). 
+All files have the same subfix of filename, indicating the partipant id, participant number, date of data collection, and a random string of characters (that are the same for the same participant). 
 
 If the file end with ```_s2``` this indicates that the experiment crashed during data collection, and this is the data collected during the the second session. Thus, there will for this participant exist two version of every file.
 
 The **reation times** file include the following columns:
 - reation_time: (numeric) in seconds
 - document_id: (int)
-- word: (character)
+- word: (str)
 - participant_id: (int)
-- age: (int)
-- gender: (character)
 
 The **response** file are the responses to the questions in the ```../questions.xlsx``` file. The file includes the following columns:
-- response: (character) the answer the participant chose (indicated by the letter of the response, i.e. a, b,, c, or d)
+- response: (str) the answer the participant chose (indicated by the letter of the response, i.e. a, b,, c, or d)
 - correct: (int) indicate if the response was correct
 - document_id: (int)
 - question_id: (int)
 - participant_id: (int)
-- age: (int)
-- gender: (character)
+
+*Note: Both csv-files also include all participant information except the questions related to language abilities.*
+
+The **participant information** file include the following information:
+- Participant identification:
+    - participant_number: (int) number assigned to the participant by the experimenter, that determines hand and RSVP text 
+    - hand: (str) which hand the participant was instructed to use (i.e., left or right) 
+    - rsvp_document_id: (int) document id of the the text showed in RSVP 
+    - participant_id: (str) 
+    - participant_subfix: (str) subfix of all files related to this participant
+- Demographics:
+    - gender: (str) 
+    - age: (int) 
+    - education": (str) highest finished education, 
+- Dutch language ability
+    - problem_reading: (str) *Heb je problemen met lezen in het Nederlands?* 
+    - read_school_or_work_pr_week: (str) *Hoeveel uur per week lees je gemiddeld in het Nederlands voor school/werk (boeken, tijdschriften, kranten, internet)?* 
+    - read_freetime_pr_week: (str) *Hoeveel uur per week lees je gemiddeld in het Nederlands in je vrije tijd (boeken, tijdschriften, kranten, internet)?* 
+    - problem_spelling: (str) *Heb je problemen met spelling in het Nederlands?*
+    - write_pr_week: (str) *Hoeveel uur per week schrijf je gemiddeld in het Nederlands (sociale media, e-mail, brieven, dagboek, school/werk opdrachten etc.)?*  
+    - best_reading_language: (str) *Kun je beter in het Nederlands lezen of in (een) andere taal/talen*
+    - best_reading_language_named: (str) Name of the language the participant reads the best in
+    - other_languages: (Dict[Dict[str or int]]) dictionary with other languages the participant speaks (keys) and when they learned and whether they speak in fluently or not (values)
 
 ## Cloze Task
 For each participant in the cloze task experiment, two csv-file are saved 

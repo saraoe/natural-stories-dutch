@@ -3,17 +3,14 @@ Self-paced reading experiment
 """
 
 from psychopy import data
-import os, glob, json
+import os, json
 import re
 import pandas as pd
 from random import shuffle
 from util import read_text
+from show_stim import show_text_from_path, show_text
+from experiment_questionnaire import exp_questionnaire
 from reading_funcs import spr_w_questions, rsvp_w_questions
-from show_stim import (
-    show_text_from_path,
-    show_text,
-    make_gui,
-)
 from config import exp_config, exp_paths
 
 
@@ -33,67 +30,29 @@ def experiment(
     ).to_dict()
 
     # GUI information
-    cont_crash = None
-    participant_id = make_gui(
-        {
-            "Participant ID": None,
-        },
-        title="Self-Paced Reading",
-    )["participant_id"]
-
-    # check if tmp-file for participant exists
-    tmp_path = glob.glob(os.path.join(paths["out_data"], f"tmp_{participant_id}*.json"))
-    if tmp_path:
-        ans = list(
-            make_gui(
-                {
-                    "Do you want to jump into experiment,\n where you ended?": [
-                        "yes",
-                        "no",
-                    ]
-                },
-                title="Self-Paced Reading",
-            ).values()
-        )[0]
-        cont_crash = True if ans == "yes" else None
-        tmp_path = tmp_path[0]
-
-    if cont_crash:
-        with open(tmp_path) as f:
-            tmp_file = json.load(f)
-        gui_information = tmp_file["gui_information"]
-    else:
-        fields = {
-            "Age": None,
-            "Gender": ["Female", "Male", "Other"],
-            "Hand": ["Left", "Right"],
-            "Condition": [1, 2],
-        }
-        gui_information = make_gui(fields, title="Self-Paced Reading")
-        gui_information["participant_id"] = participant_id
-    rsvp_text = 1 if gui_information["condition"] == 1 else 7
+    gui_information, tmp_file = exp_questionnaire(paths["out_data"])
+    cont_crash = True if tmp_file else None
 
     # for saving data
     if not os.path.exists(paths["out_data"]):
         os.makedirs(paths["out_data"])
 
-    if cont_crash:
-        old_save_subfix = tmp_file["save_subfix"]
-        save_subfix = old_save_subfix + "_s2"
+    if tmp_file:
+        old_participant_subfix = tmp_file["participant_subfix"]
+        participant_subfix = old_participant_subfix + "_s2"
     else:
-        date = data.getDateStr()
-        save_subfix = f"{gui_information['participant_id']}_{date}"
+        participant_subfix = gui_information["participant_subfix"]
 
     # config
     config = exp_config(fullscreen, keys)
-    full_paths = exp_paths(paths, experiment="spr", save_subfix=save_subfix)
+    full_paths = exp_paths(paths, experiment="spr", save_subfix=participant_subfix)
 
     # read in stories
     if cont_crash:
         stories = tmp_file["stories"]
         n_stories = len(stories)
         finished_texts = pd.read_csv(
-            os.path.join(paths["out_data"], f"rt_{old_save_subfix}.csv")
+            os.path.join(paths["out_data"], f"rt_{old_participant_subfix}.csv")
         )["story_name"].unique()
     else:
         stories = list(read_text(full_paths.stories, stories=True))
@@ -111,7 +70,7 @@ def experiment(
         tmp_info = {
             "gui_information": gui_information,
             "stories": stories,
-            "save_subfix": save_subfix,
+            "participant_subfix": participant_subfix,
         }
         with open(full_paths.tmp_path, "w") as fp:
             json.dump(tmp_info, fp)
@@ -121,18 +80,20 @@ def experiment(
         show_text_from_path(full_paths.inst_path, config)
 
     # experiment start
-    spr_practice = True
-    for n, (story_name, story) in enumerate(stories):
+    spr_practice = False if cont_crash else True
+    for n, (story_name, story) in enumerate(stories, start=1):
         if cont_crash and story_name in finished_texts:
             continue
 
         document_id = doc_ids[story_name]
         inst_path = (
-            full_paths.rsvp_inst if document_id == rsvp_text else full_paths.spr_inst
+            full_paths.rsvp_inst
+            if document_id == gui_information["rsvp_document_id"]
+            else full_paths.spr_inst
         )
         show_text_from_path(inst_path, config)
 
-        if document_id == rsvp_text:
+        if document_id == gui_information["rsvp_document_id"]:
             # practice
             show_text_from_path(full_paths.practice_info)
             rsvp_w_questions(
@@ -207,7 +168,7 @@ def experiment(
     show_text_from_path(full_paths.end, config)
 
     # remove tmp file
-    os.remove(tmp_path)
+    os.remove(full_paths.tmp_path)
 
 
 if __name__ == "__main__":
