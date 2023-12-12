@@ -128,8 +128,6 @@ def show_questions(
     win,
     escape_keys,
     question_keys,
-    save_path,
-    extra_cols,
 ):
     q_stim = visual.TextBox2(
         win=win,
