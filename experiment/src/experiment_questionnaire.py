@@ -283,14 +283,16 @@ def existing_gui_info(out_path: str, subfix: str):
         dlg = gui.Dlg(title="Continue Experiment?")
         dlg.addField(
             "Do you want to jump into experiment,\n where you ended?",
-            choices=["yes", "no"],
+            choices=["ja", "nee"],
         )
         dlg.show()
 
         if dlg.OK:
-            cont_crash = True if dlg.data[0] == "yes" else None
+            cont_crash = True if dlg.data[0] == "ja" else None
             if cont_crash:
                 tmp_path = tmp_path[0]
+            else:
+                tmp_path = None
         else:
             core.quit()
 
