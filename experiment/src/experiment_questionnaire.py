@@ -238,7 +238,9 @@ def lang_ability_gui():
     # speak_languages
     n = 5
     dlg = gui.Dlg(title="Language Ability")
-    dlg.addText("Welke talen spreek je?")
+    dlg.addText(
+        "Welke talen spreek je?\n\nNote: if you don't speak any other languages than Dutch, you can leave all fields blank."
+    )
     for i in range(1, n + 1):
         dlg.addText(f"{i}:")
         dlg.addField("Taal")
