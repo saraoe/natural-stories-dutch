@@ -44,15 +44,23 @@ def get_scale_question(document_id: int, story_name: str):
 
 
 def get_punct_dict():
-    punct_dict = {
+    key_punct = {
         "period": ".",
         "comma": ",",
         "minus": "-",
-        "slash": "?",
-        "semicolon": ":",
+        "slash": "/",
+        "semicolon": ";",
         "1": "!",
     }
-    return punct_dict
+    shift_punct = {
+        "slash": "?",
+        "1": "!",
+        "semicolon": ":",
+        "9": "(",
+        "0": ")",
+        "minus": "_",
+    }
+    return key_punct, shift_punct
 
 
 def make_lines(current_lines: List[str], word: str, maxchar: int):
