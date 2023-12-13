@@ -90,6 +90,8 @@ def text_questions(
     save_path: str,
     extra_cols: dict,
 ):
+    extra_cols["story_name"] = story_name
+
     scale_question = get_scale_question(document_id, story_name)
     scale_response = show_scale(
         scale_question,
