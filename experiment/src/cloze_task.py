@@ -88,6 +88,7 @@ def experiment(paths: dict, fullscreen: bool):
                 config.text_stim,
                 config.win,
                 config.escape_keys,
+                config.show_text_ending,
             )
             document_id = doc_ids[story_name]
 

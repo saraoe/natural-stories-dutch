@@ -33,8 +33,8 @@ def show_text(
     text_stim,
     win,
     escape_keys,
+    text_ending,
     possible_keys=None,
-    text_ending="(Druk op een toets om verder te gaan!)",
 ):
     text_stim.text = text + f"\n\n{text_ending}"
     text_stim.draw()
@@ -48,7 +48,13 @@ def show_text(
 
 def show_text_from_path(path: str, config):
     for t in read_text(path):
-        show_text(t, config.smalltext_stim, config.win, config.escape_keys)
+        show_text(
+            t,
+            config.smalltext_stim,
+            config.win,
+            config.escape_keys,
+            config.show_text_ending,
+        )
 
 
 def show_word(word: str, text_stim, win, stopwatch, escape_keys):

@@ -45,7 +45,7 @@ def experiment(
         participant_subfix = gui_information["participant_subfix"]
 
     # config
-    config = exp_config(fullscreen, keys)
+    config = exp_config(fullscreen, keys, hand_condition=gui_information["hand"])
     full_paths = exp_paths(paths, experiment="spr", save_subfix=participant_subfix)
 
     # read in stories
@@ -124,6 +124,7 @@ def experiment(
                 config.text_stim,
                 config.win,
                 config.escape_keys,
+                config.show_text_ending,
             )
             rsvp_w_questions(
                 story=story,
@@ -159,6 +160,7 @@ def experiment(
                 config.text_stim,
                 config.win,
                 config.escape_keys,
+                config.show_text_ending,
             )
             spr_w_questions(
                 story=story,

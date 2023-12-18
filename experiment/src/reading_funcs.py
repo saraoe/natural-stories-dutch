@@ -8,7 +8,6 @@ from show_stim import (
     show_fixation,
     show_word,
     show_word_fixed,
-    show_text,
     type_response,
     show_scale,
     show_questions,
