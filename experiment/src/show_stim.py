@@ -237,7 +237,7 @@ def type_response(
     char = list(string.ascii_lowercase + string.digits)
     punct, shift_punct = get_punct_dict()
 
-    response_prefix = "Your response: "
+    response_prefix = "Je antwoord: "
     response = ""
 
     # scroll if there a more lines than can be viewed

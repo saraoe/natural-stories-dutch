@@ -1,22 +1,27 @@
-You will begin by seeing the first word of the story.
+De teksten zullen dus woord voor woord worden weergegeven. Je begint met het eerste woord van de tekst. Op basis van dit eerste woord vul je de volgende twee woorden in die volgens jou aansluiten bij de context van de tekst. Indien nodig (bijvoorbeeld aan het einde van een zin) kun je ook een leesteken toevoegen (zoals een punt, komma, vraagteken of uitroepteken) aan je antwoord. Om je antwoord te bevestigen, druk je op enter. Nadat je dit hebt gedaan zul je het woord dat daadwerkelijk in de tekst staat te zien krijgen. Je wordt dan gevraagd om de volgende twee woorden (plus eventueel leesteken) in te vullen. 
 
+Je kan bijvoorbeeld het volgende woord als eerste te zien krijgen:
 
-Based on the first word, you will fill in the following word/words that fits the context best. You do so by typing the word using the keyboard. Press enter to confirm your response.
+“De”
 
+Aan de hand van dit woord vul je twee woorden in, bijvoorbeeld:
 
-After each completion, the next word in the story will be revealed, and you will be asked to fill in the following word/words that best fits the extended context.
+“De man loopt”
 
+Wanneer je op enter drukt, krijg je te zien wat er daadwerkelijk in de originele tekst staat en kun je de volgende twee woorden invullen, bijvoorbeeld:
 
-Type the word/words that you believe correctly fit into the story, ensuring grammatical accuracy and contextual relevance.
+“De zon kwam op in”
 
+Wanneer je hierna, op enter drukt, krijg je wederom te zien wat er daadwerkelijk in de originele tekst staat en kun je de volgende twee woorden invullen, bijvoorbeeld:
 
-Please ensure that you type your response as quickly as possible.
+“De zon kwam op in het oosten” 
 
+Wanneer je denkt dat de paragraaf eindigt, vul dan slechts één woord en een leesteken (zoals een punt, vraagteken of uitroepteken) in. 
 
-If you have any questions, please contact the experimenter!
+Je typt dus telkens twee woorden (plus eventueel leesteken) of één woord en een leesteken (aan het einde van een paragraaf) waarvan je denkt dat ze in de tekst passen. Zorg ervoor dat je antwoorden zowel grammaticaal kloppen als aansluiten bij de context van de tekst. 
 
+Denk niet te lang na over je antwoorden en vul in wat als eerste in je opkomt. Er zijn geen goede of foute antwoorden.
 
-The experiment begins with some practice rounds to familiarize yourself with the task.
+Als je vragen hebt, neem dan contact op met de onderzoeker!
 
-
-(Press a key to continue!)
+Het experiment begint met enkele oefenrondes om je te laten wennen aan de taak. 

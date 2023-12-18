@@ -1,16 +1,13 @@
-You will read 10 texts in total. The texts will be presented word by word in the middle of the screen. You will read the texts at your own pace. To view the next word, you press the spacebar. Make sure you have read the word before continuing, as you will not be able to go back.
+Je zult in totaal 10 teksten lezen. De teksten worden woord voor woord in het midden van het scherm weergegeven. 
 
+Je zult 9 van deze teksten op je eigen tempo lezen. Om bij deze teksten het volgende woord te bekijken, druk je op de knop met je linker/rechterhand. Zorg ervoor dat je het woord hebt gelezen voordat je doorgaat, want je kunt niet teruggaan. 
 
-<to be decided> will appear before each text. A fixation point will appear before each paragraph in the text.
+Ook zul je 1 tekst lezen op een vaste snelheid. Je hoeft bij deze teksten niet op de knop met je linker/rechterhand te drukken om het volgende woord te zien, omdat deze automatisch zal verschijnen in het midden van het scherm.  
 
+Voor de start van elke nieuwe paragraaf, zal er een fixatiepunt verschijnen. 
 
-After each text you will be asked a couple of questions with four possible answers (1, 2, 3, and 4). You pick your answer by pressing the corresponding number on the keyboard.
+Na elke tekst zul je zes vragen krijgen met vier mogelijke antwoorden (1, 2, 3 en 4). Je kiest je antwoord door het overeenkomstige nummer op het toetsenbord in te drukken.
 
+Als je vragen hebt, neem dan contact op met de onderzoeker!
 
-If you have any questions, please contact the experimenter!
-
-
-The experiment begins with some practice rounds to familiarize yourself with the task.
-
-
-(Press a key to continue!)
+Het experiment begint met enkele oefenrondes zodat je kunt wennen aan de taak. 
