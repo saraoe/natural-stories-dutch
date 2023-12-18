@@ -101,7 +101,7 @@ class exp_paths:
         self.practice_end = os.path.join(paths["instructions"], "practice_end*.txt")
         self.pause = os.path.join(paths["instructions"], "pause.txt")
         self.end = os.path.join(paths["instructions"], "end.txt")
-        self.stories = paths["stories"]
+        self.stories = os.path.join(paths["stories"], "*.txt")
 
         if experiment == "spr":
             self.inst = os.path.join(paths["instructions"], "eeg_instruction*.txt")
@@ -109,11 +109,11 @@ class exp_paths:
                 paths["instructions"], "rsvp_instructions*.txt"
             )
             self.practice_text_rsvp = os.path.join(
-                paths["instructions"], f"practice_text_rsvp.txt"
+                paths["stories"], f"practice_text_jorinde_en_joringel.txt"
             )
             self.spr_inst = os.path.join(paths["instructions"], "spr_instructions*.txt")
             self.practice_text_spr = os.path.join(
-                paths["instructions"], f"practice_text_spr.txt"
+                paths["stories"], f"practice_text_de_uil.txt"
             )
 
             self.save_rt = os.path.join(paths["out_data"], f"rt_{save_subfix}.csv")
@@ -124,7 +124,7 @@ class exp_paths:
         if experiment == "cloze":
             self.inst = os.path.join(paths["instructions"], "cloze_instruction*.txt")
             self.practice_text = os.path.join(
-                paths["instructions"], f"practice_text_spr.txt"
+                paths["stories"], f"practice_text_de_uil.txt"
             )
 
             self.save_cloze = os.path.join(

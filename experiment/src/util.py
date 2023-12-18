@@ -15,8 +15,10 @@ def get_name_from_path(path: str):
     return name
 
 
-def read_text(path: str, stories: bool = False):
+def read_text(path: str, stories: bool = False, ignore_paths: List[str] = []):
     for text_path in glob(path):
+        if text_path in ignore_paths:
+            continue
         f = open(text_path, "r", encoding="utf8")
         text = f.read()
         if stories:
@@ -34,7 +36,8 @@ def list_to_csv(df_list: List[dict], out_path: str, extra_cols: dict = {}):
 
 
 def get_scale_question(document_id: int, story_name: str):
-    if document_id in [0, 1, 2]:
+    story_name = story_name.replace("practice text", "")
+    if document_id in [1, 2, 11, 12]:
         q = f"In hoeverre was je bekend met het sprookje {story_name} dat werd verteld in de vorige tekst?"
     elif document_id in [5, 6]:
         q = f"In hoeverre was je bekend met de roman/film {story_name} waarover werd verteld in de vorige tekst?"

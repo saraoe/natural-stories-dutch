@@ -48,11 +48,17 @@ def experiment(paths: dict, fullscreen: bool):
             os.path.join(paths["out_data"], f"cloze_{old_participant_subfix}.csv")
         )["story_name"].unique()
     else:
-        stories = list(read_text(full_paths.stories, stories=True))
+        stories = list(
+            read_text(
+                full_paths.stories,
+                stories=True,
+                ignore_paths=[full_paths.practice_text],
+            )
+        )
         shuffle(stories)
         n_stories = len(stories)
         practice_story = list(read_text(full_paths.practice_text))[0]
-        stories = [("practice story", practice_story)] + stories
+        stories = [("practice story de uil", practice_story)] + stories
 
     # save info in tmp file
     if not cont_crash:
@@ -75,7 +81,7 @@ def experiment(paths: dict, fullscreen: bool):
 
         if n == 0:  # practice text
             show_text_from_path(full_paths.practice_info, config)
-            document_id = 0
+            document_id = 11
         else:
             show_text(
                 f"{story_name.title()}\n\nStory {n} out of {n_stories}",
@@ -118,7 +124,7 @@ if __name__ == "__main__":
     paths = {
         "questions": os.path.join("questions.xlsx"),
         "instructions": os.path.join("instructions"),
-        "stories": os.path.join("..", "texts", "edited", "*"),
+        "stories": os.path.join("..", "texts", "edited"),
         "out_data": os.path.join("data", "cloze"),
     }
 

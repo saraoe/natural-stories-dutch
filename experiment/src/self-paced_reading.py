@@ -22,6 +22,7 @@ def experiment(
 ):
     # questions
     questions_df = pd.read_excel(paths["questions"])
+    questions_df = questions_df[questions_df["Chosen question"] == "yes"]
     questions_df["story"] = questions_df["Story"].apply(
         lambda s: re.sub("[^a-zA-Z\s]+", "", s).lower()
     )
@@ -55,7 +56,16 @@ def experiment(
             os.path.join(paths["out_data"], f"rt_{old_participant_subfix}.csv")
         )["story_name"].unique()
     else:
-        stories = list(read_text(full_paths.stories, stories=True))
+        stories = list(
+            read_text(
+                full_paths.stories,
+                stories=True,
+                ignore_paths=[
+                    full_paths.practice_text_rsvp,
+                    full_paths.practice_text_spr,
+                ],
+            )
+        )
         shuffle(stories)
         n_stories = len(stories)
 
@@ -98,8 +108,8 @@ def experiment(
             show_text_from_path(full_paths.practice_info)
             rsvp_w_questions(
                 story=practice_story["rsvp"],
-                story_name="practice story rsvp",
-                document_id=0,
+                story_name="practice story jorinde en joringel",
+                document_id=12,
                 questions_df=questions_df,
                 config=config,
                 times=times,
@@ -131,8 +141,8 @@ def experiment(
                 show_text_from_path(full_paths.practice_info, config)
                 spr_w_questions(
                     story=practice_story["spr"],
-                    story_name="practice story spr",
-                    document_id=0,
+                    story_name="practice story de uil",
+                    document_id=11,
                     questions_df=questions_df,
                     config=config,
                     times=times,
@@ -175,7 +185,7 @@ if __name__ == "__main__":
     # paths
     paths = {
         "instructions": os.path.join("instructions"),
-        "stories": os.path.join("..", "texts", "edited", "*"),
+        "stories": os.path.join("..", "texts", "edited"),
         "questions": os.path.join("questions.xlsx"),
         "out_data": os.path.join("data", "spr"),
     }
