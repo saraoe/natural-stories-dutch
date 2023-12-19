@@ -52,9 +52,12 @@ def experiment(
     if cont_crash:
         stories = tmp_file["stories"]
         n_stories = len(stories)
-        finished_texts = pd.read_csv(
-            os.path.join(paths["out_data"], f"rt_{old_participant_subfix}.csv")
-        )["story_name"].unique()
+        try:
+            finished_texts = pd.read_csv(
+                os.path.join(paths["out_data"], f"rt_{old_participant_subfix}.csv")
+            )["story_name"].unique()
+        except FileNotFoundError:
+            finished_texts = []
     else:
         stories = list(
             read_text(
@@ -105,7 +108,7 @@ def experiment(
 
         if document_id == gui_information["rsvp_document_id"]:
             # practice
-            show_text_from_path(full_paths.practice_info)
+            show_text_from_path(full_paths.practice_info, config)
             rsvp_w_questions(
                 story=practice_story["rsvp"],
                 story_name="practice story jorinde en joringel",
@@ -116,7 +119,7 @@ def experiment(
                 full_paths=full_paths,
                 extra_cols=gui_information,
             )
-            show_text_from_path(full_paths.practice_end)
+            show_text_from_path(full_paths.practice_end, config)
 
             # experimental text
             show_text(
