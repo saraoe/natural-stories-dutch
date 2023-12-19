@@ -59,13 +59,11 @@ def rsvp(story: str, times, config):
     paragraphs = re.split("\n\n", story)
 
     for paragraph in paragraphs:
-        show_word_fixed(
-            "+",
-            times["fixation"] - 0.02,
-            times["fixation"],
-            config.text_stim,
+        show_fixation(
+            config.fix_cross,
             config.win,
-            config.escape_keys,
+            sec=times["fixation"],
+            escape_keys=config.escape_keys,
         )
 
         words = re.split(r"[\s]", paragraph)
