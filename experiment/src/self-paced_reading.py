@@ -18,7 +18,8 @@ def experiment(
     paths: dict,
     times: dict,
     keys: str,
-    fullscreen: bool = True,
+    eeg: bool,
+    fullscreen: bool,
 ):
     # questions
     questions_df = pd.read_excel(paths["questions"])
@@ -45,7 +46,9 @@ def experiment(
         participant_subfix = gui_information["participant_subfix"]
 
     # config
-    config = exp_config(fullscreen, keys, hand_condition=gui_information["hand"])
+    config = exp_config(
+        fullscreen, keys, hand_condition=gui_information["hand"], eeg=eeg
+    )
     full_paths = exp_paths(paths, experiment="spr", save_subfix=participant_subfix)
 
     # read in stories
@@ -207,10 +210,6 @@ if __name__ == "__main__":
     # experimental device
     keys = "computer"
     fullscreen = False
+    eeg = True
 
-    experiment(
-        paths,
-        times,
-        keys,
-        fullscreen,
-    )
+    experiment(paths=paths, times=times, keys=keys, eeg=eeg, fullscreen=fullscreen)

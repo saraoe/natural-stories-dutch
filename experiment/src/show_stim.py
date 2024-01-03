@@ -6,7 +6,7 @@ import re
 import string
 import pandas as pd
 from random import shuffle
-from util import key_scroll, get_punct_dict, read_text
+from util import key_scroll, get_punct_dict, read_text, send_eeg_trigger
 
 
 def show_fixation(stim, win, sec, escape_keys):
@@ -57,10 +57,12 @@ def show_text_from_path(path: str, config):
         )
 
 
-def show_word(word: str, text_stim, win, stopwatch, escape_keys):
+def show_word(word: str, text_stim, win, stopwatch, escape_keys, eeg_trigger=None):
     text_stim.text = word
     text_stim.draw()
     win.flip()
+    if eeg_trigger:
+        send_eeg_trigger(eeg_trigger)
     stopwatch.reset()
     key = event.waitKeys()[0]
     rt = stopwatch.getTime()
@@ -70,12 +72,16 @@ def show_word(word: str, text_stim, win, stopwatch, escape_keys):
     return rt
 
 
-def show_word_fixed(word: str, pr_char_sec, min_sec, text_stim, win, escape_keys):
+def show_word_fixed(
+    word: str, pr_char_sec, min_sec, text_stim, win, escape_keys, eeg_trigger=None
+):
     char_time = pr_char_sec * len(word) + 0.02
     sec = char_time if char_time >= min_sec else min_sec
     text_stim.text = word
     text_stim.draw()
     win.flip()
+    if eeg_trigger:
+        send_eeg_trigger(eeg_trigger)
     core.wait(sec)
 
     pressed_escape_keys = event.getKeys(keyList=escape_keys)

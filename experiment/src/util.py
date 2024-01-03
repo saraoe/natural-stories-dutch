@@ -86,3 +86,7 @@ def key_scroll(scroll: int, key: str, max_lines: int, n_lines: int):
         if max_lines + scroll > n_lines:
             scroll = n_lines - max_lines
     return scroll
+
+
+def send_eeg_trigger(eeg_trigger: str):
+    print(eeg_trigger)

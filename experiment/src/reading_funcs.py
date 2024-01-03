@@ -2,7 +2,7 @@
 Functions for self-paced reading (SPR) and rapid series visual representation (RSVP)
 """
 import re
-from util import list_to_csv, make_lines, read_text, get_scale_question
+from util import list_to_csv, make_lines, get_scale_question, send_eeg_trigger
 from show_stim import (
     show_blackscreen,
     show_fixation,
@@ -24,19 +24,39 @@ def spr(
     save_path: str,
     extra_cols: dict,
 ):
-    paragraphs = re.split("\n\n", story)
+    if config.eeg:
+        send_eeg_trigger(config.trigger_documents[document_id])
+    else:
+        word_trigger = None
 
+    paragraphs = re.split("\n\n", story)
     for paragraph in paragraphs:
+        if config.eeg:
+            send_eeg_trigger(config.trigger_paragraph)
+
         show_fixation(
             config.fix_cross,
             config.win,
             sec=times["fixation"],
             escape_keys=config.escape_keys,
         )
+
         words = re.split(r"[\s]", paragraph)
-        for word in words:
+        for n, word in enumerate(words):
+            if config.eeg:
+                word_trigger = (
+                    config.trigger_word_even
+                    if n % 2 == 0
+                    else config.trigger_word_uneven
+                )
+
             rt = show_word(
-                word, config.text_stim, config.win, config.stopwatch, config.escape_keys
+                word,
+                config.text_stim,
+                config.win,
+                config.stopwatch,
+                config.escape_keys,
+                word_trigger,
             )
             list_to_csv(
                 df_list=[
@@ -55,10 +75,17 @@ def spr(
     show_blackscreen(config.win, sec=times["blackscreen_long"])
 
 
-def rsvp(story: str, times, config):
-    paragraphs = re.split("\n\n", story)
+def rsvp(story: str, document_id: int, times: dict, config):
+    if config.eeg:
+        send_eeg_trigger(config.trigger_documents[document_id])
+    else:
+        word_trigger = None
 
+    paragraphs = re.split("\n\n", story)
     for paragraph in paragraphs:
+        if config.eeg:
+            send_eeg_trigger(config.trigger_paragraph)
+
         show_fixation(
             config.fix_cross,
             config.win,
@@ -67,7 +94,14 @@ def rsvp(story: str, times, config):
         )
 
         words = re.split(r"[\s]", paragraph)
-        for word in words:
+        for n, word in enumerate(words):
+            if config.eeg:
+                word_trigger = (
+                    config.trigger_word_even
+                    if n % 2 == 0
+                    else config.trigger_word_uneven
+                )
+
             show_word_fixed(
                 word,
                 times["rsvp_pr_char"],
@@ -75,6 +109,7 @@ def rsvp(story: str, times, config):
                 config.text_stim,
                 config.win,
                 config.escape_keys,
+                word_trigger,
             )
             show_blackscreen(config.win, times["rsvp_min"])
 
@@ -163,7 +198,7 @@ def rsvp_w_questions(
     full_paths,
     extra_cols: dict,
 ):
-    rsvp(story, times, config)
+    rsvp(story, document_id, times, config)
 
     text_questions(
         story_name,
@@ -188,7 +223,6 @@ def cloze_task(
 
     lines = [""]
     response, rt = "NA", "NA"
-    responses = []
     for paragraph in paragraphs:
         words = re.split(r"[\s]", paragraph)
         for word in words:
