@@ -128,10 +128,11 @@ class exp_paths:
         paths: dict,
         experiment: str,
         save_subfix: str,
+        tmp_subfix: str,
         hand_condition: str = None,
     ) -> None:
         # general paths
-        self.tmp_path = os.path.join(paths["out_data"], f"tmp_{save_subfix}.json")
+        self.tmp_path = os.path.join(paths["out_data"], f"tmp_{tmp_subfix}.json")
         self.practice_info = os.path.join(paths["instructions"], "practice_info*.txt")
         self.practice_end = os.path.join(paths["instructions"], "practice_end*.txt")
         self.pause = os.path.join(paths["instructions"], "pause.txt")
