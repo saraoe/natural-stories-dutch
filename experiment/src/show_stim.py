@@ -88,6 +88,7 @@ def show_word_fixed(
     if pressed_escape_keys:
         win.close()
         core.quit()
+    return sec
 
 
 def show_question(
