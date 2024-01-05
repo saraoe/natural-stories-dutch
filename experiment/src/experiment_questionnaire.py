@@ -37,11 +37,11 @@ def check_list(response_list):
 def participant_id_gui():
     # participant number (for determining hand and condition)
     hand_d = {n: hand for n, hand in zip(range(4), ["left", "left", "right", "right"])}
-    cond_d = {n: cond for n, cond in zip(range(4), [1, 7, 1, 7])}
+    cond_d = {n: cond for n, cond in zip(range(4), [1, 6, 1, 6])}
 
-    dlg = gui.Dlg(title="Participant Number")
-    dlg.addText("Please let the experimenter fill out you participant number")
-    dlg.addField(required_field("Participant Number"), choices=range(1, 200))
+    dlg = gui.Dlg(title="Participantnummer")
+    dlg.addText("Laat de onderzoeker je participantnummer invullen")
+    dlg.addField(required_field("Participantnummer"), choices=range(1, 200))
     dlg.show()
 
     if dlg.OK:
@@ -59,7 +59,7 @@ def participant_id_gui():
     missing_id = True
     while missing_id:
         dlg = gui.Dlg(title="Participant ID")
-        q_text = """We willen je vragen om je eigen unieke experimentele ID te creëren.\nJe creëert je experimentele ID (bestaande uit 3 letters en 2 cijfers) op de volgende manier:
+        q_text = """Creëer je eigen unieke participant ID (bestaande uit 3 letters en 2 cijfers). Je doet dit op de volgende manier:
 
         1. De eerste letter van de voornaam van je moeder
         2. De tweede letter van de voornaam van je vader
@@ -85,14 +85,14 @@ def participant_id_gui():
 
 def demographics_gui():
     missing_demographics = True
-    dlg = gui.Dlg(title="Demographics")
+    dlg = gui.Dlg(title="Demografische gegevens")
     dlg.addField(
         required_field("Geslacht"),
         choices=["-", "Man", "Vrouw", "Non-binair", "Geef ik liever niet aan"],
     )
     dlg.addField(required_field("Leeftijd"), choices=["-"] + list(range(18, 100)))
     dlg.addField(
-        required_field("Wat is je hoogst afgeronde opleiding?"),
+        required_field("Wat is je huidige of hoogst genoten opleiding?"),
         choices=[
             "-",
             "Ik heb geen opleiding afgerond",
@@ -110,7 +110,7 @@ def demographics_gui():
         ],
     )
     dlg.addText(
-        "\nIf you responded Anders in the last question, please name your highest finished educations"
+        "\nAls je “Anders” hebt geantwoord op de vorige vraag, kun je dit toelichten"
     )
     dlg.addField("Namelijk")
     while missing_demographics:
@@ -158,7 +158,7 @@ def lang_ability_gui():
         "Meer dan 10 uur per week",
     ]
 
-    dlg = gui.Dlg(title="Language Ability")
+    dlg = gui.Dlg(title="Nederlandse taalvaardigheid")
     dlg.addField(
         required_field("Heb je problemen met lezen in het Nederlands?"),
         choices=degree_choices,
@@ -197,7 +197,9 @@ def lang_ability_gui():
         ],
     )
     dlg.addText(
-        "\nIf you responded\n - Ik lees beter in (een) anderen taal/talen or\n - Ik lees even goed in het Nederlands als in (een) andere taal/talen \nin the last question, please name the language"
+        """\nAls je op de vorige vraag een van de volgende antwoorden hebt gegeven, noem dan dan deze taal/talen 
+        - Ik lees beter in (een) anderen taal/talen or
+        - Ik lees even goed in het Nederlands als in (een) andere taal/talen"""
     )
     dlg.addField("Namelijk")
 
@@ -224,7 +226,7 @@ def lang_ability_gui():
                 lang_abililty["best_reading_language"]
                 == "Ik lees beter in het Nederlands"
             ):
-                lang_abililty["best_reading_language_named"] = "dutch"
+                lang_abililty["best_reading_language_named"] = "nederlands"
             else:
                 lang_abililty["best_reading_language_named"] = gui_info[-1]
                 if lang_abililty["best_reading_language_named"] == "":
@@ -237,9 +239,9 @@ def lang_ability_gui():
 
     # speak_languages
     n = 5
-    dlg = gui.Dlg(title="Language Ability")
+    dlg = gui.Dlg(title="Taalvaardigheid")
     dlg.addText(
-        "Welke talen spreek je?\n\nNote: if you don't speak any other languages than Dutch, you can leave all fields blank."
+        "Welke talen spreek je?\n\nOpmerking: als je geen andere talen spreekt dan Nederlands, kun je alle velden leeg laten."
     )
     for i in range(1, n + 1):
         dlg.addText(f"{i}:")
@@ -280,9 +282,9 @@ def lang_ability_gui():
 def existing_gui_info(out_path: str, subfix: str):
     tmp_path = glob.glob(os.path.join(out_path, f"tmp_{subfix}.json"))
     if tmp_path:
-        dlg = gui.Dlg(title="Continue Experiment?")
+        dlg = gui.Dlg(title="Experiment voortzetten?")
         dlg.addField(
-            "Do you want to jump into experiment,\n where you ended?",
+            "Wil je verdergaan met het experiment waar je bent geëindigd?",
             choices=["ja", "nee"],
         )
         dlg.show()

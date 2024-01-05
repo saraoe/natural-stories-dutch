@@ -1,13 +1,7 @@
-Welcome to our EEG experiment and thank you for your participation!
+Welkom bij ons EEG-experiment en bedankt voor je deelname!
 
+In dit experiment zul je op je eigen tempo teksten lezen op het scherm. Nadat je een tekst hebt gelezen, zul je een aantal meerkeuzevragen over de tekst beantwoorden. 
 
-In this experiment you will read texts on the screen. All texts will be followed by a couple of multiple-choice questions that you should answer.
+Gedurende deze tijd meten we je hersengolven. Hiervoor hebben we een EEG-cap met veel geïntegreerde elektroden op je hoofd geplaatst. Deze elektroden zijn gevuld met een geleidende gel om de elektrische weerstand tussen de elektroden en je hoofdhuid te verminderen. Het gehele proces is niet-invasief (e.g. er wordt niet in de huid gesneden of geprikt) en brengt geen enkel risico met zich mee voor jou.
 
-
-During this time we will measure your brain waves. To do so, we have placed an EEG cap with numerous integrated electrodes on your head. These electrodes have been filled with a conductive gel to reduce the electrical resistance between the electrodes and your scalp. The whole procedure is non-invasive and does not pose any risks to you.
-
-
-Try to maintain a comfortable and upright position during the experiment and avoid excessive movements.
-
-
-(Press a button to continue!)
+Probeer een comfortabele en rechtopzittende houding te behouden tijdens het experiment en probeer ook niet te veel te bewegen. 

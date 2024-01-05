@@ -2,13 +2,12 @@
 Functions for self-paced reading (SPR) and rapid series visual representation (RSVP)
 """
 import re
-from util import list_to_csv, make_lines, read_text, get_scale_question
+from util import list_to_csv, make_lines, get_scale_question, send_eeg_trigger
 from show_stim import (
     show_blackscreen,
     show_fixation,
     show_word,
     show_word_fixed,
-    show_text,
     type_response,
     show_scale,
     show_questions,
@@ -25,27 +24,52 @@ def spr(
     save_path: str,
     extra_cols: dict,
 ):
-    paragraphs = re.split("\n\n", story)
+    if config.eeg:
+        document_trigger = config.trigger_documents[document_id]
+        send_eeg_trigger(document_trigger)
+    else:
+        document_trigger = None
+        word_trigger = None
 
+    paragraphs = re.split("\n\n", story)
     for paragraph in paragraphs:
+        if config.eeg:
+            send_eeg_trigger(config.trigger_paragraph)
+
         show_fixation(
             config.fix_cross,
             config.win,
             sec=times["fixation"],
             escape_keys=config.escape_keys,
         )
+
         words = re.split(r"[\s]", paragraph)
-        for word in words:
+        for n, word in enumerate(words):
+            if config.eeg:
+                word_trigger = (
+                    config.trigger_word_even
+                    if n % 2 == 0
+                    else config.trigger_word_uneven
+                )
+
             rt = show_word(
-                word, config.text_stim, config.win, config.stopwatch, config.escape_keys
+                word,
+                config.text_stim,
+                config.win,
+                config.stopwatch,
+                config.escape_keys,
+                word_trigger,
             )
             list_to_csv(
                 df_list=[
                     {
+                        "reading_type": "SPR",
                         "reation_time": rt,
                         "story_name": story_name,
                         "document_id": document_id,
+                        "document_trigger": document_trigger,
                         "word": word,
+                        "word_trigger": word_trigger,
                     }
                 ],
                 out_path=save_path,
@@ -56,28 +80,66 @@ def spr(
     show_blackscreen(config.win, sec=times["blackscreen_long"])
 
 
-def rsvp(story: str, times, config):
-    paragraphs = re.split("\n\n", story)
+def rsvp(
+    story: str,
+    story_name: str,
+    document_id: int,
+    times: dict,
+    config,
+    save_path: str,
+    extra_cols: dict,
+):
+    if config.eeg:
+        document_trigger = config.trigger_documents[document_id]
+        send_eeg_trigger(document_trigger)
+    else:
+        document_trigger = None
+        word_trigger = None
 
+    paragraphs = re.split("\n\n", story)
     for paragraph in paragraphs:
-        show_word_fixed(
-            "+",
-            times["fixation"] - 0.02,
-            times["fixation"],
-            config.text_stim,
+        if config.eeg:
+            send_eeg_trigger(config.trigger_paragraph)
+
+        show_fixation(
+            config.fix_cross,
             config.win,
-            config.escape_keys,
+            sec=times["fixation"],
+            escape_keys=config.escape_keys,
         )
 
         words = re.split(r"[\s]", paragraph)
-        for word in words:
-            show_word_fixed(
+        for n, word in enumerate(words):
+            if config.eeg:
+                word_trigger = (
+                    config.trigger_word_even
+                    if n % 2 == 0
+                    else config.trigger_word_uneven
+                )
+
+            word_time = show_word_fixed(
                 word,
                 times["rsvp_pr_char"],
                 times["rsvp_min"],
                 config.text_stim,
                 config.win,
                 config.escape_keys,
+                word_trigger,
+            )
+            list_to_csv(
+                df_list=[
+                    {
+                        "reading_type": "RSVP",
+                        "reation_time": word_time,
+                        "story_name": story_name,
+                        "document_id": document_id,
+                        "document_trigger": document_trigger,
+                        "word": word,
+                        "word_trigger": word_trigger,
+                    }
+                ],
+                out_path=save_path,
+                extra_cols=extra_cols,
             )
             show_blackscreen(config.win, times["rsvp_min"])
 
@@ -166,7 +228,7 @@ def rsvp_w_questions(
     full_paths,
     extra_cols: dict,
 ):
-    rsvp(story, times, config)
+    rsvp(story, story_name, document_id, times, config, full_paths.save_rt, extra_cols)
 
     text_questions(
         story_name,
@@ -191,7 +253,6 @@ def cloze_task(
 
     lines = [""]
     response, rt = "NA", "NA"
-    responses = []
     for paragraph in paragraphs:
         words = re.split(r"[\s]", paragraph)
         for word in words:

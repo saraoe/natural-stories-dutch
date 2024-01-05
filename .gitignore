@@ -3,7 +3,7 @@
 pandoc*
 
 stories/*
-texts/*
+texts/*.txt
 
 experiment/data/cloze/*
 experiment/data/spr/*

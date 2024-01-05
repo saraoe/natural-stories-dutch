@@ -13,6 +13,10 @@ from config import exp_config, exp_paths
 
 
 def experiment(paths: dict, fullscreen: bool):
+    # for saving data
+    if not os.path.exists(paths["out_data"]):
+        os.makedirs(paths["out_data"])
+
     # get document_ids
     questions_df = pd.read_excel(paths["questions"])
     questions_df["story"] = questions_df["Story"].apply(
@@ -26,33 +30,38 @@ def experiment(paths: dict, fullscreen: bool):
     gui_information, tmp_file = exp_questionnaire(paths["out_data"])
     cont_crash = True if tmp_file else None
 
-    # for saving data
-    if not os.path.exists(paths["out_data"]):
-        os.makedirs(paths["out_data"])
-
     if tmp_file:
-        old_participant_subfix = tmp_file["participant_subfix"]
-        participant_subfix = old_participant_subfix + "_s2"
+        tmp_subfix = tmp_file["participant_subfix"]
+        participant_subfix = tmp_subfix + "_s2"
     else:
         participant_subfix = gui_information["participant_subfix"]
+        tmp_subfix = participant_subfix
 
     # defining a window
     config = exp_config(fullscreen, keys="computer", cloze=True)
-    full_paths = exp_paths(paths, experiment="cloze", save_subfix=participant_subfix)
+    full_paths = exp_paths(
+        paths, experiment="cloze", save_subfix=participant_subfix, tmp_subfix=tmp_subfix
+    )
 
     # read in stories
     if cont_crash:
         stories = tmp_file["stories"]
         n_stories = len(stories)
         finished_texts = pd.read_csv(
-            os.path.join(paths["out_data"], f"cloze_{old_participant_subfix}.csv")
+            os.path.join(paths["out_data"], f"cloze_{tmp_subfix}.csv")
         )["story_name"].unique()
     else:
-        stories = list(read_text(full_paths.stories, stories=True))
+        stories = list(
+            read_text(
+                full_paths.stories,
+                stories=True,
+                ignore_paths=[full_paths.practice_text],
+            )
+        )
         shuffle(stories)
         n_stories = len(stories)
         practice_story = list(read_text(full_paths.practice_text))[0]
-        stories = [("practice story", practice_story)] + stories
+        stories = [("practice story de uil", practice_story)] + stories
 
     # save info in tmp file
     if not cont_crash:
@@ -75,13 +84,14 @@ def experiment(paths: dict, fullscreen: bool):
 
         if n == 0:  # practice text
             show_text_from_path(full_paths.practice_info, config)
-            document_id = 0
+            document_id = 11
         else:
             show_text(
                 f"{story_name.title()}\n\nStory {n} out of {n_stories}",
                 config.text_stim,
                 config.win,
                 config.escape_keys,
+                config.show_text_ending,
             )
             document_id = doc_ids[story_name]
 
@@ -118,7 +128,7 @@ if __name__ == "__main__":
     paths = {
         "questions": os.path.join("questions.xlsx"),
         "instructions": os.path.join("instructions"),
-        "stories": os.path.join("..", "texts", "edited", "*"),
+        "stories": os.path.join("..", "texts", "edited"),
         "out_data": os.path.join("data", "cloze"),
     }
 

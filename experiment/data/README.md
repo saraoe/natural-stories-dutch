@@ -22,10 +22,13 @@ All files have the same subfix of filename, indicating the partipant id, partici
 If the file end with ```_s2``` this indicates that the experiment crashed during data collection, and this is the data collected during the the second session. Thus, there will for this participant exist two version of every file.
 
 The **reation times** file include the following columns:
-- reation_time: (numeric) in seconds
+- reading_type: (str) indicates whether reading was excuted in SPR or RSVP framework
+- reation_time: (numeric) in seconds (for SPR it is reaction time, for RSVP it is the time the word was present)
 - story_name: (str) name of the story
 - document_id: (int)
+- document_trigger: (str) eeg trigger for the unique document
 - word: (str)
+- word_trigger: (str) eeg trigger sent for the word (alternating)
 - participant_id: (int)
 
 The **response** file are the responses to the questions in the ```../questions.xlsx``` file. The file includes the following columns:

@@ -30,9 +30,28 @@ def make_arrows(direction: str, textbox, win):
 
 
 class exp_config:
-    def __init__(self, fullscreen: bool, keys: str, cloze: bool = None) -> None:
+    def __init__(
+        self,
+        fullscreen: bool,
+        keys: str,
+        cloze: bool = None,
+        hand_condition: str = None,
+        eeg: bool = None,
+    ) -> None:
         self.win = visual.Window(color="grey", fullscr=fullscreen)
         self.stopwatch = core.Clock()
+
+        # eeg triggers
+        self.eeg = eeg
+        if eeg:
+            self.trigger_word_even = "word even"
+            self.trigger_word_uneven = "word uneven"
+            self.trigger_paragraph = "paragraph"
+            doc_ids = range(1, 13)  # ten texts and two practice texts
+            doc_triggers = [f"document {i}" for i in doc_ids]
+            self.trigger_documents = {
+                doc_id: trigger for doc_id, trigger in zip(doc_ids, doc_triggers)
+            }
 
         # define stim
         self.text_stim = visual.TextStim(win=self.win)
@@ -67,6 +86,16 @@ class exp_config:
         self.scale_keys = [str(tick) for tick in self.scale_stim.ticks]
         self.scale_keys.append(self.respond_key)
 
+        # button press text
+        if hand_condition:
+            # hand condition
+            hand_dutch = "linker" if hand_condition == "left" else "rechter"
+            self.show_text_ending = (
+                f"(Druk op de knop met je {hand_dutch}hand om door te gaan!)"
+            )
+        else:
+            self.show_text_ending = "(Druk op een toets om door te gaan!)"
+
         # extra config only for cloze
         if cloze:
             self.storybox_stim = visual.TextBox2(
@@ -94,39 +123,52 @@ class exp_config:
 
 
 class exp_paths:
-    def __init__(self, paths: dict, experiment: str, save_subfix: str) -> None:
+    def __init__(
+        self,
+        paths: dict,
+        experiment: str,
+        save_subfix: str,
+        tmp_subfix: str,
+        hand_condition: str = None,
+    ) -> None:
         # general paths
-        self.tmp_path = os.path.join(paths["out_data"], f"tmp_{save_subfix}.json")
+        self.tmp_path = os.path.join(paths["out_data"], f"tmp_{tmp_subfix}.json")
         self.practice_info = os.path.join(paths["instructions"], "practice_info*.txt")
         self.practice_end = os.path.join(paths["instructions"], "practice_end*.txt")
         self.pause = os.path.join(paths["instructions"], "pause.txt")
         self.end = os.path.join(paths["instructions"], "end.txt")
-        self.stories = paths["stories"]
+        self.stories = os.path.join(paths["stories"], "*.txt")
 
         if experiment == "spr":
+            # instructions
             self.inst = os.path.join(paths["instructions"], "eeg_instruction*.txt")
             self.rsvp_inst = os.path.join(
-                paths["instructions"], "rsvp_instructions*.txt"
+                paths["instructions"], f"rsvp_instructions_{hand_condition}.txt"
             )
             self.practice_text_rsvp = os.path.join(
-                paths["instructions"], f"practice_text_rsvp.txt"
+                paths["stories"], f"practice_text_jorinde_en_joringel.txt"
             )
-            self.spr_inst = os.path.join(paths["instructions"], "spr_instructions*.txt")
+            self.spr_inst = os.path.join(
+                paths["instructions"], f"spr_instructions_{hand_condition}.txt"
+            )
             self.practice_text_spr = os.path.join(
-                paths["instructions"], f"practice_text_spr.txt"
+                paths["stories"], f"practice_text_de_uil.txt"
             )
 
+            # save paths
             self.save_rt = os.path.join(paths["out_data"], f"rt_{save_subfix}.csv")
             self.save_response = os.path.join(
                 paths["out_data"], f"responses_{save_subfix}.csv"
             )
 
         if experiment == "cloze":
+            # instructions
             self.inst = os.path.join(paths["instructions"], "cloze_instruction*.txt")
             self.practice_text = os.path.join(
-                paths["instructions"], f"practice_text_spr.txt"
+                paths["stories"], f"practice_text_de_uil.txt"
             )
 
+            # save paths
             self.save_cloze = os.path.join(
                 paths["out_data"], f"cloze_{save_subfix}.csv"
             )

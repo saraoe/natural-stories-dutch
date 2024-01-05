@@ -1,22 +1,17 @@
-You will begin by seeing the first word of the story.
+De teksten zullen dus woord voor woord worden weergegeven. Je begint met het eerste woord van de tekst. Op basis van dit eerste woord vul je de volgende twee woorden in die volgens jou aansluiten bij de context van de tekst. Indien nodig (bijvoorbeeld aan het einde van een zin) kun je ook een leesteken toevoegen (zoals een punt, komma, vraagteken of uitroepteken) aan je antwoord. Om je antwoord te bevestigen, druk je op enter. Nadat je dit hebt gedaan zul je het woord dat daadwerkelijk in de tekst staat te zien krijgen. Je wordt dan gevraagd om de volgende twee woorden (plus eventueel leesteken) in te vullen. 
 
+Je kan bijvoorbeeld het volgende woord als eerste te zien krijgen:
 
-Based on the first word, you will fill in the following word/words that fits the context best. You do so by typing the word using the keyboard. Press enter to confirm your response.
+“De”
 
+Aan de hand van dit woord vul je twee woorden in, bijvoorbeeld:
 
-After each completion, the next word in the story will be revealed, and you will be asked to fill in the following word/words that best fits the extended context.
+“De man loopt”
 
+Wanneer je op enter drukt, krijg je te zien wat er daadwerkelijk in de originele tekst staat en kun je de volgende twee woorden invullen, bijvoorbeeld:
 
-Type the word/words that you believe correctly fit into the story, ensuring grammatical accuracy and contextual relevance.
+“De zon kwam op in”
 
+Wanneer je hierna, op enter drukt, krijg je wederom te zien wat er daadwerkelijk in de originele tekst staat en kun je de volgende twee woorden invullen, bijvoorbeeld:
 
-Please ensure that you type your response as quickly as possible.
-
-
-If you have any questions, please contact the experimenter!
-
-
-The experiment begins with some practice rounds to familiarize yourself with the task.
-
-
-(Press a key to continue!)
+“De zon kwam op in het oosten” 

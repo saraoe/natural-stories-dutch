@@ -18,10 +18,16 @@ def experiment(
     paths: dict,
     times: dict,
     keys: str,
-    fullscreen: bool = True,
+    eeg: bool,
+    fullscreen: bool,
 ):
+    # for saving data
+    if not os.path.exists(paths["out_data"]):
+        os.makedirs(paths["out_data"])
+
     # questions
     questions_df = pd.read_excel(paths["questions"])
+    questions_df = questions_df[questions_df["Chosen question"] == "yes"]
     questions_df["story"] = questions_df["Story"].apply(
         lambda s: re.sub("[^a-zA-Z\s]+", "", s).lower()
     )
@@ -33,29 +39,46 @@ def experiment(
     gui_information, tmp_file = exp_questionnaire(paths["out_data"])
     cont_crash = True if tmp_file else None
 
-    # for saving data
-    if not os.path.exists(paths["out_data"]):
-        os.makedirs(paths["out_data"])
-
     if tmp_file:
-        old_participant_subfix = tmp_file["participant_subfix"]
-        participant_subfix = old_participant_subfix + "_s2"
+        tmp_subfix = tmp_file["participant_subfix"]
+        participant_subfix = tmp_subfix + "_s2"
     else:
         participant_subfix = gui_information["participant_subfix"]
+        tmp_subfix = participant_subfix
 
     # config
-    config = exp_config(fullscreen, keys)
-    full_paths = exp_paths(paths, experiment="spr", save_subfix=participant_subfix)
+    config = exp_config(
+        fullscreen, keys, hand_condition=gui_information["hand"], eeg=eeg
+    )
+    full_paths = exp_paths(
+        paths,
+        experiment="spr",
+        save_subfix=participant_subfix,
+        tmp_subfix=tmp_subfix,
+        hand_condition=gui_information["hand"],
+    )
 
     # read in stories
     if cont_crash:
         stories = tmp_file["stories"]
         n_stories = len(stories)
-        finished_texts = pd.read_csv(
-            os.path.join(paths["out_data"], f"rt_{old_participant_subfix}.csv")
-        )["story_name"].unique()
+        try:
+            finished_texts = pd.read_csv(
+                os.path.join(paths["out_data"], f"rt_{tmp_subfix}.csv")
+            )["story_name"].unique()
+        except FileNotFoundError:
+            finished_texts = []
     else:
-        stories = list(read_text(full_paths.stories, stories=True))
+        stories = list(
+            read_text(
+                full_paths.stories,
+                stories=True,
+                ignore_paths=[
+                    full_paths.practice_text_rsvp,
+                    full_paths.practice_text_spr,
+                ],
+            )
+        )
         shuffle(stories)
         n_stories = len(stories)
 
@@ -95,18 +118,18 @@ def experiment(
 
         if document_id == gui_information["rsvp_document_id"]:
             # practice
-            show_text_from_path(full_paths.practice_info)
+            show_text_from_path(full_paths.practice_info, config)
             rsvp_w_questions(
                 story=practice_story["rsvp"],
-                story_name="practice story rsvp",
-                document_id=0,
+                story_name="practice story jorinde en joringel",
+                document_id=12,
                 questions_df=questions_df,
                 config=config,
                 times=times,
                 full_paths=full_paths,
                 extra_cols=gui_information,
             )
-            show_text_from_path(full_paths.practice_end)
+            show_text_from_path(full_paths.practice_end, config)
 
             # experimental text
             show_text(
@@ -114,6 +137,7 @@ def experiment(
                 config.text_stim,
                 config.win,
                 config.escape_keys,
+                config.show_text_ending,
             )
             rsvp_w_questions(
                 story=story,
@@ -131,8 +155,8 @@ def experiment(
                 show_text_from_path(full_paths.practice_info, config)
                 spr_w_questions(
                     story=practice_story["spr"],
-                    story_name="practice story spr",
-                    document_id=0,
+                    story_name="practice story de uil",
+                    document_id=11,
                     questions_df=questions_df,
                     config=config,
                     times=times,
@@ -149,6 +173,7 @@ def experiment(
                 config.text_stim,
                 config.win,
                 config.escape_keys,
+                config.show_text_ending,
             )
             spr_w_questions(
                 story=story,
@@ -175,7 +200,7 @@ if __name__ == "__main__":
     # paths
     paths = {
         "instructions": os.path.join("instructions"),
-        "stories": os.path.join("..", "texts", "edited", "*"),
+        "stories": os.path.join("..", "texts", "edited"),
         "questions": os.path.join("questions.xlsx"),
         "out_data": os.path.join("data", "spr"),
     }
@@ -185,17 +210,13 @@ if __name__ == "__main__":
         "fixation": 0.5,
         "blackscreen_short": 0.2,
         "blackscreen_long": 0.75,
-        "rsvp_prchar": 0.19,
+        "rsvp_pr_char": 0.19,
         "rsvp_min": 0.25,
     }
 
     # experimental device
     keys = "computer"
     fullscreen = False
+    eeg = True
 
-    experiment(
-        paths,
-        times,
-        keys,
-        fullscreen,
-    )
+    experiment(paths=paths, times=times, keys=keys, eeg=eeg, fullscreen=fullscreen)
