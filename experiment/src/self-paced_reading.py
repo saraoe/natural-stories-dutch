@@ -21,6 +21,10 @@ def experiment(
     eeg: bool,
     fullscreen: bool,
 ):
+    # for saving data
+    if not os.path.exists(paths["out_data"]):
+        os.makedirs(paths["out_data"])
+
     # questions
     questions_df = pd.read_excel(paths["questions"])
     questions_df = questions_df[questions_df["Chosen question"] == "yes"]
@@ -34,10 +38,6 @@ def experiment(
     # GUI information
     gui_information, tmp_file = exp_questionnaire(paths["out_data"])
     cont_crash = True if tmp_file else None
-
-    # for saving data
-    if not os.path.exists(paths["out_data"]):
-        os.makedirs(paths["out_data"])
 
     if tmp_file:
         tmp_subfix = tmp_file["participant_subfix"]

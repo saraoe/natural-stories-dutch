@@ -13,6 +13,10 @@ from config import exp_config, exp_paths
 
 
 def experiment(paths: dict, fullscreen: bool):
+    # for saving data
+    if not os.path.exists(paths["out_data"]):
+        os.makedirs(paths["out_data"])
+
     # get document_ids
     questions_df = pd.read_excel(paths["questions"])
     questions_df["story"] = questions_df["Story"].apply(
@@ -26,26 +30,25 @@ def experiment(paths: dict, fullscreen: bool):
     gui_information, tmp_file = exp_questionnaire(paths["out_data"])
     cont_crash = True if tmp_file else None
 
-    # for saving data
-    if not os.path.exists(paths["out_data"]):
-        os.makedirs(paths["out_data"])
-
     if tmp_file:
-        old_participant_subfix = tmp_file["participant_subfix"]
-        participant_subfix = old_participant_subfix + "_s2"
+        tmp_subfix = tmp_file["participant_subfix"]
+        participant_subfix = tmp_subfix + "_s2"
     else:
         participant_subfix = gui_information["participant_subfix"]
+        tmp_subfix = participant_subfix
 
     # defining a window
     config = exp_config(fullscreen, keys="computer", cloze=True)
-    full_paths = exp_paths(paths, experiment="cloze", save_subfix=participant_subfix)
+    full_paths = exp_paths(
+        paths, experiment="cloze", save_subfix=participant_subfix, tmp_subfix=tmp_subfix
+    )
 
     # read in stories
     if cont_crash:
         stories = tmp_file["stories"]
         n_stories = len(stories)
         finished_texts = pd.read_csv(
-            os.path.join(paths["out_data"], f"cloze_{old_participant_subfix}.csv")
+            os.path.join(paths["out_data"], f"cloze_{tmp_subfix}.csv")
         )["story_name"].unique()
     else:
         stories = list(
