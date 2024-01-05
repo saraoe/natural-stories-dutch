@@ -198,7 +198,7 @@ def lang_ability_gui():
     )
     dlg.addText(
         """\nAls je op de vorige vraag een van de volgende antwoorden hebt gegeven, noem dan dan deze taal/talen 
-        - Ik lees beter in (een) anderen taal/talen or
+        - Ik lees beter in (een) anderen taal/talen of
         - Ik lees even goed in het Nederlands als in (een) andere taal/talen"""
     )
     dlg.addField("Namelijk")
