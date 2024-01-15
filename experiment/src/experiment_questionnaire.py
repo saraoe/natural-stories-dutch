@@ -2,7 +2,8 @@
 Questionnaire in the beginning of experiment.
 Include Participant ID, demographics, and language ability 
 """
-from psychopy import core, gui, data
+from psychopy import core, gui
+from datetime import date
 import string
 import os, json, glob
 
@@ -323,16 +324,16 @@ def exp_questionnaire(
         gui_info = add_info(gui_info, participant_id_gui())
 
     # use participant id to make subfix
-    date = data.getDateStr()
+    date_str = str(date.today())
     save_subfix = (
-        f"{gui_info['participant_id']}_{gui_info['participant_number']}_{date}"
+        f"{gui_info['participant_id']}_{gui_info['participant_number']}_{date_str}"
     )
-    gui_info["participant_subfix"] = save_subfix
+    gui_info["participant_subfix"] = f"{save_subfix}_s1"
 
     # check if tmp_file exists
     tmp_path = existing_gui_info(
         out_path,
-        subfix=f"{gui_info['participant_id']}_{gui_info['participant_number']}*",
+        subfix=save_subfix,
     )
     if tmp_path:
         with open(tmp_path) as f:

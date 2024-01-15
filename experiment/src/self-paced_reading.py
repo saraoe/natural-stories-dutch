@@ -7,7 +7,7 @@ import os, json
 import re
 import pandas as pd
 from random import shuffle
-from util import read_text
+from util import read_text, get_n_session, get_finished_texts
 from show_stim import show_text_from_path, show_text
 from experiment_questionnaire import exp_questionnaire
 from reading_funcs import spr_w_questions, rsvp_w_questions
@@ -41,7 +41,10 @@ def experiment(
 
     if tmp_file:
         tmp_subfix = tmp_file["participant_subfix"]
-        participant_subfix = tmp_subfix + "_s2"
+        n_session = get_n_session(
+            out_path=paths["out_data"], filename=f"rt_{tmp_subfix}*.csv"
+        )
+        participant_subfix = f"{tmp_subfix}_s{n_session}"
     else:
         participant_subfix = gui_information["participant_subfix"]
         tmp_subfix = participant_subfix
@@ -62,12 +65,7 @@ def experiment(
     if cont_crash:
         stories = tmp_file["stories"]
         n_stories = len(stories)
-        try:
-            finished_texts = pd.read_csv(
-                os.path.join(paths["out_data"], f"rt_{tmp_subfix}.csv")
-            )["story_name"].unique()
-        except FileNotFoundError:
-            finished_texts = []
+        finished_texts = get_finished_texts(paths["out_data"], f"rt_{tmp_subfix}*.csv")
     else:
         stories = list(
             read_text(

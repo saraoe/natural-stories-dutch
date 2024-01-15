@@ -17,9 +17,9 @@ For each participant, two seperate csv-files and one json-file are saved during 
 - responses: ```responses_*.csv```
 - participant information: ```participant_info_*.json```
 
-All files have the same subfix of filename, indicating the partipant id, participant number, date of data collection, and a random string of characters (that are the same for the same participant). 
+All files have the same subfix of filename, indicating the partipant id, participant number, date of data collection, and session. 
 
-If the file end with ```_s2``` this indicates that the experiment crashed during data collection, and this is the data collected during the the second session. Thus, there will for this participant exist two version of every file.
+If the file end with ```_sn``` where n > 1, this indicates that the experiment crashed during data collection, and this is the data collected during the n'th session. Thus, there will for this participant exist n versions of every file.
 
 The **reation times** file include the following columns:
 - reading_type: (str) indicates whether reading was excuted in SPR or RSVP framework
@@ -69,9 +69,9 @@ For each participant in the cloze task experiment, two csv-file and one json-fil
 - Responses of scale questions: ```responses_*.csv```
 - Participant information: ```participant_info_*.json```
 
-The subfix of the filename is created similarly to those for the SPR experiment (i.e. partipant id, date of data collection, and a random string of characters).
+The subfix of the filename is created similarly to those for the SPR experiment (i.e. partipant id, participant number, date of data collection, and session).
 
-If the file end with ```_s2``` this indicates that the experiment crashed during data collection, and this is the data collected during the the second session. Thus, there will for this participant exist two version of every file.
+If the file end with ```_sn``` where n > 1, this indicates that the experiment crashed during data collection, and this is the data collected during the n'th session. Thus, there will for this participant exist n versions of every file.
 
 The main **cloze** file includes the following columns:
 - response: (str) the two words the participant responded with (seperated by whitespace)

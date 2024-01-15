@@ -28,6 +28,19 @@ def read_text(path: str, stories: bool = False, ignore_paths: List[str] = []):
             yield text
 
 
+def get_n_session(out_path: str, filename: str):
+    latest_file = glob(os.path.join(out_path, filename))[-1]
+    return int(latest_file.split(".")[-2][-1]) + 1
+
+
+def get_finished_texts(out_path: str, filename: str):
+    finished_texts = []
+    for file in glob(os.path.join(out_path, filename)):
+        finished_texts += [t for t in pd.read_csv(file)["story_name"].unique()]
+        print(finished_texts)
+    return finished_texts
+
+
 def list_to_csv(df_list: List[dict], out_path: str, extra_cols: dict = {}):
     df = pd.DataFrame(df_list, index=range(len(df_list)))
     for name, values in extra_cols.items():

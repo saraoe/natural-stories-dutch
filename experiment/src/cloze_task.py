@@ -5,7 +5,7 @@ Cloze task
 import os, re, json
 from random import shuffle
 import pandas as pd
-from util import read_text
+from util import read_text, get_n_session, get_finished_texts
 from show_stim import show_text, show_text_from_path
 from experiment_questionnaire import exp_questionnaire
 from reading_funcs import cloze_task, cloze_scale_question
@@ -32,7 +32,10 @@ def experiment(paths: dict, fullscreen: bool):
 
     if tmp_file:
         tmp_subfix = tmp_file["participant_subfix"]
-        participant_subfix = tmp_subfix + "_s2"
+        n_session = get_n_session(
+            out_path=paths["out_data"], filename=f"cloze_{tmp_subfix}*.csv"
+        )
+        participant_subfix = f"{tmp_subfix}_s{n_session}"
     else:
         participant_subfix = gui_information["participant_subfix"]
         tmp_subfix = participant_subfix
@@ -47,9 +50,9 @@ def experiment(paths: dict, fullscreen: bool):
     if cont_crash:
         stories = tmp_file["stories"]
         n_stories = len(stories)
-        finished_texts = pd.read_csv(
-            os.path.join(paths["out_data"], f"cloze_{tmp_subfix}.csv")
-        )["story_name"].unique()
+        finished_texts = get_finished_texts(
+            paths["out_data"], f"cloze_{tmp_subfix}*.csv"
+        )
     else:
         stories = list(
             read_text(
