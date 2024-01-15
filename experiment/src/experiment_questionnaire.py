@@ -306,6 +306,16 @@ def exp_questionnaire(
     participant_id: bool = True,
     demographics: bool = True,
     lang_ability: bool = True,
+    return_info: list = [
+        "participant_number",
+        "hand",
+        "rsvp_document_id",
+        "participant_id",
+        "participant_subfix",
+        "gender",
+        "age",
+        "education",
+    ],
 ):
     gui_info = {}
 
@@ -331,9 +341,6 @@ def exp_questionnaire(
 
     if demographics:
         gui_info = add_info(gui_info, demographics_gui())
-    gui_info_returned = (
-        gui_info  # only participant id and demographics should be returned
-    )
 
     if lang_ability:
         gui_info = add_info(gui_info, lang_ability_gui())
@@ -341,5 +348,7 @@ def exp_questionnaire(
     save_path = os.path.join(out_path, f"participant_info_{save_subfix}.json")
     with open(save_path, "w") as fp:
         json.dump(gui_info, fp)
+
+    gui_info_returned = {key: gui_info[key] for key in return_info}
 
     return gui_info_returned, None
