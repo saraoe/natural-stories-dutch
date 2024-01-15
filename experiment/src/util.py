@@ -37,7 +37,6 @@ def get_finished_texts(out_path: str, filename: str):
     finished_texts = []
     for file in glob(os.path.join(out_path, filename)):
         finished_texts += [t for t in pd.read_csv(file)["story_name"].unique()]
-        print(finished_texts)
     return finished_texts
 
 

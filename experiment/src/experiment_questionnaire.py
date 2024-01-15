@@ -326,9 +326,9 @@ def exp_questionnaire(
     # use participant id to make subfix
     date_str = str(date.today())
     save_subfix = (
-        f"{gui_info['participant_id']}_{gui_info['participant_number']}_{date_str}"
+        f"{gui_info['participant_id']}_{gui_info['participant_number']}_{date_str}_s1"
     )
-    gui_info["participant_subfix"] = f"{save_subfix}_s1"
+    gui_info["participant_subfix"] = save_subfix
 
     # check if tmp_file exists
     tmp_path = existing_gui_info(
