@@ -64,6 +64,8 @@ def experiment(paths: dict, fullscreen: bool):
         shuffle(stories)
         n_stories = len(stories)
         practice_story = list(read_text(full_paths.practice_text))[0]
+        # only use two first sentences for practice
+        practice_story = ".".join(practice_story.split(".")[:2]) + "."
         stories = [("practice story de uil", practice_story)] + stories
 
     # save info in tmp file
