@@ -35,10 +35,22 @@ def check_list(response_list):
     return all([r != "-" for r in response_list])
 
 
-def participant_id_gui():
-    # participant number (for determining hand and condition)
-    hand_d = {n: hand for n, hand in zip(range(4), ["left", "left", "right", "right"])}
-    cond_d = {n: cond for n, cond in zip(range(4), [1, 6, 1, 6])}
+def participant_id_gui(exp: str):
+    # conditions
+    if exp == "spr":
+        # participant number for determining hand and rsvp condition
+        hand_d = {
+            n: hand for n, hand in zip(range(4), ["left", "left", "right", "right"])
+        }
+        rsvp_d = {n: rsvp_id for n, rsvp_id in zip(range(4), [1, 6, 1, 6])}
+    if exp == "cloze":
+        # participant number for determining which texts
+        doc_ids = list(range(1, 11))
+        lists = [
+            doc_ids[i - 2 : i] for i in [2, 4, 6, 8, 10]
+        ]  # i.e., two texts in every list
+        lists += [l[::-1] for l in lists]  # reversed order
+        doc_id_d = {n: ids for n, ids in enumerate(lists)}
 
     missing_n = True
     while missing_n:
@@ -53,11 +65,17 @@ def participant_id_gui():
             participant_number = dlg.data[0]
             if check_list([participant_number]):
                 missing_n = False
-                participant_info = {
-                    "participant_number": participant_number,
-                    "hand": hand_d[participant_number % 4],
-                    "rsvp_document_id": cond_d[participant_number % 4],
-                }
+                participant_info = {"participant_number": participant_number}
+
+                if exp == "spr":
+                    participant_info["hand"] = hand_d[participant_number % 4]
+                    participant_info["rsvp_document_id"] = rsvp_d[
+                        participant_number % 4
+                    ]
+                if exp == "cloze":
+                    participant_info["included_documents"] = doc_id_d[
+                        participant_number % len(doc_id_d)
+                    ]
         else:
             core.quit()
 
@@ -309,6 +327,7 @@ def existing_gui_info(out_path: str, subfix: str):
 
 def exp_questionnaire(
     out_path: str,
+    exp: str,
     participant_id: bool = True,
     demographics: bool = True,
     lang_ability: bool = True,
@@ -316,6 +335,7 @@ def exp_questionnaire(
         "participant_number",
         "hand",
         "rsvp_document_id",
+        "included_documents",
         "participant_id",
         "participant_subfix",
         "gender",
@@ -326,7 +346,7 @@ def exp_questionnaire(
     gui_info = {}
 
     if participant_id:
-        gui_info = add_info(gui_info, participant_id_gui())
+        gui_info = add_info(gui_info, participant_id_gui(exp))
 
     # use participant id to make subfix
     date_str = str(date.today())
@@ -355,6 +375,8 @@ def exp_questionnaire(
     with open(save_path, "w") as fp:
         json.dump(gui_info, fp)
 
-    gui_info_returned = {key: gui_info[key] for key in return_info}
+    gui_info_returned = {
+        key: gui_info[key] for key in return_info if key in gui_info.keys()
+    }
 
     return gui_info_returned, None

@@ -27,7 +27,7 @@ def experiment(paths: dict, fullscreen: bool):
     ).to_dict()
 
     # GUI information
-    gui_information, tmp_file = exp_questionnaire(paths["out_data"])
+    gui_information, tmp_file = exp_questionnaire(paths["out_data"], exp="cloze")
     cont_crash = True if tmp_file else None
 
     if tmp_file:
@@ -49,20 +49,28 @@ def experiment(paths: dict, fullscreen: bool):
     # read in stories
     if cont_crash:
         stories = tmp_file["stories"]
-        n_stories = len(stories)
+        n_stories = len(stories) - 1  # do not include practice text in number
         finished_texts = get_finished_texts(
             paths["out_data"], f"cloze_{tmp_subfix}*.csv"
         )
     else:
-        stories = list(
-            read_text(
+        all_stories = {
+            name: [name, story]
+            for name, story in read_text(
                 full_paths.stories,
                 stories=True,
                 ignore_paths=[full_paths.practice_text],
             )
-        )
-        shuffle(stories)
+        }
+        story_name_include = [
+            name
+            for name in doc_ids
+            if doc_ids[name] in gui_information["included_documents"]
+        ]
+        stories = [all_stories[s] for s in story_name_include]
         n_stories = len(stories)
+        gui_information.pop("included_documents", None)  # remove from gui_information
+
         practice_story = list(read_text(full_paths.practice_text))[0]
         # only use two first sentences for practice
         practice_story = ".".join(practice_story.split(".")[:2]) + "."

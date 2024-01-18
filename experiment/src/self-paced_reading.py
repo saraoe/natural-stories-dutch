@@ -36,7 +36,7 @@ def experiment(
     ).to_dict()
 
     # GUI information
-    gui_information, tmp_file = exp_questionnaire(paths["out_data"])
+    gui_information, tmp_file = exp_questionnaire(paths["out_data"], exp="spr")
     cont_crash = True if tmp_file else None
 
     if tmp_file:
