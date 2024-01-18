@@ -40,21 +40,26 @@ def participant_id_gui():
     hand_d = {n: hand for n, hand in zip(range(4), ["left", "left", "right", "right"])}
     cond_d = {n: cond for n, cond in zip(range(4), [1, 6, 1, 6])}
 
-    dlg = gui.Dlg(title="Participantnummer")
-    dlg.addText("Laat de onderzoeker je participantnummer invullen")
-    dlg.addField(required_field("Participantnummer"), choices=range(1, 200))
-    dlg.show()
+    missing_n = True
+    while missing_n:
+        dlg = gui.Dlg(title="Participantnummer")
+        dlg.addText("Laat de onderzoeker je participantnummer invullen")
+        dlg.addField(
+            required_field("Participantnummer"), choices=["-"] + list(range(1, 200))
+        )
+        dlg.show()
 
-    if dlg.OK:
-        participant_number = dlg.data[0]
-
-        participant_info = {
-            "participant_number": participant_number,
-            "hand": hand_d[participant_number % 4],
-            "rsvp_document_id": cond_d[participant_number % 4],
-        }
-    else:
-        core.quit()
+        if dlg.OK:
+            participant_number = dlg.data[0]
+            if check_list([participant_number]):
+                missing_n = False
+                participant_info = {
+                    "participant_number": participant_number,
+                    "hand": hand_d[participant_number % 4],
+                    "rsvp_document_id": cond_d[participant_number % 4],
+                }
+        else:
+            core.quit()
 
     # participant id
     missing_id = True
