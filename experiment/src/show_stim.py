@@ -284,9 +284,7 @@ def type_response(
             rt = stopwatch.getTime()
             break
 
-        if key == "space":
-            response += " "
-        elif key == "backspace":
+        if key == "backspace":
             response = response[:-1]
         elif key in char:
             response += key
