@@ -279,6 +279,7 @@ def cloze_task(
                 config.writebox_stim,
                 config.stopwatch,
                 config.win,
+                last_word=(word == words[-1]),
             )
         lines.append("\n")
 

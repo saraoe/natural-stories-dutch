@@ -239,6 +239,7 @@ def type_response(
     text_stim,
     stopwatch,
     win,
+    last_word,
 ):
     # possible characters
     char = list(string.ascii_lowercase + string.digits)
@@ -280,9 +281,10 @@ def type_response(
         if key == "escape":
             win.close()
             core.quit()
-        if key == "return" and response != "":
-            rt = stopwatch.getTime()
-            break
+        if key == "return":
+            if response != "" or last_word:
+                rt = stopwatch.getTime()
+                break
 
         if key == "backspace":
             response = response[:-1]
