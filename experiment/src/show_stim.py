@@ -190,6 +190,7 @@ def show_scale(
 ):
     qtext_stim.text = question
     qtext_stim.pos = (0, 0.6)
+    scale_stim.markerPos = None
     response = None
 
     while True:
