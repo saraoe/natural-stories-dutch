@@ -128,7 +128,7 @@ def experiment(paths: dict, fullscreen: bool):
         if n == 0:
             # practice end
             show_text_from_path(full_paths.practice_end, config)
-        else:
+        elif n + 1 < len(stories):
             # pause
             show_text_from_path(full_paths.pause, config)
 
