@@ -91,8 +91,7 @@ The **responses** files includes the following columns:
 The **participant information** file include the following information:
 - Participant identification:
     - participant_number: (int) number assigned to the participant by the experimenter, that determines hand and RSVP text 
-    - hand: (str) which hand the participant was instructed to use (i.e., left or right) 
-    - rsvp_document_id: (int) document id of the the text showed in RSVP 
+    - included_documents: (list) list of documents included in the experiment (the list is ordered). *NB: this variable is not included in the csv-files*
     - participant_id: (str) 
     - participant_subfix: (str) subfix of all files related to this participant
 - Demographics:
