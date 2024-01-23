@@ -24,8 +24,7 @@ To run the Self-Paced Reading experiment:
 python src/self-paced_reading.py
 ```
 
-To run Cloze experiment
+To run Cloze Task experiment
 ```
 python src/cloze_task.py
 ```
-**NB: the cloze experiment is not working yet**
