@@ -12,7 +12,7 @@ Experiment for the Self-Paced Reading (SPR) EEG study.
 ├── questions.xlsx              <- comprehension question for SPR experiment
 ├── src
 │   ├──  self-paced_reading.py  <- psychopy script of SPR experiment
-│   ├──  cloze.py               <- psychopy script of cloze task
+│   ├──  cloze_task.py          <- psychopy script of cloze task
 │   └── ...
 ```
 
