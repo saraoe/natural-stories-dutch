@@ -29,8 +29,11 @@ def read_text(path: str, stories: bool = False, ignore_paths: List[str] = []):
 
 
 def get_n_session(out_path: str, filename: str):
-    latest_file = glob(os.path.join(out_path, filename))[-1]
-    return int(latest_file.split(".")[-2][-1]) + 1
+    try:
+        latest_file = glob(os.path.join(out_path, filename))[-1]
+        return int(latest_file.split(".")[-2][-1]) + 1
+    except IndexError:
+        return 1
 
 
 def get_finished_texts(out_path: str, filename: str):
