@@ -240,7 +240,8 @@ def type_response(
     text_stim,
     stopwatch,
     win,
-    last_word,
+    last_word: bool,
+    time_out: int,
 ):
     # possible characters
     char = list(string.ascii_lowercase + string.digits)
@@ -248,6 +249,10 @@ def type_response(
 
     response_prefix = "Je antwoord: "
     response = ""
+
+    if time_out:
+        timed_out = False
+        time_out_stim = visual.TextStim(win=win, text="", pos=(0, -0.85), color="pink")
 
     # scroll if there a more lines than can be viewed
     n_lines = len(lines)
@@ -258,6 +263,7 @@ def type_response(
     else:
         scroll = n_lines - max_lines
 
+    stopwatch.reset()
     while True:
         if isinstance(scroll, int) == True:
             story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
@@ -270,14 +276,32 @@ def type_response(
         else:
             story_stim.text = "\n".join(lines)
         text_stim.text = response_prefix + response
+
+        if time_out:
+            current_time = stopwatch.getTime()
+            if current_time >= time_out:
+                time_out_stim.text = "\n Timed out!"
+                timed_out = True
+            elif current_time >= time_out / 2:
+                time_out_stim.text = "\n Hurry up!"
+            time_out_stim.draw()
+
         text_stim.draw()
         story_stim.draw()
         up_stim.draw()
         down_stim.draw()
         win.flip()
-        stopwatch.reset()
 
-        key = event.waitKeys()[0]
+        if timed_out:
+            core.wait(0.5)
+            rt = current_time
+            break
+
+        keys = event.getKeys()
+        if keys:
+            key = keys[-1]
+        else:
+            continue
 
         if key == "escape":
             win.close()

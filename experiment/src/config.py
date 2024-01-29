@@ -107,8 +107,8 @@ class exp_config:
             self.writebox_stim = visual.TextBox2(
                 win=self.win,
                 text="",
-                pos=(0, -0.8),
-                size=[1, 0.1],
+                pos=(0, -0.7),
+                size=[1, 0.2],
                 borderColor="darkgrey",
             )
             self.up_arrow = make_arrows("up", self.storybox_stim, self.win)
