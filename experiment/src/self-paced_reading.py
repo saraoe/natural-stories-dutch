@@ -131,7 +131,7 @@ def experiment(
 
             # experimental text
             show_text(
-                f"{story_name.title()}\n\nStory {n} out of {n_stories}",
+                f"{story_name.title()}\n\nText {n} van {n_stories}",
                 config.text_stim,
                 config.win,
                 config.escape_keys,
@@ -167,7 +167,7 @@ def experiment(
 
             # experimental text
             show_text(
-                f"{story_name.title()}\n\nStory {n} out of {n_stories}",
+                f"{story_name.title()}\n\nText {n} van {n_stories}",
                 config.text_stim,
                 config.win,
                 config.escape_keys,

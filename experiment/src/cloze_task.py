@@ -100,7 +100,7 @@ def experiment(paths: dict, fullscreen: bool):
             document_id = 11
         else:
             show_text(
-                f"{story_name.title()}\n\nStory {n} out of {n_stories}",
+                f"{story_name.title()}\n\nText {n} van {n_stories}",
                 config.text_stim,
                 config.win,
                 config.escape_keys,
