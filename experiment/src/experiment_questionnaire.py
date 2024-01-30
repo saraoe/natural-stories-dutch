@@ -45,10 +45,7 @@ def participant_id_gui(exp: str):
         rsvp_d = {n: rsvp_id for n, rsvp_id in zip(range(4), [1, 6, 1, 6])}
     if exp == "cloze":
         # participant number for determining which texts
-        doc_ids = list(range(1, 11))
-        lists = [
-            doc_ids[i - 2 : i] for i in [2, 4, 6, 8, 10]
-        ]  # i.e., two texts in every list
+        lists = [[1, 3], [2, 5], [4, 6], [7, 8]]  # i.e., two texts in every list
         lists += [l[::-1] for l in lists]  # reversed order
         doc_id_d = {n: ids for n, ids in enumerate(lists)}
 
