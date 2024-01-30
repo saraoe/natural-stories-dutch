@@ -255,6 +255,7 @@ def type_response(
     if time_out:
         timed_out = False
         time_out_stim = visual.TextStim(win=win, text="", pos=(0, -0.85), color="pink")
+        time_out_stim.size = 0.07
 
     # scroll if there a more lines than can be viewed
     n_lines = len(lines)
@@ -282,10 +283,10 @@ def type_response(
         if time_out:
             current_time = stopwatch.getTime()
             if current_time >= time_out:
-                time_out_stim.text = "\n Timed out!"
+                time_out_stim.text = "\n Time-out!"
                 timed_out = True
             elif current_time >= time_out / 2:
-                time_out_stim.text = "\n Hurry up!"
+                time_out_stim.text = "\n Haast je"
             time_out_stim.draw()
 
         text_stim.draw()

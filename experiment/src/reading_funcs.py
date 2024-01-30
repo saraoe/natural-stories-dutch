@@ -280,7 +280,7 @@ def cloze_task(
                 config.stopwatch,
                 config.win,
                 last_word=(word == words[-1]),
-                time_out=3,
+                time_out=6,
             )
         lines.append("\n")
 
