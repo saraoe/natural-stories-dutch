@@ -98,7 +98,7 @@ def experiment(
 
     # show instruction:
     if not cont_crash:
-        show_text_from_path(full_paths.inst, config)
+        show_text_from_path(full_paths.inst, config, align_text="left")
 
     # experiment start
     spr_practice = False if cont_crash else True
@@ -112,7 +112,7 @@ def experiment(
             if document_id == gui_information["rsvp_document_id"]
             else full_paths.spr_inst
         )
-        show_text_from_path(inst_path, config)
+        show_text_from_path(inst_path, config, align_text="left")
 
         if document_id == gui_information["rsvp_document_id"]:
             # practice
@@ -188,7 +188,7 @@ def experiment(
         show_text_from_path(full_paths.pause, config)
 
     # show ending
-    show_text_from_path(full_paths.end, config)
+    show_text_from_path(full_paths.end, config, align_text="left")
 
     # remove tmp file
     os.remove(full_paths.tmp_path)

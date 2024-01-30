@@ -46,7 +46,9 @@ def show_text(
     return key
 
 
-def show_text_from_path(path: str, config):
+def show_text_from_path(path: str, config, align_text: str = "center"):
+    config.smalltext_stim.alignText = align_text
+
     for t in read_text(path):
         show_text(
             t,
