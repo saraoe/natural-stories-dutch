@@ -1,17 +1,1 @@
-De teksten zullen dus woord voor woord worden weergegeven. Je begint met het eerste woord van de tekst. Op basis van dit eerste woord vul je de volgende twee woorden in die volgens jou aansluiten bij de context van de tekst. Indien nodig (bijvoorbeeld aan het einde van een zin) kun je ook een leesteken toevoegen (zoals een punt, komma, vraagteken of uitroepteken) aan je antwoord. Om je antwoord te bevestigen, druk je op enter. Nadat je dit hebt gedaan zul je het woord dat daadwerkelijk in de tekst staat te zien krijgen. Je wordt dan gevraagd om de volgende twee woorden (plus eventueel leesteken) in te vullen. 
-
-Je kan bijvoorbeeld het volgende woord als eerste te zien krijgen:
-
-“De”
-
-Aan de hand van dit woord vul je twee woorden in, bijvoorbeeld:
-
-“De man loopt”
-
-Wanneer je op enter drukt, krijg je te zien wat er daadwerkelijk in de originele tekst staat en kun je de volgende twee woorden invullen, bijvoorbeeld:
-
-“De zon kwam op in”
-
-Wanneer je hierna, op enter drukt, krijg je wederom te zien wat er daadwerkelijk in de originele tekst staat en kun je de volgende twee woorden invullen, bijvoorbeeld:
-
-“De zon kwam op in het oosten” 
+De teksten zullen dus woord voor woord worden weergegeven. Je begint met het eerste woord van de tekst. Op basis van dit eerste woord vul je het volgende woord in dat volgens jou aansluit bij de context van de tekst. Indien nodig (bijvoorbeeld aan het einde van een zin) kun je ook een leesteken toevoegen (zoals een punt, komma, vraagteken of uitroepteken) aan je antwoord. Om je antwoord te bevestigen, druk je op enter. Nadat je dit hebt gedaan zul je het woord dat daadwerkelijk in de tekst staat te zien krijgen. Je wordt dan gevraagd om het volgende woord (plus eventueel leesteken) in te vullen. 
