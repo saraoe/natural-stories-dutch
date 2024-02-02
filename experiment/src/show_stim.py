@@ -1,6 +1,7 @@
 """
 functions for showing stimuli in psychopy scripts
 """
+
 from psychopy import core, event, gui, visual
 import re
 import string
