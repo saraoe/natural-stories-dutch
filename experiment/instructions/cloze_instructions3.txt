@@ -4,14 +4,14 @@ Je kan bijvoorbeeld het volgende woord als eerste te zien krijgen:
 
 Aan de hand van dit woord vul je het volgende woord in, bijvoorbeeld:
 
-“De man”
+“De <i>man</i>”
 
 Wanneer je op enter drukt, krijg je het volgende woord dat daadwerkelijk in de originele tekst staat te zien en kun je het volgende woord invullen, bijvoorbeeld:
 
-“De zon kwam”
+“De zon <i>kwam</i>”
 
 Wanneer je hierna op enter drukt, krijg je wederom het volgende woord dat daadwerkelijk in de originele tekst staat te zien en kun je het volgende woord invullen, bijvoorbeeld:
 
-“De zon kwam op” 
+“De zon kwam <i>op</i>” 
 
 Je typt dus één woord (plus eventueel leesteken) waarvan je denkt dat het in de tekst past. Zorg ervoor dat je antwoorden zowel grammaticaal kloppen als aansluiten bij de context van de tekst. 

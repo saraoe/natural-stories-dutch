@@ -1,6 +1,7 @@
 """
 Define config used in the experiments
 """
+
 from psychopy import visual, core
 import os
 import numpy as np
@@ -55,8 +56,8 @@ class exp_config:
 
         # define stim
         self.text_stim = visual.TextStim(win=self.win)
-        self.smalltext_stim = visual.TextStim(win=self.win)
-        self.smalltext_stim.size = 0.05
+        self.smalltext_stim = visual.TextBox2(win=self.win, text="", letterHeight=0.05)
+        # self.smalltext_stim.size = 0.05
         self.fix_cross = visual.TextStim(win=self.win, text="+", alignText="center")
 
         # define keys

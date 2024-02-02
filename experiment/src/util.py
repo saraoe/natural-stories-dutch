@@ -1,6 +1,7 @@
 """
 Util functions
 """
+
 import re, os
 from glob import glob
 import pandas as pd
@@ -82,11 +83,18 @@ def get_punct_dict():
     return key_punct, shift_punct
 
 
-def make_lines(current_lines: List[str], word: str, maxchar: int):
+def remove_font(line: str):
+    return re.sub(r"</?[a-z]>", "", line)
+
+
+def make_lines(
+    current_lines: List[str], word: str, maxchar: int, last_word_font: str = "i"
+):
+    current_lines = [remove_font(l) for l in current_lines]
     line = current_lines[-1]
-    tmp_line = line + f" {word}"
-    if len(tmp_line) > maxchar:
-        lines = current_lines + [word]
+    tmp_line = line + f" <{last_word_font}>{word}</{last_word_font}>"
+    if len(tmp_line) > maxchar + 7:  # 7 char is for the font
+        lines = current_lines + [f"<{last_word_font}>{word}</{last_word_font}>"]
     else:
         lines = current_lines[:-1] + [tmp_line]
     return lines
