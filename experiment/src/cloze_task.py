@@ -153,6 +153,5 @@ if __name__ == "__main__":
 
     # experimental setup
     fullscreen = args.fullscreen
-    print(fullscreen)
 
     experiment(paths, fullscreen)

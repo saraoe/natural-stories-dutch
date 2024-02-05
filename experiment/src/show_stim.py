@@ -245,6 +245,7 @@ def type_response(
     win,
     last_word: bool,
     time_out: int,
+    possible_scroll: bool = False,
 ):
     # possible characters
     char = list(string.ascii_lowercase + string.digits)
@@ -258,10 +259,10 @@ def type_response(
         time_out_stim = visual.TextStim(win=win, text="", pos=(0, -0.85), color="pink")
         time_out_stim.size = 0.07
 
-    # scroll if there a more lines than can be viewed
+    # if there a more lines than can be viewed
     n_lines = len(lines)
+    scroll = None
     if n_lines <= max_lines:
-        scroll = None
         up_stim.fillColor = "darkgrey"
         down_stim.fillColor = "darkgrey"
     else:
@@ -270,13 +271,18 @@ def type_response(
     stopwatch.reset()
     while True:
         if isinstance(scroll, int) == True:
-            story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
-            up_stim.fillColor = "white"
-            down_stim.fillColor = "white"
-            if scroll == 0:
-                up_stim.fillColor = "darkgrey"
-            if scroll + max_lines == n_lines:
-                down_stim.fillColor = "darkgrey"
+            if possible_scroll:
+                story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
+                up_stim.fillColor = "white"
+                down_stim.fillColor = "white"
+                if scroll == 0:
+                    up_stim.fillColor = "darkgrey"
+                if scroll + max_lines == n_lines:
+                    down_stim.fillColor = "darkgrey"
+            else:
+                story_stim.text = "(...) " + "\n".join(
+                    lines[scroll : max_lines + scroll]
+                )
         else:
             story_stim.text = "\n".join(lines)
         text_stim.text = response_prefix + response
@@ -292,8 +298,9 @@ def type_response(
 
         text_stim.draw()
         story_stim.draw()
-        up_stim.draw()
-        down_stim.draw()
+        if possible_scroll:
+            up_stim.draw()
+            down_stim.draw()
         win.flip()
 
         if timed_out:
@@ -329,7 +336,7 @@ def type_response(
                 response += second_key.upper()
 
         # scroll through text
-        if isinstance(scroll, int) == True:
+        if possible_scroll and isinstance(scroll, int) == True:
             scroll = key_scroll(scroll, key, max_lines, n_lines)
 
     return response, rt
