@@ -57,7 +57,6 @@ class exp_config:
         # define stim
         self.text_stim = visual.TextStim(win=self.win)
         self.smalltext_stim = visual.TextBox2(win=self.win, text="", letterHeight=0.05)
-        # self.smalltext_stim.size = 0.05
         self.fix_cross = visual.TextStim(win=self.win, text="+", alignText="center")
 
         # define keys
@@ -100,10 +99,7 @@ class exp_config:
         # extra config only for cloze
         if cloze:
             self.storybox_stim = visual.TextBox2(
-                win=self.win,
-                text="",
-                pos=(0, 0.1),
-                size=[1, 0.9],
+                win=self.win, text="", pos=(0, 0.1), size=[1, 0.9], letterHeight=0.07
             )
             self.writebox_stim = visual.TextBox2(
                 win=self.win,
@@ -111,13 +107,14 @@ class exp_config:
                 pos=(0, -0.7),
                 size=[1, 0.2],
                 borderColor="darkgrey",
+                letterHeight=0.07,
             )
             self.up_arrow = make_arrows("up", self.storybox_stim, self.win)
             self.down_arrow = make_arrows("down", self.storybox_stim, self.win)
             # text size
             if fullscreen:
-                self.maxchar_pr_line = 90
-                self.max_lines = 10
+                self.maxchar_pr_line = 45
+                self.max_lines = 8
             else:
                 self.maxchar_pr_line = 35
                 self.max_lines = 7
