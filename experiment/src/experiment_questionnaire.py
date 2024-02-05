@@ -2,6 +2,7 @@
 Questionnaire in the beginning of experiment.
 Include Participant ID, demographics, and language ability 
 """
+
 from psychopy import core, gui
 from datetime import date
 import string
@@ -42,7 +43,9 @@ def participant_id_gui(exp: str):
         hand_d = {
             n: hand for n, hand in zip(range(4), ["left", "left", "right", "right"])
         }
-        rsvp_d = {n: rsvp_id for n, rsvp_id in zip(range(4), [1, 6, 1, 6])}
+        rsvp_d = {
+            n: rsvp_id for n, rsvp_id in zip(range(4), [1, 5, 1, 5])
+        }  # mijn heer + permafrost
     if exp == "cloze":
         # participant number for determining which texts
         lists = [[1, 3], [2, 5], [4, 6], [7, 8]]  # i.e., two texts in every list
