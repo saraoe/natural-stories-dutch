@@ -287,7 +287,7 @@ def type_response(
                 time_out_stim.text = "\n Time-out!"
                 timed_out = True
             elif current_time >= time_out / 2:
-                time_out_stim.text = "\n Haast je"
+                time_out_stim.text = "\n Probeer snel te antwoorden"
             time_out_stim.draw()
 
         text_stim.draw()
