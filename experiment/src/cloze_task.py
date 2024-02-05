@@ -3,7 +3,7 @@ Cloze task
 """
 
 import os, re, json
-from random import shuffle
+import argparse
 import pandas as pd
 from util import read_text, get_n_session, get_finished_texts
 from show_stim import show_text, show_text_from_path
@@ -137,6 +137,12 @@ def experiment(paths: dict, fullscreen: bool):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fullscreen", dest="fullscreen", action="store_true")
+    parser.add_argument("--no-fullscreen", dest="fullscreen", action="store_false")
+    parser.set_defaults(fullscreen=True)
+    args = parser.parse_args()
+
     # paths
     paths = {
         "questions": os.path.join("questions.xlsx"),
@@ -146,6 +152,7 @@ if __name__ == "__main__":
     }
 
     # experimental setup
-    fullscreen = False
+    fullscreen = args.fullscreen
+    print(fullscreen)
 
     experiment(paths, fullscreen)

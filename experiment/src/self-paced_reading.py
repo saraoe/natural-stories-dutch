@@ -2,9 +2,9 @@
 Self-paced reading experiment
 """
 
-from psychopy import data
 import os, json
 import re
+import argparse
 import pandas as pd
 from random import shuffle
 from util import read_text, get_n_session, get_finished_texts
@@ -195,6 +195,16 @@ def experiment(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fullscreen", dest="fullscreen", action="store_true")
+    parser.add_argument("--no-fullscreen", dest="fullscreen", action="store_false")
+    parser.add_argument("--eeg", dest="eeg", action="store_true")
+    parser.add_argument("--no-eeg", dest="eeg", action="store_false")
+    parser.set_defaults(fullscreen=True, eeg=True)
+    parser.add_argument("--keys", type=str, required=False, default="computer")
+    args = parser.parse_args()
+    print(args)
+
     # paths
     paths = {
         "instructions": os.path.join("instructions"),
@@ -213,8 +223,8 @@ if __name__ == "__main__":
     }
 
     # experimental device
-    keys = "computer"
-    fullscreen = False
-    eeg = True
+    fullscreen = args.fullscreen
+    keys = args.keys.lower()
+    eeg = args.eeg
 
     experiment(paths=paths, times=times, keys=keys, eeg=eeg, fullscreen=fullscreen)
