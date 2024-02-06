@@ -280,7 +280,7 @@ def type_response(
                 if scroll + max_lines == n_lines:
                     down_stim.fillColor = "darkgrey"
             else:
-                story_stim.text = "(...) " + "\n".join(
+                story_stim.text = "(...)" + "\n".join(
                     lines[scroll : max_lines + scroll]
                 )
         else:
