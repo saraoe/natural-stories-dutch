@@ -18,7 +18,7 @@ def get_name_from_path(path: str):
 
 def read_text(path: str, stories: bool = False, ignore_paths: List[str] = []):
     text_paths = glob(path)
-    text_path.sort()
+    text_paths.sort()
     for text_path in text_paths:
         if text_path in ignore_paths:
             continue
