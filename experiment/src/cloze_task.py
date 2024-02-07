@@ -31,7 +31,7 @@ def experiment(paths: dict, fullscreen: bool):
     cont_crash = True if tmp_file else None
 
     if tmp_file:
-        tmp_subfix = tmp_file["participant_subfix"]
+        tmp_subfix = tmp_file["participant_subfix"].replace("_s1", "")
         n_session = get_n_session(
             out_path=paths["out_data"], filename=f"cloze_{tmp_subfix}*.csv"
         )
