@@ -140,7 +140,6 @@ class exp_paths:
         if experiment == "spr":
             # instructions
             self.inst = os.path.join(paths["instructions"], "eeg_instruction*.txt")
-            self.inst.sort()
             self.rsvp_inst = os.path.join(
                 paths["instructions"], f"rsvp_instructions_{hand_condition}.txt"
             )
@@ -163,7 +162,6 @@ class exp_paths:
         if experiment == "cloze":
             # instructions
             self.inst = os.path.join(paths["instructions"], "cloze_instruction*.txt")
-            self.inst.sort()
             self.practice_text = os.path.join(
                 paths["stories"], f"practice_text_de_uil.txt"
             )
