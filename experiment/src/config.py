@@ -62,13 +62,16 @@ class exp_config:
         # define keys
         if keys == "computer":
             self.respond_key = "return"
+            self.respond_key_name = "enter"
             self.escape_keys = ["escape", "q"]
             self.question_keys = ["1", "2", "3", "4"]
 
         # define question stim
         self.qtext_stim = visual.TextStim(win=self.win)
         self.respond_stim = visual.TextStim(
-            win=self.win, pos=(0, -0.8), text=f"Press {self.respond_key} to respond"
+            win=self.win,
+            pos=(0, -0.8),
+            text=f"Druk op {self.respond_key_name} om te reageren",
         )
         self.scale_stim = visual.Slider(
             win=self.win,
@@ -77,7 +80,7 @@ class exp_config:
             ticks=(1, 2, 3, 4, 5),
             labels=[
                 "1\nIk heb er nog nooit van gehoord",
-                "2\nIk ben er een heel klein beetje bekend meel",
+                "2\nIk ben er een heel klein beetje bekend mee",
                 "3\nIk ben er tot op zekere hoogte bekend mee",
                 "4\nIk ben er bekend mee",
                 "5\nIk ben er heel bekend mee",
@@ -114,7 +117,7 @@ class exp_config:
             # text size
             if fullscreen:
                 self.maxchar_pr_line = 45
-                self.max_lines = 8
+                self.max_lines = 1
             else:
                 self.maxchar_pr_line = 35
                 self.max_lines = 7

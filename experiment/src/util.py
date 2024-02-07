@@ -54,7 +54,7 @@ def list_to_csv(df_list: List[dict], out_path: str, extra_cols: dict = {}):
 
 
 def get_scale_question(document_id: int, story_name: str):
-    story_name = story_name.replace("practice story", "")
+    story_name = story_name.replace("practice story ", "")
     story_name = story_name.title()
     if document_id in [1, 2, 11, 12]:
         q = f"In hoeverre was je bekend met het sprookje {story_name} dat werd verteld in de vorige tekst?"

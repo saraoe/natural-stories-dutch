@@ -19,6 +19,12 @@ def required_field(s: str):
     return s + "*"
 
 
+def participant_number_exists(n: int, out_path: str):
+    if glob.glob(os.path.join(out_path, f"participant_info_*_{n}_*.json")):
+        return True
+    return False
+
+
 def check_id(participant_id: str):
     if len(participant_id) != 5:
         return False
@@ -36,7 +42,7 @@ def check_list(response_list):
     return all([r != "-" for r in response_list])
 
 
-def participant_id_gui(exp: str):
+def participant_id_gui(exp: str, out_path: str):
     # conditions
     if exp == "spr":
         # participant number for determining hand and rsvp condition
@@ -53,16 +59,24 @@ def participant_id_gui(exp: str):
         doc_id_d = {n: ids for n, ids in enumerate(lists)}
 
     missing_n = True
+    new_participant_number = False
     while missing_n:
         dlg = gui.Dlg(title="Participantnummer")
         dlg.addText("Laat de onderzoeker je participantnummer invullen")
         dlg.addField(
             required_field("Participantnummer"), choices=["-"] + list(range(1, 200))
         )
+        if new_participant_number:
+            dlg.addText("\nFout: Participantnummer bestaat al", color="red")
         dlg.show()
 
         if dlg.OK:
             participant_number = dlg.data[0]
+
+            if participant_number_exists(participant_number, out_path):
+                new_participant_number = True
+                continue
+
             if check_list([participant_number]):
                 missing_n = False
                 participant_info = {"participant_number": participant_number}
@@ -346,7 +360,7 @@ def exp_questionnaire(
     gui_info = {}
 
     if participant_id:
-        gui_info = add_info(gui_info, participant_id_gui(exp))
+        gui_info = add_info(gui_info, participant_id_gui(exp, out_path))
 
     # use participant id to make subfix
     date_str = str(date.today())
