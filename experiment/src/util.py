@@ -91,7 +91,7 @@ def remove_font(line: str):
 
 def add_word(current_text: str, word: str, last_word_font: str = "i"):
     current_text = remove_font(current_text)
-    text = current_text + f" <{last_word_font}>{word}</{last_word_font}>"
+    text = current_text + f"<{last_word_font}>{word}</{last_word_font}> "
     return text
 
 
