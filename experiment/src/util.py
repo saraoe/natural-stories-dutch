@@ -89,29 +89,10 @@ def remove_font(line: str):
     return re.sub(r"</?[a-z]>", "", line)
 
 
-def make_lines(
-    current_lines: List[str], word: str, maxchar: int, last_word_font: str = "i"
-):
-    current_lines = [remove_font(l) for l in current_lines]
-    line = current_lines[-1]
-    tmp_line = line + f" <{last_word_font}>{word}</{last_word_font}>"
-    if len(tmp_line) > maxchar + 7:  # 7 char is for the font
-        lines = current_lines + [f"<{last_word_font}>{word}</{last_word_font}>"]
-    else:
-        lines = current_lines[:-1] + [tmp_line]
-    return lines
-
-
-def key_scroll(scroll: int, key: str, max_lines: int, n_lines: int):
-    if key == "up":
-        scroll -= 1
-        if scroll < 0:
-            scroll = 0
-    if key == "down":
-        scroll += 1
-        if max_lines + scroll > n_lines:
-            scroll = n_lines - max_lines
-    return scroll
+def add_word(current_text: str, word: str, last_word_font: str = "i"):
+    current_text = remove_font(current_text)
+    text = current_text + f" <{last_word_font}>{word}</{last_word_font}>"
+    return text
 
 
 def send_eeg_trigger(eeg_trigger: str):

@@ -39,7 +39,7 @@ class exp_config:
         hand_condition: str = None,
         eeg: bool = None,
     ) -> None:
-        self.win = visual.Window(color="grey", fullscr=fullscreen)
+        self.win = visual.Window(color="grey", fullscr=fullscreen, allowStencil=True)
         self.stopwatch = core.Clock()
 
         # eeg triggers
@@ -102,7 +102,15 @@ class exp_config:
         # extra config only for cloze
         if cloze:
             self.storybox_stim = visual.TextBox2(
-                win=self.win, text="", pos=(0, 0.1), size=[1, 0.9], letterHeight=0.07
+                win=self.win,
+                text="",
+                pos=(0, 0.1),
+                size=[1, 0.9],
+                letterHeight=0.07,
+                lineSpacing=1,
+                overflow="hidden",
+                alignment="bottom-left",
+                padding=0.07,
             )
             self.writebox_stim = visual.TextBox2(
                 win=self.win,
@@ -112,15 +120,6 @@ class exp_config:
                 borderColor="darkgrey",
                 letterHeight=0.07,
             )
-            self.up_arrow = make_arrows("up", self.storybox_stim, self.win)
-            self.down_arrow = make_arrows("down", self.storybox_stim, self.win)
-            # text size
-            if fullscreen:
-                self.maxchar_pr_line = 45
-                self.max_lines = 1
-            else:
-                self.maxchar_pr_line = 35
-                self.max_lines = 7
 
 
 class exp_paths:

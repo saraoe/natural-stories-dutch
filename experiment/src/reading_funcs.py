@@ -1,8 +1,9 @@
 """
 Functions for self-paced reading (SPR) and rapid series visual representation (RSVP)
 """
+
 import re
-from util import list_to_csv, make_lines, get_scale_question, send_eeg_trigger
+from util import list_to_csv, add_word, get_scale_question, send_eeg_trigger
 from show_stim import (
     show_blackscreen,
     show_fixation,
@@ -251,7 +252,7 @@ def cloze_task(
 ):
     paragraphs = story.split("\n\n")
 
-    lines = [""]
+    text = ""
     response, rt = "NA", "NA"
     for paragraph in paragraphs:
         words = re.split(r"[\s]", paragraph)
@@ -269,20 +270,17 @@ def cloze_task(
                 out_path=save_path,
                 extra_cols=extra_cols,
             )
-            lines = make_lines(lines, word, config.maxchar_pr_line)
+            text = add_word(text, word)
             response, rt = type_response(
                 config.storybox_stim,
-                lines,
-                config.max_lines,
-                config.up_arrow,
-                config.down_arrow,
+                text,
                 config.writebox_stim,
                 config.stopwatch,
                 config.win,
                 last_word=(word == words[-1]),
                 time_out=6,
             )
-        lines.append("\n")
+        text += "\n\n"
 
 
 def cloze_scale_question(
