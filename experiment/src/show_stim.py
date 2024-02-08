@@ -7,7 +7,7 @@ import re
 import string
 import pandas as pd
 from random import shuffle
-from util import key_scroll, get_punct_dict, read_text, send_eeg_trigger
+from util import get_punct_dict, read_text, send_eeg_trigger
 
 
 def show_fixation(stim, win, sec, escape_keys):
@@ -47,8 +47,8 @@ def show_text(
     return key
 
 
-def show_text_from_path(path: str, config, align_text: str = "center"):
-    config.smalltext_stim.alignText = align_text
+def show_text_from_path(path: str, config, align_text: str = "left"):
+    config.smalltext_stim.alignment = align_text
 
     for t in read_text(path):
         show_text(
@@ -236,16 +236,12 @@ def make_gui(fields: dict, title: str):
 
 def type_response(
     story_stim,
-    lines,
-    max_lines,
-    up_stim,
-    down_stim,
+    text,
     text_stim,
     stopwatch,
     win,
     last_word: bool,
     time_out: int,
-    possible_scroll: bool = False,
 ):
     # possible characters
     char = list(string.ascii_lowercase + string.digits)
@@ -253,38 +249,15 @@ def type_response(
 
     response_prefix = "Je antwoord: "
     response = ""
+    story_stim.text = text + "\n"
 
     if time_out:
         timed_out = False
         time_out_stim = visual.TextStim(win=win, text="", pos=(0, -0.85), color="pink")
         time_out_stim.size = 0.07
 
-    # if there a more lines than can be viewed
-    n_lines = len(lines)
-    scroll = None
-    if n_lines <= max_lines:
-        up_stim.fillColor = "darkgrey"
-        down_stim.fillColor = "darkgrey"
-    else:
-        scroll = n_lines - max_lines
-
     stopwatch.reset()
     while True:
-        if isinstance(scroll, int) == True:
-            if possible_scroll:
-                story_stim.text = "\n".join(lines[scroll : max_lines + scroll])
-                up_stim.fillColor = "white"
-                down_stim.fillColor = "white"
-                if scroll == 0:
-                    up_stim.fillColor = "darkgrey"
-                if scroll + max_lines == n_lines:
-                    down_stim.fillColor = "darkgrey"
-            else:
-                story_stim.text = "(...)" + "\n".join(
-                    lines[scroll : max_lines + scroll]
-                )
-        else:
-            story_stim.text = "\n".join(lines)
         text_stim.text = response_prefix + response
 
         if time_out:
@@ -298,9 +271,6 @@ def type_response(
 
         text_stim.draw()
         story_stim.draw()
-        if possible_scroll:
-            up_stim.draw()
-            down_stim.draw()
         win.flip()
 
         if timed_out:
@@ -334,9 +304,5 @@ def type_response(
                 response += shift_punct[second_key]
             elif second_key in char:
                 response += second_key.upper()
-
-        # scroll through text
-        if possible_scroll and isinstance(scroll, int) == True:
-            scroll = key_scroll(scroll, key, max_lines, n_lines)
 
     return response, rt

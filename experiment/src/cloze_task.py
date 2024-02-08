@@ -88,7 +88,7 @@ def experiment(paths: dict, fullscreen: bool):
 
     # show instruction:
     if not cont_crash:
-        show_text_from_path(full_paths.inst, config, align_text="left")
+        show_text_from_path(full_paths.inst, config)
 
     # start experiment
     for n, (story_name, story) in enumerate(stories):
