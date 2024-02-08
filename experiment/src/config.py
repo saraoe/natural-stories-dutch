@@ -71,7 +71,7 @@ class exp_config:
         self.respond_stim = visual.TextStim(
             win=self.win,
             pos=(0, -0.8),
-            text=f"Druk op {self.respond_key_name} om te reageren",
+            text=f"Druk op {self.respond_key_name} om verder te gaan",
         )
         self.scale_stim = visual.Slider(
             win=self.win,

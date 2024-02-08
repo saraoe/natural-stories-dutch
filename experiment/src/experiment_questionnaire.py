@@ -59,23 +59,30 @@ def participant_id_gui(exp: str, out_path: str):
         doc_id_d = {n: ids for n, ids in enumerate(lists)}
 
     missing_n = True
-    new_participant_number = False
+    used_participant_number = False
     while missing_n:
         dlg = gui.Dlg(title="Participantnummer")
         dlg.addText("Laat de onderzoeker je participantnummer invullen")
         dlg.addField(
-            required_field("Participantnummer"), choices=["-"] + list(range(1, 200))
+            required_field("Participantnummer"),
+            choices=["-"] + list(range(1, 200)),
         )
-        if new_participant_number:
-            dlg.addText("\nFout: Participantnummer bestaat al", color="red")
+        if used_participant_number:
+            dlg.addText(
+                "\nWaarschuwing: Participantnummer is al in gebruik", color="red"
+            )
         dlg.show()
 
         if dlg.OK:
             participant_number = dlg.data[0]
 
             if participant_number_exists(participant_number, out_path):
-                new_participant_number = True
-                continue
+                if (
+                    not used_participant_number
+                    or participant_number != used_participant_number
+                ):
+                    used_participant_number = participant_number
+                    continue
 
             if check_list([participant_number]):
                 missing_n = False
