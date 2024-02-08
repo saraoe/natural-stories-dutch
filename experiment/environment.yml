@@ -5,11 +5,11 @@ channels:
 dependencies:
   - python=3.8  # Specify your Python version here
   - pandas
-  - psychopy  # psychopy is available through conda-forge
   - pip
   - pip:
       # List any pip-only packages here. If your custom modules have dependencies not available in Conda, specify them here.
       # Example:
       # - some-pip-package==1.2.3
+      - psychopy==2023.2.3
 
 
