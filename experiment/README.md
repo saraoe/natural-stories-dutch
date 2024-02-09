@@ -22,9 +22,13 @@ Experiment for the Self-Paced Reading (SPR) EEG study.
 conda env create -f environment.yml
 ```
 
-## Run experiment
-To run the experiment, you first have to make a virtualenv with python version 3.8. Then you can run ```pip install -r requirements.txt``` to install the correct version of PsychoPy. 
+or create a python environment with python3.8 and pip install requirements.
 
+```
+pip install -r requirements.txt
+```
+
+## Run experiment
 To run the Self-Paced Reading experiment:
 ```
 conda activate expt            
