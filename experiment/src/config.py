@@ -82,11 +82,11 @@ class exp_config:
             self.storybox_stim = visual.TextBox2(
                 win=self.win,
                 text="",
-                pos=(0, 0),
+                pos=(0, 0.1),
                 size=[1.4, 1.2],
                 letterHeight=0.07,
                 lineSpacing=1,
-                overflow="hidden",
+                #overflow="hidden",
                 alignment="bottom-left",
                 padding=0.07,
             )
