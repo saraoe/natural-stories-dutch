@@ -27,12 +27,14 @@ def experiment(
 
     # questions
     questions_df = pd.read_excel(paths["questions"])
-    questions_df = questions_df[questions_df["Chosen question"] == "yes"]
     questions_df["story"] = questions_df["Story"].apply(
-        lambda s: re.sub("[^a-zA-Z\s]+", "", s).lower()
+        lambda s: re.sub("[^a-zA-Z\s]+", "", s).lower().replace(" practice text", "")
     )
     doc_ids = pd.Series(
         questions_df.document_id.values, index=questions_df.story
+    ).to_dict()
+    text_types = pd.Series(
+        questions_df.text_type.values, index=questions_df.story
     ).to_dict()
 
     # GUI information
@@ -121,6 +123,7 @@ def experiment(
                 story=practice_story["rsvp"],
                 story_name="practice story jorinde en joringel",
                 document_id=12,
+                text_type=text_types["jorinde en joringel"],
                 questions_df=questions_df,
                 config=config,
                 times=times,
@@ -141,6 +144,7 @@ def experiment(
                 story=story,
                 story_name=story_name,
                 document_id=document_id,
+                text_type=text_types[story_name.replace("practice story ", "")],
                 questions_df=questions_df,
                 config=config,
                 times=times,
@@ -155,6 +159,7 @@ def experiment(
                     story=practice_story["spr"],
                     story_name="practice story de uil",
                     document_id=11,
+                    text_type=text_types["de uil"],
                     questions_df=questions_df,
                     config=config,
                     times=times,
@@ -177,6 +182,7 @@ def experiment(
                 story=story,
                 story_name=story_name,
                 document_id=document_id,
+                text_type=text_types[story_name.replace("practice story ", "")],
                 questions_df=questions_df,
                 config=config,
                 times=times,

@@ -148,6 +148,7 @@ def rsvp(
 def text_questions(
     story_name: str,
     document_id: int,
+    text_type: str,
     questions_df,
     config,
     save_path: str,
@@ -155,7 +156,7 @@ def text_questions(
 ):
     extra_cols["story_name"] = story_name
 
-    scale_question = get_scale_question(document_id, story_name)
+    scale_question = get_scale_question(story_name, text_type)
     scale_response = show_scale(
         scale_question,
         qtext_stim=config.qtext_stim,
@@ -193,6 +194,7 @@ def spr_w_questions(
     story: str,
     story_name: str,
     document_id: int,
+    text_type: str,
     questions_df,
     config,
     times: dict,
@@ -212,6 +214,7 @@ def spr_w_questions(
     text_questions(
         story_name,
         document_id,
+        text_type,
         questions_df,
         config,
         full_paths.save_response,
@@ -223,6 +226,7 @@ def rsvp_w_questions(
     story: str,
     story_name: str,
     document_id: int,
+    text_type: str,
     questions_df,
     config,
     times: dict,
@@ -234,6 +238,7 @@ def rsvp_w_questions(
     text_questions(
         story_name,
         document_id,
+        text_type,
         questions_df,
         config,
         full_paths.save_response,
@@ -286,11 +291,12 @@ def cloze_task(
 def cloze_scale_question(
     document_id,
     story_name,
+    text_type,
     config,
     save_path,
     extra_cols,
 ):
-    scale_question = get_scale_question(document_id, story_name)
+    scale_question = get_scale_question(story_name, text_type)
     scale_response = show_scale(
         scale_question,
         qtext_stim=config.qtext_stim,

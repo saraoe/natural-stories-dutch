@@ -17,13 +17,16 @@ def experiment(paths: dict, fullscreen: bool):
     if not os.path.exists(paths["out_data"]):
         os.makedirs(paths["out_data"])
 
-    # get document_ids
+    # get document_ids and text_type
     questions_df = pd.read_excel(paths["questions"])
     questions_df["story"] = questions_df["Story"].apply(
-        lambda s: re.sub("[^a-zA-Z\s]+", "", s).lower()
+        lambda s: re.sub("[^a-zA-Z\s]+", "", s).lower().replace(" practice text", "")
     )
     doc_ids = pd.Series(
         questions_df.document_id.values, index=questions_df.story
+    ).to_dict()
+    text_types = pd.Series(
+        questions_df.text_type.values, index=questions_df.story
     ).to_dict()
 
     # GUI information
@@ -97,7 +100,6 @@ def experiment(paths: dict, fullscreen: bool):
 
         if n == 0:  # practice text
             show_text_from_path(full_paths.practice_info, config)
-            document_id = 11
         else:
             show_text(
                 f"{story_name.title()}\n\nTekst {n} van {n_stories}",
@@ -106,7 +108,7 @@ def experiment(paths: dict, fullscreen: bool):
                 config.escape_keys,
                 config.show_text_ending,
             )
-            document_id = doc_ids[story_name]
+        document_id = doc_ids[story_name.replace("practice story ", "")]
 
         cloze_task(
             story=story,
@@ -120,6 +122,7 @@ def experiment(paths: dict, fullscreen: bool):
         cloze_scale_question(
             document_id=document_id,
             story_name=story_name,
+            text_type=text_types[story_name.replace("practice story ", "")],
             config=config,
             save_path=full_paths.save_responses,
             extra_cols=gui_information,
