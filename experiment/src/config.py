@@ -86,7 +86,7 @@ class exp_config:
                 size=[1.4, 1.2],
                 letterHeight=0.07,
                 lineSpacing=1,
-                #overflow="hidden",
+                # overflow="hidden",
                 alignment="bottom-left",
                 padding=0.07,
             )
@@ -112,7 +112,9 @@ class exp_paths:
         # general paths
         self.tmp_path = os.path.join(paths["out_data"], f"tmp_{tmp_subfix}.json")
         self.practice_info = os.path.join(paths["instructions"], "practice_info.txt")
-        self.practice_end = os.path.join(paths["instructions"], "practice_end.txt")
+        self.practice_end = os.path.join(
+            paths["instructions"], f"practice_end_{experiment}.txt"
+        )
         self.pause = os.path.join(paths["instructions"], "pause.txt")
         self.end = os.path.join(paths["instructions"], "end.txt")
         self.stories = os.path.join(paths["stories"], "*.txt")
