@@ -22,7 +22,7 @@ Experiment for the Self-Paced Reading (SPR) EEG study.
 conda env create -f environment.yml
 ```
 
-or create a python environment with python3.8 and pip install requirements.
+or create a python environment with Python 3.8.1 and pip install requirements.
 
 ```
 pip install -r requirements.txt
