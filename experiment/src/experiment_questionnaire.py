@@ -379,7 +379,7 @@ def exp_questionnaire(
     # check if tmp_file exists
     tmp_path = existing_gui_info(
         out_path,
-        subfix=save_subfix,
+        subfix=save_subfix.replace("_s1", ""),
     )
     if tmp_path:
         with open(tmp_path) as f:

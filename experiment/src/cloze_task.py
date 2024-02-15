@@ -41,7 +41,7 @@ def experiment(paths: dict, fullscreen: bool):
         participant_subfix = f"{tmp_subfix}_s{n_session}"
     else:
         participant_subfix = gui_information["participant_subfix"]
-        tmp_subfix = participant_subfix
+        tmp_subfix = participant_subfix.replace("_s1", "")
 
     # defining a window
     config = exp_config(fullscreen, keys="computer", cloze=True)
