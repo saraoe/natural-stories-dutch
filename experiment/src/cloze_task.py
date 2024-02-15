@@ -138,6 +138,9 @@ def experiment(paths: dict, fullscreen: bool):
     # show ending
     show_text_from_path(full_paths.end, config, align_text="left")
 
+    # remove tmp file
+    os.remove(full_paths.tmp_path)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

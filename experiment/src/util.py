@@ -33,7 +33,7 @@ def read_text(path: str, stories: bool = False, ignore_paths: List[str] = []):
 
 def get_n_session(out_path: str, filename: str):
     try:
-        latest_file = glob(os.path.join(out_path, filename))[-1]
+        latest_file = glob(os.path.join(out_path, filename)).sort()[-1]
         return int(latest_file.split(".")[-2][-1]) + 1
     except IndexError:
         return 1
