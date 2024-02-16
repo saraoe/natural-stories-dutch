@@ -212,6 +212,7 @@ def show_scale(
         response = int(key)
         scale_stim.markerPos = response
         respondtext.draw()
+    return response
 
 
 def fix_name(name: str):
