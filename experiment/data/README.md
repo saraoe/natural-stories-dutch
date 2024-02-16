@@ -77,6 +77,7 @@ The main **cloze** file includes the following columns:
 - response: (str) the two words the participant responded with (seperated by whitespace)
 - story_name: (str) name of the story
 - correct_word: (str) the correct word (i.e. if the participant responded correctly, this should correpond with the first of the words in the *response* column)
+- number_word: (int) Number of the word in the story
 - participant_id: (int)
 
 The **responses** files includes the following columns:

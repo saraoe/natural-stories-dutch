@@ -259,9 +259,11 @@ def cloze_task(
 
     text = ""
     response, rt = "NA", "NA"
+    n_word = 0
     for paragraph in paragraphs:
         words = re.split(r"[\s]", paragraph)
         for word in words:
+            n_word += 1
             list_to_csv(
                 df_list=[
                     {
@@ -270,6 +272,7 @@ def cloze_task(
                         "correct_word": word,
                         "document_id": document_id,
                         "story_name": story_name,
+                        "number_word": n_word,
                     }
                 ],
                 out_path=save_path,
