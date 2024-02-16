@@ -41,6 +41,10 @@ def get_n_session(out_path: str, filename: str):
         return 1
 
 
+def story_name_from_id(doc_ids: dict, doc_id):
+    return list(doc_ids.keys())[list(doc_ids.values()).index(doc_id)]
+
+
 def get_finished_texts(out_path: str, filename: str):
     finished_texts = []
     for file in glob(os.path.join(out_path, filename)):

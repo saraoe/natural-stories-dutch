@@ -5,7 +5,7 @@ Cloze task
 import os, re, json
 import argparse
 import pandas as pd
-from util import read_text, get_n_session, get_finished_texts
+from util import read_text, get_n_session, get_finished_texts, story_name_from_id
 from show_stim import show_text, show_text_from_path
 from experiment_questionnaire import exp_questionnaire
 from reading_funcs import cloze_task, cloze_scale_question
@@ -66,9 +66,8 @@ def experiment(paths: dict, fullscreen: bool):
             )
         }
         story_name_include = [
-            name
-            for name in doc_ids
-            if doc_ids[name] in gui_information["included_documents"]
+            story_name_from_id(doc_ids, doc_id)
+            for doc_id in gui_information["included_documents"]
         ]
         stories = [all_stories[s] for s in story_name_include]
         n_stories = len(stories)
