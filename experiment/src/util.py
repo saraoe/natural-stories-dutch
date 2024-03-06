@@ -6,6 +6,7 @@ import re, os
 from glob import glob
 import pandas as pd
 from typing import List
+from psychopy import core
 
 
 def get_name_from_path(path: str):
@@ -101,8 +102,12 @@ def add_word(current_text: str, word: str, last_word_font: str = "i"):
     return text
 
 
-def send_eeg_trigger(eeg, eeg_trigger: str):
-    if eeg:
-        pass
+def send_eeg_trigger(config, eeg_trigger: str, reset=False):
+    if config.eeg:
+        config.port.setData(eeg_trigger)
     else:
         print(eeg_trigger)
+
+    if reset:
+        core.wait(config.trigger_wait)
+        send_eeg_trigger(config, 0)

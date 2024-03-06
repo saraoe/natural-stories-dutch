@@ -26,11 +26,11 @@ def spr(
     extra_cols: dict,
 ):
     document_trigger = config.trigger_documents[document_id]
-    send_eeg_trigger(config.eeg, document_trigger)
+    send_eeg_trigger(config, document_trigger, reset=True)
 
     paragraphs = re.split("\n\n", story)
     for paragraph in paragraphs:
-        send_eeg_trigger(config.eeg, config.trigger_paragraph)
+        send_eeg_trigger(config, config.trigger_paragraph)
 
         show_fixation(
             config.fix_cross,
@@ -38,6 +38,7 @@ def spr(
             sec=times["fixation"],
             escape_keys=config.escape_keys,
         )
+        send_eeg_trigger(config, 0)
 
         words = re.split(r"[\s]", paragraph)
         for n, word in enumerate(words):
@@ -51,7 +52,7 @@ def spr(
                 config.win,
                 config.stopwatch,
                 config.escape_keys,
-                config.eeg,
+                config,
                 word_trigger,
             )
             list_to_csv(
@@ -83,17 +84,12 @@ def rsvp(
     save_path: str,
     extra_cols: dict,
 ):
-    if config.eeg:
-        document_trigger = config.trigger_documents[document_id]
-        send_eeg_trigger(document_trigger)
-    else:
-        document_trigger = None
-        word_trigger = None
+    document_trigger = config.trigger_documents[document_id]
+    send_eeg_trigger(config, document_trigger)
 
     paragraphs = re.split("\n\n", story)
     for paragraph in paragraphs:
-        if config.eeg:
-            send_eeg_trigger(config.trigger_paragraph)
+        send_eeg_trigger(config, config.trigger_paragraph)
 
         show_fixation(
             config.fix_cross,
@@ -118,7 +114,7 @@ def rsvp(
                 config.text_stim,
                 config.win,
                 config.escape_keys,
-                config.eeg,
+                config,
                 word_trigger,
             )
             list_to_csv(
@@ -148,6 +144,7 @@ def text_questions(
     save_path: str,
     extra_cols: dict,
 ):
+    send_eeg_trigger(config, config.trigger_questions, reset=True)
     extra_cols["story_name"] = story_name
 
     scale_question = get_scale_question(story_name, text_type)

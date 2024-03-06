@@ -7,7 +7,7 @@ import re
 import argparse
 import pandas as pd
 from random import shuffle
-from util import read_text, get_n_session, get_finished_texts
+from util import read_text, get_n_session, get_finished_texts, send_eeg_trigger
 from show_stim import show_text_from_path, show_text
 from experiment_questionnaire import exp_questionnaire
 from reading_funcs import spr_w_questions, rsvp_w_questions
@@ -104,6 +104,7 @@ def experiment(
 
     # experiment start
     spr_practice = False if cont_crash else True
+    send_eeg_trigger(config, config.trigger_exp_start, reset=True)
     for n, (story_name, story) in enumerate(stories, start=1):
         if cont_crash and story_name in finished_texts:
             continue
@@ -191,6 +192,7 @@ def experiment(
             )
 
         # pause
+        send_eeg_trigger(config, config.trigger_pause, reset=True)
         show_text_from_path(full_paths.pause, config)
 
     # show ending

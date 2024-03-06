@@ -61,19 +61,20 @@ def show_text_from_path(path: str, config, align_text: str = "left"):
 
 
 def show_word(
-    word: str, text_stim, win, stopwatch, escape_keys, eeg=False, eeg_trigger=None
+    word: str, text_stim, win, stopwatch, escape_keys, config=None, eeg_trigger=None
 ):
     text_stim.text = word
     text_stim.draw()
     win.flip()
     if eeg_trigger:
-        send_eeg_trigger(eeg, eeg_trigger)
+        send_eeg_trigger(config, eeg_trigger)
     stopwatch.reset()
     key = event.waitKeys()[0]
     rt = stopwatch.getTime()
     if key in escape_keys:
         win.close()
         core.quit()
+    send_eeg_trigger(config, 0)
     return rt
 
 
@@ -84,7 +85,7 @@ def show_word_fixed(
     text_stim,
     win,
     escape_keys,
-    eeg=False,
+    config=None,
     eeg_trigger=None,
 ):
     char_time = pr_char_sec * len(word)
@@ -93,13 +94,14 @@ def show_word_fixed(
     text_stim.draw()
     win.flip()
     if eeg_trigger:
-        send_eeg_trigger(eeg, eeg_trigger)
+        send_eeg_trigger(config, eeg_trigger)
     core.wait(sec)
 
     pressed_escape_keys = event.getKeys(keyList=escape_keys)
     if pressed_escape_keys:
         win.close()
         core.quit()
+    send_eeg_trigger(config, 0)
     return sec
 
 
