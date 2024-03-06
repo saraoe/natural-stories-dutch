@@ -101,5 +101,8 @@ def add_word(current_text: str, word: str, last_word_font: str = "i"):
     return text
 
 
-def send_eeg_trigger(eeg_trigger: str):
-    print(eeg_trigger)
+def send_eeg_trigger(eeg, eeg_trigger: str):
+    if eeg:
+        pass
+    else:
+        print(eeg_trigger)

@@ -25,17 +25,12 @@ def spr(
     save_path: str,
     extra_cols: dict,
 ):
-    if config.eeg:
-        document_trigger = config.trigger_documents[document_id]
-        send_eeg_trigger(document_trigger)
-    else:
-        document_trigger = None
-        word_trigger = None
+    document_trigger = config.trigger_documents[document_id]
+    send_eeg_trigger(config.eeg, document_trigger)
 
     paragraphs = re.split("\n\n", story)
     for paragraph in paragraphs:
-        if config.eeg:
-            send_eeg_trigger(config.trigger_paragraph)
+        send_eeg_trigger(config.eeg, config.trigger_paragraph)
 
         show_fixation(
             config.fix_cross,
@@ -46,12 +41,9 @@ def spr(
 
         words = re.split(r"[\s]", paragraph)
         for n, word in enumerate(words):
-            if config.eeg:
-                word_trigger = (
-                    config.trigger_word_even
-                    if n % 2 == 0
-                    else config.trigger_word_uneven
-                )
+            word_trigger = (
+                config.trigger_word_even if n % 2 == 0 else config.trigger_word_uneven
+            )
 
             rt = show_word(
                 word,
@@ -59,6 +51,7 @@ def spr(
                 config.win,
                 config.stopwatch,
                 config.escape_keys,
+                config.eeg,
                 word_trigger,
             )
             list_to_csv(
@@ -125,6 +118,7 @@ def rsvp(
                 config.text_stim,
                 config.win,
                 config.escape_keys,
+                config.eeg,
                 word_trigger,
             )
             list_to_csv(

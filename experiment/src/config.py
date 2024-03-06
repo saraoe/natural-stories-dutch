@@ -20,15 +20,14 @@ class exp_config:
 
         # eeg triggers
         self.eeg = eeg
-        if eeg:
-            self.trigger_word_even = "word even"
-            self.trigger_word_uneven = "word uneven"
-            self.trigger_paragraph = "paragraph"
-            doc_ids = range(1, 13)  # ten texts and two practice texts
-            doc_triggers = [f"document {i}" for i in doc_ids]
-            self.trigger_documents = {
-                doc_id: trigger for doc_id, trigger in zip(doc_ids, doc_triggers)
-            }
+        self.trigger_word_even = "word even"
+        self.trigger_word_uneven = "word uneven"
+        self.trigger_paragraph = "paragraph"
+        doc_ids = range(1, 13)  # ten texts and two practice texts
+        doc_triggers = [f"document {i}" for i in doc_ids]
+        self.trigger_documents = {
+            doc_id: trigger for doc_id, trigger in zip(doc_ids, doc_triggers)
+        }
 
         # define stim
         self.text_stim = visual.TextStim(win=self.win)
