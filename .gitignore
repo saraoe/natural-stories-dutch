@@ -1,6 +1,7 @@
 *.pyc
 .vscode/*
 pandoc*
+pkgs/*
 
 stories/*
 texts/*.txt
