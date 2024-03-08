@@ -2,7 +2,7 @@
 Define config used in the experiments
 """
 
-from psychopy import visual, core
+from psychopy import visual, core, parallel
 import os
 
 
@@ -20,15 +20,24 @@ class exp_config:
 
         # eeg triggers
         self.eeg = eeg
+        self.trigger_exp_start = "exp start"
+        self.trigger_pause = "pause"
+        self.trigger_questions = "questions"
+        self.trigger_word_even = "word even"
+        self.trigger_word_uneven = "word uneven"
+        self.trigger_paragraph = "paragraph"
+        doc_ids = range(1, 13)  # ten texts and two practice texts
+        doc_triggers = [f"document {i}" for i in doc_ids]
+        self.trigger_documents = {
+            doc_id: trigger for doc_id, trigger in zip(doc_ids, doc_triggers)
+        }
+        self.trigger_wait = 0.45  # in sec
+        # parallel port
         if eeg:
-            self.trigger_word_even = "word even"
-            self.trigger_word_uneven = "word uneven"
-            self.trigger_paragraph = "paragraph"
-            doc_ids = range(1, 13)  # ten texts and two practice texts
-            doc_triggers = [f"document {i}" for i in doc_ids]
-            self.trigger_documents = {
-                doc_id: trigger for doc_id, trigger in zip(doc_ids, doc_triggers)
-            }
+            self.port = parallel.ParallelPort(address="/dev/parport0")
+            self.port.setData(4)
+            self.port.readPin(2)
+            self.port.setPin(2, 1)
 
         # define stim
         self.text_stim = visual.TextStim(win=self.win)
