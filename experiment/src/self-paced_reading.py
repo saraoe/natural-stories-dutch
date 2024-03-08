@@ -49,7 +49,7 @@ def experiment(
         participant_subfix = f"{tmp_subfix}_s{n_session}"
     else:
         participant_subfix = gui_information["participant_subfix"]
-        tmp_subfix = participant_subfix
+        tmp_subfix = participant_subfix.replace("_s1", "")
 
     # config
     config = exp_config(
