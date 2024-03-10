@@ -100,12 +100,9 @@ def rsvp(
 
         words = re.split(r"[\s]", paragraph)
         for n, word in enumerate(words):
-            if config.eeg:
-                word_trigger = (
-                    config.trigger_word_even
-                    if n % 2 == 0
-                    else config.trigger_word_uneven
-                )
+            word_trigger = (
+                config.trigger_word_even if n % 2 == 0 else config.trigger_word_uneven
+            )
 
             word_time = show_word_fixed(
                 word,
