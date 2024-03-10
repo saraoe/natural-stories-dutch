@@ -20,14 +20,14 @@ class exp_config:
 
         # eeg triggers
         self.eeg = eeg
-        self.trigger_exp_start = "exp start"
-        self.trigger_pause = "pause"
-        self.trigger_questions = "questions"
-        self.trigger_word_even = "word even"
-        self.trigger_word_uneven = "word uneven"
-        self.trigger_paragraph = "paragraph"
+        self.trigger_exp_start = 201
+        self.trigger_pause = 202
+        self.trigger_questions = 203
+        self.trigger_word_even = 102
+        self.trigger_word_uneven = 101
+        self.trigger_paragraph = 103
         doc_ids = range(1, 13)  # ten texts and two practice texts
-        doc_triggers = [f"document {i}" for i in doc_ids]
+        doc_triggers = [i for i in doc_ids]
         self.trigger_documents = {
             doc_id: trigger for doc_id, trigger in zip(doc_ids, doc_triggers)
         }
