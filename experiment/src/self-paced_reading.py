@@ -27,6 +27,9 @@ def experiment(
 
     # questions
     questions_df = pd.read_excel(paths["questions"])
+    questions_df = questions_df[
+        questions_df["Chosen question"].apply(lambda x: x.lower()) == "yes"
+    ]
     questions_df["story"] = questions_df["Story"].apply(
         lambda s: re.sub("[^a-zA-Z\s]+", "", s).lower().replace(" practice text", "")
     )
