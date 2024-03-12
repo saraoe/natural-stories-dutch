@@ -64,6 +64,7 @@ def spr(
                         "document_id": document_id,
                         "document_trigger": document_trigger,
                         "word": word,
+                        "word_n": n,
                         "word_trigger": word_trigger,
                     }
                 ],
@@ -123,6 +124,7 @@ def rsvp(
                         "document_id": document_id,
                         "document_trigger": document_trigger,
                         "word": word,
+                        "word_n": n,
                         "word_trigger": word_trigger,
                     }
                 ],

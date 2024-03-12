@@ -28,6 +28,7 @@ The **reation times** file include the following columns:
 - document_id: (int)
 - document_trigger: (str) eeg trigger for the unique document
 - word: (str)
+- word_n: (int) word number
 - word_trigger: (str) eeg trigger sent for the word (alternating)
 - participant_id: (int)
 
