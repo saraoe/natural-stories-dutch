@@ -59,7 +59,7 @@ def spr(
                 df_list=[
                     {
                         "reading_type": "SPR",
-                        "reation_time": rt,
+                        "reaction_time": rt,
                         "story_name": story_name,
                         "document_id": document_id,
                         "document_trigger": document_trigger,
@@ -119,7 +119,7 @@ def rsvp(
                 df_list=[
                     {
                         "reading_type": "RSVP",
-                        "reation_time": word_time,
+                        "reaction_time": word_time,
                         "story_name": story_name,
                         "document_id": document_id,
                         "document_trigger": document_trigger,
