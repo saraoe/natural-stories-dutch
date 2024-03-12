@@ -11,11 +11,11 @@ from util import get_punct_dict, read_text, send_eeg_trigger
 
 
 def show_fixation(stim, win, sec, escape_keys):
-    stim.fontColor = "darkgrey"
+    stim.foreColor = "darkgrey"
     stim.draw()
     win.flip()
     core.wait(sec)
-    stim.fontColor = "white"
+    stim.foreColor = "white"
     stim.draw()
     win.flip()
     key = event.waitKeys()[0]
