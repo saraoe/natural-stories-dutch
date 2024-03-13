@@ -42,6 +42,9 @@ def spr(
 
         words = re.split(r"[\s]", paragraph)
         for n, word in enumerate(words):
+            if not word:  # if word is an empty str
+                continue
+
             word_trigger = (
                 config.trigger_word_even if n % 2 == 0 else config.trigger_word_uneven
             )
@@ -73,7 +76,9 @@ def spr(
             )
 
             show_blackscreen(config.win, sec=times["blackscreen_short"])
-    show_blackscreen(config.win, sec=times["blackscreen_long"])
+    show_blackscreen(
+        config.win, sec=(times["blackscreen_long"] - times["blackscreen_short"])
+    )
 
 
 def rsvp(
@@ -101,6 +106,9 @@ def rsvp(
 
         words = re.split(r"[\s]", paragraph)
         for n, word in enumerate(words):
+            if not word:  # if word is an empty str
+                continue
+
             word_trigger = (
                 config.trigger_word_even if n % 2 == 0 else config.trigger_word_uneven
             )
@@ -131,7 +139,10 @@ def rsvp(
                 out_path=save_path,
                 extra_cols=extra_cols,
             )
-            show_blackscreen(config.win, times["rsvp_min"])
+            show_blackscreen(config.win, sec=times["blackscreen_short"])
+    show_blackscreen(
+        config.win, sec=(times["blackscreen_long"] - times["blackscreen_short"])
+    )
 
 
 def text_questions(
