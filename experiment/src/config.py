@@ -12,7 +12,6 @@ class exp_config:
         fullscreen: bool,
         keys: str,
         cloze: bool = None,
-        hand_condition: str = None,
         eeg: bool = None,
     ) -> None:
         self.win = visual.Window(color="grey", fullscr=fullscreen, allowStencil=True)
@@ -77,14 +76,7 @@ class exp_config:
         self.scale_keys.append(self.respond_key)
 
         # button press text
-        if hand_condition:
-            # hand condition
-            hand_dutch = "linker" if hand_condition == "left" else "rechter"
-            self.show_text_ending = (
-                f"(Druk op de knop met je {hand_dutch}hand om door te gaan!)"
-            )
-        else:
-            self.show_text_ending = "(Druk op een toets om door te gaan!)"
+        self.show_text_ending = "(Druk op een toets om door te gaan!)"
 
         # extra config only for cloze
         if cloze:
@@ -116,7 +108,6 @@ class exp_paths:
         experiment: str,
         save_subfix: str,
         tmp_subfix: str,
-        hand_condition: str = None,
     ) -> None:
         # general paths
         self.tmp_path = os.path.join(paths["out_data"], f"tmp_{tmp_subfix}.json")
@@ -132,14 +123,12 @@ class exp_paths:
             # instructions
             self.inst = os.path.join(paths["instructions"], "eeg_instruction*.txt")
             self.rsvp_inst = os.path.join(
-                paths["instructions"], f"rsvp_instructions_{hand_condition}.txt"
+                paths["instructions"], "rsvp_instructions.txt"
             )
             self.practice_text_rsvp = os.path.join(
                 paths["stories"], f"practice_text_jorinde_en_joringel.txt"
             )
-            self.spr_inst = os.path.join(
-                paths["instructions"], f"spr_instructions_{hand_condition}.txt"
-            )
+            self.spr_inst = os.path.join(paths["instructions"], "spr_instructions.txt")
             self.practice_text_spr = os.path.join(
                 paths["stories"], f"practice_text_de_uil.txt"
             )

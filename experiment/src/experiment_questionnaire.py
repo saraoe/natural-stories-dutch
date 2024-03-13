@@ -45,12 +45,9 @@ def check_list(response_list):
 def participant_id_gui(exp: str, out_path: str):
     # conditions
     if exp == "spr":
-        # participant number for determining hand and rsvp condition
-        hand_d = {
-            n: hand for n, hand in zip(range(4), ["left", "left", "right", "right"])
-        }
+        # participant number for determining rsvp condition
         rsvp_d = {
-            n: rsvp_id for n, rsvp_id in zip(range(4), [1, 5, 1, 5])
+            n: rsvp_id for n, rsvp_id in zip(range(2), [1, 5])
         }  # mijn heer + permafrost
     if exp == "cloze":
         # participant number for determining which texts
@@ -89,9 +86,8 @@ def participant_id_gui(exp: str, out_path: str):
                 participant_info = {"participant_number": participant_number}
 
                 if exp == "spr":
-                    participant_info["hand"] = hand_d[participant_number % 4]
                     participant_info["rsvp_document_id"] = rsvp_d[
-                        participant_number % 4
+                        participant_number % len(rsvp_d)
                     ]
                 if exp == "cloze":
                     participant_info["included_documents"] = doc_id_d[

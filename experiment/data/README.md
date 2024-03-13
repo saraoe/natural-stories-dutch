@@ -45,7 +45,6 @@ The **response** file are the responses to the questions in the ```../questions.
 The **participant information** file include the following information:
 - Participant identification:
     - participant_number: (int) number assigned to the participant by the experimenter, that determines hand and RSVP text 
-    - hand: (str) which hand the participant was instructed to use (i.e., left or right) 
     - rsvp_document_id: (int) document id of the the text showed in RSVP 
     - participant_id: (str) 
     - participant_subfix: (str) subfix of all files related to this participant

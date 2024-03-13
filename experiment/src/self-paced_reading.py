@@ -55,15 +55,12 @@ def experiment(
         tmp_subfix = participant_subfix.replace("_s1", "")
 
     # config
-    config = exp_config(
-        fullscreen, keys, hand_condition=gui_information["hand"], eeg=eeg
-    )
+    config = exp_config(fullscreen, keys, eeg=eeg)
     full_paths = exp_paths(
         paths,
         experiment="spr",
         save_subfix=participant_subfix,
         tmp_subfix=tmp_subfix,
-        hand_condition=gui_information["hand"],
     )
 
     # read in stories
