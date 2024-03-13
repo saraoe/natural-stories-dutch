@@ -29,7 +29,7 @@ def spr(
     send_eeg_trigger(config, document_trigger, reset=True)
 
     paragraphs = re.split("\n\n", story)
-    for paragraph in paragraphs:
+    for m, paragraph in enumerate(paragraphs):
         send_eeg_trigger(config, config.trigger_paragraph)
 
         show_fixation(
@@ -68,6 +68,7 @@ def spr(
                         "document_trigger": document_trigger,
                         "word": word,
                         "word_n": n,
+                        "paragraph_n": m,
                         "word_trigger": word_trigger,
                     }
                 ],
@@ -94,7 +95,7 @@ def rsvp(
     send_eeg_trigger(config, document_trigger)
 
     paragraphs = re.split("\n\n", story)
-    for paragraph in paragraphs:
+    for m, paragraph in enumerate(paragraphs):
         send_eeg_trigger(config, config.trigger_paragraph)
 
         show_fixation(
@@ -133,6 +134,7 @@ def rsvp(
                         "document_trigger": document_trigger,
                         "word": word,
                         "word_n": n,
+                        "paragraph_n": m,
                         "word_trigger": word_trigger,
                     }
                 ],
