@@ -157,7 +157,8 @@ def text_questions(
     extra_cols: dict,
 ):
     send_eeg_trigger(config, config.trigger_questions, reset=True)
-    extra_cols["story_name"] = story_name
+    question_extra_cols = extra_cols.copy()
+    question_extra_cols["story_name"] = story_name
 
     scale_question = get_scale_question(story_name, text_type)
     scale_response = show_scale(
@@ -179,7 +180,7 @@ def text_questions(
             }
         ],
         out_path=save_path,
-        extra_cols=extra_cols,
+        extra_cols=question_extra_cols,
     )
     qs = questions_df[questions_df["document_id"] == document_id]
     q_responses = show_questions(
@@ -190,7 +191,7 @@ def text_questions(
         config.escape_keys,
         config.question_keys + [config.respond_key],
     )
-    list_to_csv(df_list=q_responses, out_path=save_path, extra_cols=extra_cols)
+    list_to_csv(df_list=q_responses, out_path=save_path, extra_cols=question_extra_cols)
 
 
 def spr_w_questions(
