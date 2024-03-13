@@ -138,6 +138,9 @@ class exp_paths:
             self.save_response = os.path.join(
                 paths["out_data"], f"responses_{save_subfix}.csv"
             )
+            for path in [self.save_rt, self.save_response]:
+                if os.path.exists(path):
+                    os.remove(path)
 
         if experiment == "cloze":
             # instructions
@@ -153,3 +156,6 @@ class exp_paths:
             self.save_responses = os.path.join(
                 paths["out_data"], f"responses_{save_subfix}.csv"
             )
+            for path in [self.save_cloze, self.save_responses]:
+                if os.path.exists(path):
+                    os.remove(path)
