@@ -1,10 +1,10 @@
 *.pyc
 .vscode/*
 pandoc*
-pkgs/*
 
 stories/*
 texts/*.txt
 
 experiment/data/cloze/*
 experiment/data/spr/*
+experiment/src/test.py
