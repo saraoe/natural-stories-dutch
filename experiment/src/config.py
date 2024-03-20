@@ -112,9 +112,6 @@ class exp_paths:
         # general paths
         self.tmp_path = os.path.join(paths["out_data"], f"tmp_{tmp_subfix}.json")
         self.practice_info = os.path.join(paths["instructions"], "practice_info.txt")
-        self.practice_end = os.path.join(
-            paths["instructions"], f"practice_end_{experiment}.txt"
-        )
         self.pause = os.path.join(paths["instructions"], "pause.txt")
         self.end = os.path.join(paths["instructions"], "end.txt")
         self.stories = os.path.join(paths["stories"], "*.txt")
@@ -125,10 +122,16 @@ class exp_paths:
             self.rsvp_inst = os.path.join(
                 paths["instructions"], "rsvp_instructions.txt"
             )
+            self.practice_end_rsvp = os.path.join(
+                paths["instructions"], f"practice_end_rsvp.txt"
+            )
             self.practice_text_rsvp = os.path.join(
                 paths["stories"], f"practice_text_jorinde_en_joringel.txt"
             )
             self.spr_inst = os.path.join(paths["instructions"], "spr_instructions.txt")
+            self.practice_end_rsvp = os.path.join(
+                paths["instructions"], f"practice_end_spr.txt"
+            )
             self.practice_text_spr = os.path.join(
                 paths["stories"], f"practice_text_de_uil.txt"
             )
@@ -145,6 +148,9 @@ class exp_paths:
         if experiment == "cloze":
             # instructions
             self.inst = os.path.join(paths["instructions"], "cloze_instruction*.txt")
+            self.practice_end = os.path.join(
+                paths["instructions"], "practice_end_cloze.txt"
+            )
             self.practice_text = os.path.join(
                 paths["stories"], f"practice_text_de_uil.txt"
             )
