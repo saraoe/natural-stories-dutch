@@ -129,7 +129,7 @@ class exp_paths:
                 paths["stories"], f"practice_text_jorinde_en_joringel.txt"
             )
             self.spr_inst = os.path.join(paths["instructions"], "spr_instructions.txt")
-            self.practice_end_rsvp = os.path.join(
+            self.practice_end_spr = os.path.join(
                 paths["instructions"], f"practice_end_spr.txt"
             )
             self.practice_text_spr = os.path.join(
