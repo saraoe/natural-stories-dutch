@@ -76,9 +76,11 @@ def spr(
                 extra_cols=extra_cols,
             )
 
-            show_blackscreen(config.win, sec=times["blackscreen_short"])
+            show_blackscreen(config.win, sec=times["blackscreen_short"], config=config)
     show_blackscreen(
-        config.win, sec=(times["blackscreen_long"] - times["blackscreen_short"])
+        config.win,
+        sec=(times["blackscreen_long"] - times["blackscreen_short"]),
+        config=config,
     )
 
 
@@ -141,9 +143,11 @@ def rsvp(
                 out_path=save_path,
                 extra_cols=extra_cols,
             )
-            show_blackscreen(config.win, sec=times["blackscreen_short"])
+            show_blackscreen(config.win, sec=times["blackscreen_short"], config=config)
     show_blackscreen(
-        config.win, sec=(times["blackscreen_long"] - times["blackscreen_short"])
+        config.win,
+        sec=(times["blackscreen_long"] - times["blackscreen_short"]),
+        config=config,
     )
 
 
