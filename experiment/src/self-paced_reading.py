@@ -193,7 +193,8 @@ def experiment(
 
         # pause
         send_eeg_trigger(config, config.trigger_pause, reset=True)
-        show_text_from_path(full_paths.pause, config)
+        if n != n_stories:
+            show_text_from_path(full_paths.pause, config)
 
     # show ending
     show_text_from_path(full_paths.end, config, align_text="left")
