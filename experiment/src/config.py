@@ -33,7 +33,7 @@ class exp_config:
         self.trigger_wait = 0.45  # in sec
         # parallel port
         if eeg:
-            self.port = parallel.ParallelPort(address="/dev/parport0")
+            self.port = parallel.ParallelPort(address=0x3028)
             self.port.setData(4)
             self.port.readPin(2)
             self.port.setPin(2, 1)
