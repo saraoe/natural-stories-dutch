@@ -94,7 +94,7 @@ def rsvp(
     extra_cols: dict,
 ):
     document_trigger = config.trigger_documents[document_id]
-    send_eeg_trigger(config, document_trigger)
+    send_eeg_trigger(config, document_trigger, reset=True)
 
     paragraphs = re.split("\n\n", story)
     for m, paragraph in enumerate(paragraphs):
@@ -106,6 +106,7 @@ def rsvp(
             sec=times["fixation"],
             escape_keys=config.escape_keys,
         )
+        send_eeg_trigger(config, 0)
 
         words = re.split(r"[\s]", paragraph)
         for n, word in enumerate(words):
