@@ -53,10 +53,11 @@ class exp_config:
             self.question_keys = ["1", "2", "3", "4"]
 
         # define question stim
-        self.qtext_stim = visual.TextStim(win=self.win)
+        self.qtext_stim = visual.TextStim(win=self.win, height=0.08)
         self.respond_stim = visual.TextStim(
             win=self.win,
             pos=(0, -0.8),
+            height=0.08,
             text=f"Druk op {self.respond_key_name} om verder te gaan",
         )
         self.scale_stim = visual.Slider(
