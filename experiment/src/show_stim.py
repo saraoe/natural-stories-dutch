@@ -63,6 +63,7 @@ def show_text_from_path(path: str, config, align_text: str = "left"):
 
 
 def show_word(word: str, text_stim, win, stopwatch, escape_keys, config, eeg_trigger):
+    event.clearEvents(eventType="keyboard")
     text_stim.text = word
     text_stim.draw()
     win.flip()
