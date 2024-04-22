@@ -87,7 +87,7 @@ def show_word_fixed(
     config,
     eeg_trigger,
 ):
-    char_time = pr_char_sec * len(word)
+    char_time = pr_char_sec[0] * len(word) + pr_char_sec[1]
     sec = char_time if char_time >= min_sec else min_sec
     text_stim.text = word
     text_stim.draw()

@@ -227,7 +227,7 @@ if __name__ == "__main__":
         "fixation": 0.5,
         "blackscreen_short": 0.2,
         "blackscreen_long": 0.75,
-        "rsvp_pr_char": 0.19,
+        "rsvp_pr_char": [0.02, 0.19],  # 0.02 * n_char + 0.19
         "rsvp_min": 0.25,
     }
 
