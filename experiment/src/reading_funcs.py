@@ -20,6 +20,7 @@ def spr(
     story: str,
     story_name: str,
     document_id: int,
+    trial: int,
     config,
     times: dict,
     save_path: str,
@@ -65,6 +66,7 @@ def spr(
                         "reaction_time": rt,
                         "story_name": story_name,
                         "document_id": document_id,
+                        "trial": trial,
                         "document_trigger": document_trigger,
                         "word": word,
                         "word_n": n,
@@ -88,6 +90,7 @@ def rsvp(
     story: str,
     story_name: str,
     document_id: int,
+    trial: int,
     times: dict,
     config,
     save_path: str,
@@ -134,6 +137,7 @@ def rsvp(
                         "reaction_time": word_time,
                         "story_name": story_name,
                         "document_id": document_id,
+                        "trial": trial,
                         "document_trigger": document_trigger,
                         "word": word,
                         "word_n": n,
@@ -203,6 +207,7 @@ def spr_w_questions(
     story: str,
     story_name: str,
     document_id: int,
+    trial: int,
     text_type: str,
     questions_df,
     config,
@@ -214,6 +219,7 @@ def spr_w_questions(
         story,
         story_name,
         document_id,
+        trial,
         config,
         times,
         full_paths.save_rt,
@@ -235,6 +241,7 @@ def rsvp_w_questions(
     story: str,
     story_name: str,
     document_id: int,
+    trial: int,
     text_type: str,
     questions_df,
     config,
@@ -242,7 +249,16 @@ def rsvp_w_questions(
     full_paths,
     extra_cols: dict,
 ):
-    rsvp(story, story_name, document_id, times, config, full_paths.save_rt, extra_cols)
+    rsvp(
+        story,
+        story_name,
+        document_id,
+        trial,
+        times,
+        config,
+        full_paths.save_rt,
+        extra_cols,
+    )
 
     text_questions(
         story_name,
