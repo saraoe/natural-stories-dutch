@@ -23,9 +23,10 @@ If the file end with ```_sn``` where n > 1, this indicates that the experiment c
 
 The **reation times** file include the following columns:
 - reading_type: (str) indicates whether reading was excuted in SPR or RSVP framework
-- reation_time: (numeric) in seconds (for SPR it is reaction time, for RSVP it is the time the word was present)
+- reaction_time: (float) in seconds (for SPR it is reaction time, for RSVP it is the time the word was present)
 - story_name: (str) name of the story
 - document_id: (int)
+- timestamp_buttonpress: (float) timestamp of the buttonpress in seconds
 - document_trigger: (str) eeg trigger for the unique document
 - word: (str)
 - word_n: (int) word number
@@ -76,6 +77,7 @@ If the file end with ```_sn``` where n > 1, this indicates that the experiment c
 
 The main **cloze** file includes the following columns:
 - response: (str) the two words the participant responded with (seperated by whitespace)
+- reaction_time: (flot) time it took to respond
 - story_name: (str) name of the story
 - correct_word: (str) the correct word (i.e. if the participant responded correctly, this should correpond with the first of the words in the *response* column)
 - number_word: (int) Number of the word in the story

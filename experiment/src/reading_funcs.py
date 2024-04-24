@@ -50,7 +50,7 @@ def spr(
                 config.trigger_word_even if n % 2 == 0 else config.trigger_word_uneven
             )
 
-            rt = show_word(
+            rt, timestamp_buttonpress = show_word(
                 word,
                 config.text_stim,
                 config.win,
@@ -64,6 +64,7 @@ def spr(
                     {
                         "reading_type": "SPR",
                         "reaction_time": rt,
+                        "timestamp_buttonpress": timestamp_buttonpress,
                         "story_name": story_name,
                         "document_id": document_id,
                         "trial": trial,
@@ -135,6 +136,7 @@ def rsvp(
                     {
                         "reading_type": "RSVP",
                         "reaction_time": word_time,
+                        "timestamp_buttonpress": None,
                         "story_name": story_name,
                         "document_id": document_id,
                         "trial": trial,

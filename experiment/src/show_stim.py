@@ -69,12 +69,12 @@ def show_word(word: str, text_stim, win, stopwatch, escape_keys, config, eeg_tri
     win.flip()
     send_eeg_trigger(config, eeg_trigger)
     stopwatch.reset()
-    key = event.waitKeys()[0]
+    key, timestamp = event.waitKeys(timeStamped=True)[0]
     rt = stopwatch.getTime()
     if key in escape_keys:
         win.close()
         core.quit()
-    return rt
+    return rt, timestamp
 
 
 def show_word_fixed(
