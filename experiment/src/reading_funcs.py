@@ -30,17 +30,20 @@ def spr(
     send_eeg_trigger(config, document_trigger, reset=True)
 
     paragraphs = re.split("\n\n", story)
+    df_list = []
     for m, paragraph in enumerate(paragraphs):
-        send_eeg_trigger(config, config.trigger_paragraph)
-
         show_fixation(
             config.fix_cross,
             config.win,
             sec=times["fixation"],
             escape_keys=config.escape_keys,
             config=config,
+            save=df_list,
+            extra_cols=extra_cols,
+            save_path=save_path,
         )
         send_eeg_trigger(config, 0)
+        df_list = []  # reset df_list
 
         words = re.split(r"[\s]", paragraph)
         for n, word in enumerate(words):
@@ -60,32 +63,37 @@ def spr(
                 config,
                 word_trigger,
             )
-            list_to_csv(
-                df_list=[
-                    {
-                        "reading_type": "SPR",
-                        "reaction_time": rt,
-                        "timestamp_buttonpress": timestamp_buttonpress,
-                        "story_name": story_name,
-                        "document_id": document_id,
-                        "trial": trial,
-                        "document_trigger": document_trigger,
-                        "word": word,
-                        "word_n": n,
-                        "paragraph_n": m,
-                        "word_trigger": word_trigger,
-                    }
-                ],
-                out_path=save_path,
-                extra_cols=extra_cols,
+            df_list.append(
+                {
+                    "reading_type": "SPR",
+                    "reaction_time": rt,
+                    "timestamp_buttonpress": timestamp_buttonpress,
+                    "story_name": story_name,
+                    "document_id": document_id,
+                    "trial": trial,
+                    "document_trigger": document_trigger,
+                    "word": word,
+                    "word_n": n,
+                    "paragraph_n": m,
+                    "word_trigger": word_trigger,
+                }
             )
 
             show_blackscreen(config.win, sec=times["blackscreen_short"], config=config)
-    show_blackscreen(
-        config.win,
-        sec=(times["blackscreen_long"] - times["blackscreen_short"]),
-        config=config,
+
+    config.stopwatch.reset()
+    list_to_csv(
+        df_list=df_list,
+        out_path=save_path,
+        extra_cols=extra_cols,
     )
+    save_time = config.stopwatch.getTime()
+    if times["blackscreen_long"] - times["blackscreen_short"] - save_time > 0:
+        show_blackscreen(
+            config.win,
+            sec=(times["blackscreen_long"] - times["blackscreen_short"] - save_time),
+            config=config,
+        )
 
 
 def rsvp(
@@ -102,6 +110,7 @@ def rsvp(
     send_eeg_trigger(config, document_trigger, reset=True)
 
     paragraphs = re.split("\n\n", story)
+    df_list = []
     for m, paragraph in enumerate(paragraphs):
         show_fixation(
             config.fix_cross,
@@ -109,8 +118,12 @@ def rsvp(
             sec=times["fixation"],
             escape_keys=config.escape_keys,
             config=config,
+            save=df_list,
+            extra_cols=extra_cols,
+            save_path=save_path,
         )
         send_eeg_trigger(config, 0)
+        df_list = []  # reset df_list
 
         words = re.split(r"[\s]", paragraph)
         for n, word in enumerate(words):
@@ -131,31 +144,36 @@ def rsvp(
                 config,
                 word_trigger,
             )
-            list_to_csv(
-                df_list=[
-                    {
-                        "reading_type": "RSVP",
-                        "reaction_time": word_time,
-                        "timestamp_buttonpress": None,
-                        "story_name": story_name,
-                        "document_id": document_id,
-                        "trial": trial,
-                        "document_trigger": document_trigger,
-                        "word": word,
-                        "word_n": n,
-                        "paragraph_n": m,
-                        "word_trigger": word_trigger,
-                    }
-                ],
-                out_path=save_path,
-                extra_cols=extra_cols,
+            df_list.append(
+                {
+                    "reading_type": "RSVP",
+                    "reaction_time": word_time,
+                    "timestamp_buttonpress": None,
+                    "story_name": story_name,
+                    "document_id": document_id,
+                    "trial": trial,
+                    "document_trigger": document_trigger,
+                    "word": word,
+                    "word_n": n,
+                    "paragraph_n": m,
+                    "word_trigger": word_trigger,
+                }
             )
             show_blackscreen(config.win, sec=times["blackscreen_short"], config=config)
-    show_blackscreen(
-        config.win,
-        sec=(times["blackscreen_long"] - times["blackscreen_short"]),
-        config=config,
+
+    config.stopwatch.reset()
+    list_to_csv(
+        df_list=df_list,
+        out_path=save_path,
+        extra_cols=extra_cols,
     )
+    save_time = config.stopwatch.getTime()
+    if times["blackscreen_long"] - times["blackscreen_short"] - save_time > 0:
+        show_blackscreen(
+            config.win,
+            sec=(times["blackscreen_long"] - times["blackscreen_short"] - save_time),
+            config=config,
+        )
 
 
 def text_questions(

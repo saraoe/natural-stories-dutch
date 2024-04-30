@@ -7,15 +7,30 @@ import re
 import string
 import pandas as pd
 from random import shuffle
-from util import get_punct_dict, read_text, send_eeg_trigger
+from util import get_punct_dict, read_text, send_eeg_trigger, list_to_csv
 
 
-def show_fixation(stim, win, sec, escape_keys, config):
+def show_fixation(
+    stim, win, sec, escape_keys, config, save=None, extra_cols=None, save_path=None
+):
     stim.foreColor = "darkgrey"
     stim.draw()
     win.flip()
     send_eeg_trigger(config, config.trigger_paragraph)
-    core.wait(sec)
+
+    # save
+    config.stopwatch.reset()
+    if save:
+        list_to_csv(
+            df_list=save,
+            out_path=save_path,
+            extra_cols=extra_cols,
+        )
+    save_time = config.stopwatch.getTime()
+    if sec - save_time > 0:
+        core.wait(sec - save_time)
+
+    # ready for keypress
     stim.foreColor = "white"
     stim.draw()
     win.flip()
