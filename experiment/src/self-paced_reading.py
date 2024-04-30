@@ -63,6 +63,9 @@ def experiment(
         tmp_subfix=tmp_subfix,
     )
 
+    # reset trigger
+    send_eeg_trigger(config, eeg_trigger=0)
+
     # read in stories
     if cont_crash:
         stories = tmp_file["stories"]

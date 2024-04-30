@@ -10,10 +10,11 @@ from random import shuffle
 from util import get_punct_dict, read_text, send_eeg_trigger
 
 
-def show_fixation(stim, win, sec, escape_keys):
+def show_fixation(stim, win, sec, escape_keys, config):
     stim.foreColor = "darkgrey"
     stim.draw()
     win.flip()
+    send_eeg_trigger(config, config.trigger_paragraph)
     core.wait(sec)
     stim.foreColor = "white"
     stim.draw()

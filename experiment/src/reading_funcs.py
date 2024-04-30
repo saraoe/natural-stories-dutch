@@ -38,6 +38,7 @@ def spr(
             config.win,
             sec=times["fixation"],
             escape_keys=config.escape_keys,
+            config=config,
         )
         send_eeg_trigger(config, 0)
 
@@ -102,13 +103,12 @@ def rsvp(
 
     paragraphs = re.split("\n\n", story)
     for m, paragraph in enumerate(paragraphs):
-        send_eeg_trigger(config, config.trigger_paragraph)
-
         show_fixation(
             config.fix_cross,
             config.win,
             sec=times["fixation"],
             escape_keys=config.escape_keys,
+            config=config,
         )
         send_eeg_trigger(config, 0)
 
