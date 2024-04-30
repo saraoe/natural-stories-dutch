@@ -135,6 +135,7 @@ def experiment(
                 full_paths=full_paths,
                 extra_cols=gui_information,
             )
+            send_eeg_trigger(config, config.trigger_pause, reset=True)
             show_text_from_path(full_paths.practice_end_rsvp, config)
 
             # experimental text
@@ -173,6 +174,7 @@ def experiment(
                     full_paths=full_paths,
                     extra_cols=gui_information,
                 )
+                send_eeg_trigger(config, config.trigger_pause, reset=True)
                 show_text_from_path(full_paths.practice_end_spr, config)
 
                 spr_practice = None  # only practice first time
