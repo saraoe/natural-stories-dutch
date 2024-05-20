@@ -36,4 +36,20 @@ stim <- stim |>
 
     )
 
+
+# add the number of the word within every text
+stim$number_word <- c(
+    1:600, # 1
+    1:594, # 2
+    1:600, # 3
+    1:598, # 4
+    1:597, # 5s
+    1:597, # 6
+    1:600, # 7
+    1:600, # 8
+    1:98,  # 11
+    1:74   # 12
+)
+
+
 write.csv(stim, "data/stim.csv")
