@@ -9,4 +9,5 @@ experiment/data/cloze/*
 experiment/data/spr/*
 experiment/src/test.py
 
-paper/data/*
+paper/data/cloze/*
+paper/data/spr/*
