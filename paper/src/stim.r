@@ -33,8 +33,8 @@ stim <- stim |>
         s_wl1 = lag(s_wl),
         s_wl2 = lag(s_wl, 2),
         s_wl3 = lag(s_wl, 3)
-
-    )
+    ) |>
+    mutate(word = gsub("\"", "", word))  # rm newline
 
 
 # add the number of the word within every text
