@@ -1,8 +1,10 @@
-# Data collected during experiments
+# SPR-EEG Data 
 
 ```
 ├── README.md
-├── stim.csv    
+├── stim.csv  
+├── mean_amplitude.csv  
+├── erp_lp.csv    
 ├── spr
 │   └── ...     <- files from SPR EEG experiment
 ├── cloze
@@ -11,11 +13,19 @@
 ```
 
 ## Stim
-
 The file ``stim.csv`` includes information about the stimuli (words). 
 The log probability (lp) of the words have been extracted using GPT2 and the package [Pangoling](https://github.com/bnicenboim/pangoling). 
 The word length (wl) is the number of characters including punctuation.
-The prefix *s_* indicates the variable has been scaled, and the subfix *n* (where n is a number) indicates the number of lag. E.g., *s_lp1* is the scaled log probability of the previous word.s  
+The prefix *s_* indicates the variable has been scaled, and the subfix *n* (where n is a number) indicates the number of lag. E.g., *s_lp1* is the scaled log probability of the previous word.
+
+## Mean amplitude and ERP
+The csv-file ``mean_amplitude.csv`` contains the mean amplitude for specific channels in a specific time window (see table). The mean amplitudes are created in ``src/preprocessing.r``.
+
+| colname | channels | time window | 
+| --- | --- | --- | --- |
+| n400 | Cz, Pz, C4, CP6, P4, P3, CP5, C3, P8, PO3, PO4, P7 | 300-500ms |
+
+The csv-file ``erp_lp.csv`` is also created in ``src/preprocessing.r``. This file contains ERP averaged for three different conditions: *high_lp* (log-probability of word in highest quartile), *low_lp* (log-probability of word in lowest quartile), and *med_lp* (words with log-probability between lowest and highest quartile). These ERPs have been averaged for trials with SPR, RSVP or both (indicated by the ``reading_type`` column).
 
 
 ## SPR EEG
@@ -132,3 +142,4 @@ The **participant information** file include the following information:
     - best_reading_language: (str) *Kun je beter in het Nederlands lezen of in (een) andere taal/talen*
     - best_reading_language_named: (str) Name of the language the participant reads the best in
     - other_languages: (Dict[Dict[str or int]]) dictionary with other languages the participant speaks (keys) and when they learned and whether they speak in fluently or not (values)
+    
