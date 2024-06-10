@@ -9,7 +9,7 @@ library(tidytable)
 library(readxl)
 
 # files
-eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[1]
+eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")
 stim <- read.csv("data/stim.csv") |>
         mutate(
             lp_quantile=ifelse(
@@ -29,7 +29,7 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
     reject_eyeblinks <- epochs |>
         eeg_group_by(segment) |>
         events_tbl() |>
-        filter(grepl("minmax_threshold=150", .description, fixed = TRUE)) |>
+        filter(grepl("minmax_threshold=180", .description, fixed = TRUE)) |>
         group_by(.id) |>
         summarize(N = n()) |>
         filter(N>=2)
@@ -70,6 +70,7 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
             p_artif_eyeblink <- epochs |>
                 eeg_filter(reject_reason == "eyeblink") |>
                 eeg_select(VEOG, Fp1, Fp2) |>
+                eeg_filter(segment %in% unique(reject_eyeblinks$.id)[1:200]) |>  # only plot 200
                 ggplot(aes(x = .time, y = .value, color=.key)) +
                 geom_line() +
                 facet_wrap(~segment) +
@@ -85,6 +86,7 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
             p_artif_eyemovement <- epochs |>
                 eeg_filter(reject_reason == "eyemovement") |>
                 eeg_select(HEOG, VEOG) |>
+                eeg_filter(segment %in% unique(reject_eyemovements$.id)[1:200]) |>  # only plot 200
                 ggplot(aes(x = .time, y = .value, color=.key)) +
                 geom_line() +
                 facet_wrap(~segment) +
@@ -100,6 +102,7 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
             p_artif_ptp <- epochs |>
                 eeg_filter(reject_reason == "ptp") |>
                 eeg_select(-HEOG, -VEOG) |>
+                eeg_filter(segment %in% unique(reject_ptp$.id)[1:200]) |>  # only plot 200
                 ggplot(aes(x = .time, y = .value, color=.key)) +
                 geom_line() +
                 facet_wrap(~segment) +
@@ -177,7 +180,7 @@ for (eeg_file in eeg_files){
                     .window = 200, 
                     .unit = "ms") |>
         eeguana::eeg_artif_minmax(VEOG, Fp1, Fp2,
-                    .threshold = 150, 
+                    .threshold = 180, 
                     .window = 200, 
                     .unit = "ms") |>
         eeguana::eeg_artif_step(HEOG, 
@@ -196,7 +199,7 @@ for (eeg_file in eeg_files){
     epochs <- epochs |>
         eeguana::eeg_baseline() |>
         eeg_events_to_NA(  # if threhold is exceeded in two channels Fp1, Fp2, and VEOG
-        grepl("minmax_threshold=150", .description, fixed = TRUE), .drop_events=TRUE, .n_chs = 2
+        grepl("minmax_threshold=180", .description, fixed = TRUE), .drop_events=TRUE, .n_chs = 2
         ) |>
         eeg_events_to_NA(  # eyemovements detected in HEOG
         grepl("step_threshold", .description, fixed = TRUE), .drop_events=TRUE, .n_chs = 1
