@@ -213,7 +213,7 @@ for (eeg_file in eeg_files){
     # ERPs for plotting
     erp_lp_all <- epochs |>
         eeg_filter(!is.na(lp_quantile)) |>
-        eeg_filter(document_id %in% c(11, 12)) |>  # exclude practice texts
+        eeg_filter(!(document_id %in% c(11, 12))) |>  # exclude practice texts
         eeg_group_by(.sample, lp_quantile, participant_number) |>
         eeg_summarize(across_ch(mean, na.rm = TRUE)) |> 
         as_tidytable() |>
@@ -222,7 +222,7 @@ for (eeg_file in eeg_files){
     erp_lp_spr <- epochs |>
         eeg_filter(reading_type=="SPR") |>
         eeg_filter(!is.na(lp_quantile)) |>
-        eeg_filter(document_id %in% c(11, 12)) |>  # exclude practice texts
+        eeg_filter(!(document_id %in% c(11, 12))) |>  # exclude practice texts
         eeg_group_by(.sample, lp_quantile, participant_number) |>
         eeg_summarize(across_ch(mean, na.rm = TRUE)) |> 
         as_tidytable() |>
@@ -231,7 +231,7 @@ for (eeg_file in eeg_files){
     erp_lp_rsvp <- epochs |>
         eeg_filter(reading_type=="RSVP") |>
         eeg_filter(!is.na(lp_quantile)) |>
-        eeg_filter(document_id %in% c(11, 12)) |>  # exclude practice texts
+        eeg_filter(!(document_id %in% c(11, 12))) |>  # exclude practice texts
         eeg_group_by(.sample, lp_quantile, participant_number) |>
         eeg_summarize(across_ch(mean, na.rm = TRUE)) |> 
         as_tidytable() |>
