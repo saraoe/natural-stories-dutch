@@ -9,7 +9,7 @@ library(tidytable)
 library(readxl)
 
 # files
-eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[7]
+eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[1]
 stim <- read.csv("data/stim.csv") |>
         mutate(
             lp_quantile=ifelse(
@@ -130,19 +130,20 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
 ## Loop over eeg-files ##
 for (eeg_file in eeg_files){
     n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", eeg_file))
-    exclude_df_filtered <- exclude_df |> filter(participant_number==n)
+    exclude_chs <- exclude_df |> filter(participant_number==n & !is.na(ch))
+    exclude_docs <- exclude_df |> filter(participant_number==n & !is.na(document_id))
     print(
         paste("Running participant: ", n, sep="")
     )
 
     ### load files
     raw_eeg <- eeguana::read_edf(eeg_file) |>
-        eeg_select(-(exclude_df_filtered$ch))
+        eeg_select(-(exclude_chs$ch))
     rt_df <- list.files("data/spr", full.names=T, pattern=paste("rt_.*_", n, "_.*\\.csv$", sep="")) |>
         lapply(read_rt_csv) |>
         bind_rows() |>
         arrange(trial, paragraph_n, word_n) |>
-        select(-X) |>
+        select(-X, -participant_id, -participant_subfix) |>
         left_join(stim, by=c("story_name", "document_id", "word_n", "paragraph_n", "word")) |>
         mutate(
             lp_quantile=ifelse(
@@ -202,7 +203,8 @@ for (eeg_file in eeg_files){
         ) |>
         eeg_events_to_NA(  # other signal with a ptp above 150
         grepl("minmax_threshold=200", .description, fixed = TRUE), .drop_events=TRUE, .n_chs = 3) |> 
-        eeg_left_join(rt_df, by="segment")
+        eeg_left_join(rt_df, by="segment") |>
+        eeg_filter(!document_id %in% exclude_df$document_id)
 
     ### create csv-files
     # ERPs for plotting
