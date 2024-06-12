@@ -11,4 +11,5 @@ experiment/src/test.py
 
 paper/data/cloze/*
 paper/data/spr/*
-paper/figs/*
+paper/figs/preprocessing/*
+paper/src/brms_models/*
