@@ -7,10 +7,12 @@ setwd("paper")
 # remotes::install_github("bnicenboim/pangoling@dev")
 library(pangoling)
 library(tidytable)
+library(stringr)
 
 # read csv
 stim <- read.csv(list.files("data/spr/",pattern = "rt_.*_1_.*\\.csv",full.names = TRUE)[1]) |>
     select(story_name, document_id, word, word_n, paragraph_n) |>
+    mutate(word = str_replace_all(word, "\\p{quotation mark}", "'")) |>  # remove fancy quotations
     arrange(document_id, paragraph_n, word_n)
 
 
