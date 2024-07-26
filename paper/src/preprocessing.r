@@ -2,14 +2,16 @@
 # Preprocessing of EEG data in SPR condition
 
 ### Libraries
-setwd("paper")
 library(eeguana)
 library(ggplot2)
 library(tidytable)
 library(readxl)
 
+setwd("paper")
+source("src/svp_erp.r")
+
 # files
-eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")
+eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[1:5]
 stim <- read.csv("data/stim.csv") |>
         mutate(
             lp_quantile=ifelse(
@@ -194,7 +196,7 @@ for (eeg_file in eeg_files){
                         .description %in% c(101, 102), 
                         .lim = c(-0.2, 1.2))
 
-    rt_df <- inspect_rejected(epochs, participant_n=n, rt_df=rt_df, save_figs=TRUE)
+    rt_df <- inspect_rejected(epochs, participant_n=n, rt_df=rt_df, save_figs=FALSE)
 
     epochs <- epochs |>
         eeguana::eeg_baseline() |>
@@ -205,7 +207,21 @@ for (eeg_file in eeg_files){
         grepl("step_threshold", .description, fixed = TRUE), .drop_events=TRUE, .n_chs = 1
         ) |>
         eeg_events_to_NA(  # other signal with a ptp above 150
-        grepl("minmax_threshold=200", .description, fixed = TRUE), .drop_events=TRUE, .n_chs = 3) |> 
+        grepl("minmax_threshold=200", .description, fixed = TRUE), .drop_events=TRUE, .n_chs = 3)
+
+    svd_epochs <- epochs |>
+        eeg_select(-M1, -M2, -VEOG, -HEOG) |>
+        svd_erp() |>
+        left_join(rt_df, by="segment") |>
+        filter(!document_id %in% exclude_df$document_id)
+    
+    if (exists("sterp")) {
+        sterp <- rbind(sterp, svd_epochs)
+    } else {
+        sterp <- svd_epochs
+    }
+
+    epochs <- epochs |> 
         eeg_left_join(rt_df, by="segment") |>
         eeg_filter(!document_id %in% exclude_df$document_id)
 
@@ -289,5 +305,6 @@ for (eeg_file in eeg_files){
 }
 
 ### write csv
+write.csv(sterp, "data/sterp.csv")
 write.csv(erp_df, "data/erp_lp.csv")
 write.csv(mean_amplitude_df, "data/mean_amplitude.csv")
