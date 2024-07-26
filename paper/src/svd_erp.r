@@ -34,7 +34,7 @@ svd_erp <- function(epochs){
 
 
 # testing function
-stwd("paper")
+setwd("paper")
 eeg_file <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[1]
 raw_eeg <- eeguana::read_edf(eeg_file)
 
@@ -45,4 +45,4 @@ svd_epochs <- eeguana::eeg_segment(
     ) |>
     eeguana::eeg_baseline() |>
     eeg_select(-M1, -M2, -Up, -Down, -Left, -Right) |>
-    svd_erp()   
+    svd_erp()

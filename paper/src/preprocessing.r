@@ -8,7 +8,7 @@ library(tidytable)
 library(readxl)
 
 setwd("paper")
-source("src/svp_erp.r")
+source("src/svd_erp.r")
 
 # files
 eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[1:5]
@@ -209,7 +209,12 @@ for (eeg_file in eeg_files){
         eeg_events_to_NA(  # other signal with a ptp above 150
         grepl("minmax_threshold=200", .description, fixed = TRUE), .drop_events=TRUE, .n_chs = 3)
 
+    epochs <- epochs |> 
+        eeg_left_join(rt_df, by="segment") |>
+        eeg_filter(!document_id %in% exclude_df$document_id)
+
     svd_epochs <- epochs |>
+        eeg_filter(!document_id %in% c(11, 12)) |>  # remove practice texts
         eeg_select(-M1, -M2, -VEOG, -HEOG) |>
         svd_erp() |>
         left_join(rt_df, by="segment") |>
@@ -220,10 +225,6 @@ for (eeg_file in eeg_files){
     } else {
         sterp <- svd_epochs
     }
-
-    epochs <- epochs |> 
-        eeg_left_join(rt_df, by="segment") |>
-        eeg_filter(!document_id %in% exclude_df$document_id)
 
     ### create csv-files
     # ERPs for plotting
