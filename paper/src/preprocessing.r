@@ -11,7 +11,7 @@ setwd("paper")
 source("src/svd_erp.r")
 
 # files
-eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[1:5]
+eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[1:10]
 stim <- read.csv("data/stim.csv") |>
         mutate(
             lp_quantile=ifelse(
@@ -147,14 +147,15 @@ for (eeg_file in eeg_files){
     rt_df <- list.files("data/spr", full.names=T, pattern=paste("rt_.*_", n, "_.*\\.csv$", sep="")) |>
         lapply(read_rt_csv) |>
         bind_rows() |>
-        arrange(trial, paragraph_n, word_n) |>
         select(-X, -participant_id, -participant_subfix) |>
         left_join(stim, by=c("story_name", "document_id", "word_n", "paragraph_n", "word")) |>
         mutate(
             lp_quantile=ifelse(
                 lp >= quantile(lp, na.rm = TRUE)[4], "high_lp", 
                 ifelse(lp <= quantile(lp, na.rm = TRUE)[2], "low_lp", "med_lp")),
-            )
+            trial = ifelse(document_id > 10, trial - 0.5, trial),
+            ) |>
+        arrange(trial, paragraph_n, word_n)
     rt_df$segment <- 1:nrow(rt_df)
     
     ### preprocessing
