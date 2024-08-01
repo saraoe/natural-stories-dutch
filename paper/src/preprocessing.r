@@ -11,7 +11,7 @@ setwd("paper")
 source("src/svd_erp.r")
 
 # files
-eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[1:10]
+eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[2]
 stim <- read.csv("data/stim.csv") |>
         mutate(
             lp_quantile=ifelse(
@@ -47,7 +47,7 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
     reject_ptp <- epochs |>
         eeg_group_by(segment) |>
         events_tbl() |>
-        filter(grepl("minmax_threshold=2000", .description, fixed = TRUE)) |>
+        filter(grepl("minmax_threshold=200", .description, fixed = TRUE)) |>
         group_by(.id) |>
         summarize(N = n()) |>
         filter(N>=3 & !(.id %in% c(reject_eyeblinks$.id, reject_eyemovements$.id)))
@@ -212,14 +212,14 @@ for (eeg_file in eeg_files){
 
     epochs <- epochs |> 
         eeg_left_join(rt_df, by="segment") |>
-        eeg_filter(!document_id %in% exclude_df$document_id)
+        eeg_filter(!document_id %in% exclude_docs)
 
     svd_epochs <- epochs |>
         eeg_filter(!document_id %in% c(11, 12)) |>  # remove practice texts
         eeg_select(-M1, -M2, -VEOG, -HEOG) |>
         svd_erp() |>
         left_join(rt_df, by="segment") |>
-        filter(!document_id %in% exclude_df$document_id)
+        filter(!document_id %in% exclude_docs)
     
     if (exists("sterp")) {
         sterp <- rbind(sterp, svd_epochs)
