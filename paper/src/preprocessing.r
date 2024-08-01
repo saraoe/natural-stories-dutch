@@ -177,7 +177,9 @@ for (eeg_file in eeg_files){
     raw_filt <- eeguana::eeg_filt_band_pass(raw_eeg, .freq = c(.1, 30))
 
     # artifact detection
-    artif_detect <- raw_filt |>
+    artif_detect <- eeg_segment(raw_filt, 
+                  .start = .description < 20, 
+                  .end = .description == 203) |>
         eeguana::eeg_artif_minmax(-HEOG, -VEOG,
                     .threshold = 200, 
                     .window = 200, 
