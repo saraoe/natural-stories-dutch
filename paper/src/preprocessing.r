@@ -11,7 +11,7 @@ setwd("paper")
 source("src/svd_erp.r")
 
 # files
-eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[2]
+eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[8:12]
 stim <- read.csv("data/stim.csv") |>
         mutate(
             lp_quantile=ifelse(
@@ -80,7 +80,8 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
                 theme_eeguana()
             ggsave(
                 paste("figs/preprocessing/", participant_n, "_artif_eyeblink.png", sep=""),
-                plot=p_artif_eyeblink
+                plot=p_artif_eyeblink,
+                width = 10, height=20
                 )
         }    
 
@@ -96,7 +97,8 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
                 theme_eeguana()
             ggsave(
                 paste("figs/preprocessing/", participant_n, "_artif_eyemovement.png", sep=""),
-                plot=p_artif_eyemovement
+                plot=p_artif_eyemovement,
+                width = 10, height=20
                 )
             }
 
@@ -112,7 +114,8 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
                 theme_eeguana()
             ggsave(
                 paste("figs/preprocessing/", participant_n, "_artif_ptp.png", sep=""),
-                plot=p_artif_ptp
+                plot=p_artif_ptp,
+                width = 10, height=20
                 )
             }
     }
@@ -199,7 +202,7 @@ for (eeg_file in eeg_files){
                         .description %in% c(101, 102), 
                         .lim = c(-0.2, 1.2))
 
-    rt_df <- inspect_rejected(epochs, participant_n=n, rt_df=rt_df, save_figs=FALSE)
+    rt_df <- inspect_rejected(epochs, participant_n=n, rt_df=rt_df, save_figs=TRUE)
 
     epochs <- epochs |>
         eeguana::eeg_baseline() |>
@@ -216,18 +219,18 @@ for (eeg_file in eeg_files){
         eeg_left_join(rt_df, by="segment") |>
         eeg_filter(!document_id %in% exclude_docs)
 
-    svd_epochs <- epochs |>
-        eeg_filter(!document_id %in% c(11, 12)) |>  # remove practice texts
-        eeg_select(-M1, -M2, -VEOG, -HEOG) |>
-        svd_erp() |>
-        left_join(rt_df, by="segment") |>
-        filter(!document_id %in% exclude_docs)
+    # svd_epochs <- epochs |>
+    #     eeg_filter(!document_id %in% c(11, 12)) |>  # remove practice texts
+    #     eeg_select(-M1, -M2, -VEOG, -HEOG) |>
+    #     svd_erp() |>
+    #     left_join(rt_df, by="segment") |>
+    #     filter(!document_id %in% exclude_docs)
     
-    if (exists("sterp")) {
-        sterp <- rbind(sterp, svd_epochs)
-    } else {
-        sterp <- svd_epochs
-    }
+    # if (exists("sterp")) {
+    #     sterp <- rbind(sterp, svd_epochs)
+    # } else {
+    #     sterp <- svd_epochs
+    # }
 
     ### create csv-files
     # ERPs for plotting
@@ -309,6 +312,6 @@ for (eeg_file in eeg_files){
 }
 
 ### write csv
-write.csv(sterp, "data/sterp.csv")
+# write.csv(sterp, "data/sterp.csv")
 write.csv(erp_df, "data/erp_lp.csv")
 write.csv(mean_amplitude_df, "data/mean_amplitude.csv")
