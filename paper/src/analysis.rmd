@@ -1,0 +1,492 @@
+# Analysis of SPR-EEG data
+```{r}
+library(ggplot2)
+library(tidytable)
+library(stringr)
+library(brms)
+
+setwd("paper")
+options(mc.cores = parallel::detectCores())
+```
+
+## Behavioral data
+
+### Load data
+```{r}
+read_rt_csv <- function(filename){
+  df <- read.csv(filename)
+  df$session <- as.numeric(gsub(".*?([0-9]+)\\.csv$", "\\1", filename))
+  return(df)
+}
+```
+
+```{r}
+stim <- read.csv("data/stim.csv") |>
+        mutate(
+            lp_quantile=ifelse(
+                lp >= quantile(lp, na.rm=TRUE)[4], "high_lp", 
+                ifelse(lp <= quantile(lp, na.rm=TRUE)[2], "low_lp", "med_lp")),
+            )
+
+rt_df <- list.files("data/spr", full.names=T, pattern="rt_.*\\.csv$") |>
+        lapply(read_rt_csv) |>
+        bind_rows() |>
+        select(-X, -participant_id, -participant_subfix) |>
+        left_join(stim, by=c("story_name", "document_id", "word_n", "paragraph_n", "word")) |>
+        mutate(
+            lp_quantile=ifelse(
+                lp >= quantile(lp, na.rm = TRUE)[4], "high_lp", 
+                ifelse(lp <= quantile(lp, na.rm = TRUE)[2], "low_lp", "med_lp")),
+        ) |>
+        mutate(rt = reaction_time/0.001)  # reading times in ms instead of s
+```
+
+### Models
+Log-probability and its spillover
+```{r}
+data <- rt_df |>
+    filter(reading_type=="SPR") |>
+    filter(!(document_id %in% c(11, 12)))
+
+m1_rt_formula <- bf(
+    rt ~ s_lp + s_lp1 + s_lp2 + s_lp3 +
+    (s_lp + s_lp1 + s_lp2 + s_lp3  || participant_number) + 
+    (s_lp + s_lp1 + s_lp2 + s_lp3  || word)
+           )
+
+m1_rt_priors <- c(prior(normal(5.5,1), class = Intercept),
+                   prior(normal(0,.1), class = b),
+                   prior(normal(.5,.1), class = sigma),
+                   prior(normal(0,.5), class = sd))
+
+m1_rt <- brm(m1_rt_formula,
+    family = lognormal(),
+    prior = m1_rt_priors,
+    data = data,
+    chains = 2,
+    control = list(adapt_delta = 0.9),
+    backend = "cmdstanr",
+    file = "src/brms_models/m1_rt"
+    )
+```
+
+```{r}
+summary(m1_rt)
+
+mcmc_plot(m1_rt, variable = "^b_[^Intercept]", regex = TRUE)
+
+plot(m1_rt, variable = "^b", regex = TRUE)
+```
+
+Log-probability, word length, and their spillover
+```{r}
+data <- rt_df |>
+    filter(reading_type=="SPR") |>
+    filter(!(document_id %in% c(11, 12)))
+
+m2_rt_formula <- bf(
+    rt ~ s_lp + s_lp1 + s_lp2 + s_lp3 + s_wl + s_wl1 + s_wl2 + s_wl3 + 
+    (s_lp + s_lp1 + s_lp2 + s_lp3 + s_wl + s_wl1 + s_wl2 + s_wl3 || participant_number) + 
+    (s_lp + s_lp1 + s_lp2 + s_lp3 + s_wl + s_wl1 + s_wl2 + s_wl3 || word)
+           )
+
+m2_rt_priors <- c(prior(normal(5.5,1), class = Intercept),
+                   prior(normal(0,.1), class = b),
+                   prior(normal(.5,.1), class = sigma),
+                   prior(normal(0,.5), class = sd))
+
+m2_rt <- brm(m2_rt_formula,
+    family = lognormal(),
+    prior = m2_rt_priors,
+    data = data,
+    chains = 2,
+    control = list(adapt_delta = 0.9),
+    backend = "cmdstanr",
+    file = "src/brms_models/m2_rt"
+    )
+```
+
+```{r}
+summary(m2_rt)
+
+mcmc_plot(m2_rt, variable = "^b_[^Intercept]", regex = TRUE)
+
+plot(m2_rt, variable = "^b_s_lp", regex = TRUE)
+plot(m2_rt, variable = "^b_s_wl", regex = TRUE)
+```
+
+## EEG
+
+### Load data
+```{r}
+mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
+    select(-lp, -s_lp, -s_lp1, -s_lp2, -s_lp3) |>
+    left_join(stim) |>
+    mutate(lp_quantile = factor(lp_quantile, levels=c("low_lp", "med_lp", "high_lp")))
+
+erp_df <- read.csv("data/erp_lp.csv") |>
+    mutate(
+      .channel = .key,
+      lp_quantile = factor(lp_quantile, levels=c("low_lp", "med_lp", "high_lp"))
+      ) |> 
+    left_join(eeguana::layout_32_1020)
+
+sterp_df <- read.csv("data/sterp.csv") |>
+    mutate(lp_quantile = factor(lp_quantile, levels=c("low_lp", "med_lp", "high_lp")))
+```
+
+
+```{r}
+# filter based on amount of rejected epochs
+reject_df <- mean_amplitude_df |>
+    filter(!document_id %in% c(11, 12)) |>
+    filter(!is.na(lp_quantile)) |> 
+    group_by(participant_number, reading_type) |> 
+    summarize(
+        "rejected_epochs" = (sum(is.na(n400)) / n()) * 100
+    ) |> 
+    filter(rejected_epochs > 30)
+
+mean_amplitude_df <- mean_amplitude_df |>
+    filter(!(participant_number %in% reject_df$participant_number))
+erp_df <- erp_df |>
+    filter(!(participant_number %in% reject_df$participant_number))
+sterp_df <- sterp_df |>
+    filter(!(participant_number %in% reject_df$participant_number))
+```
+
+### Models
+N400 ~ Log-probability in RSVP for nouns, verbs, adjective, and adverbs
+```{r}
+# with mean_amplitude_df
+data <- mean_amplitude_df |>
+    filter(!(document_id %in% c(11, 12))) |>
+    filter(reading_type=="RSVP") |>
+    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV"))
+
+# with sterp_df
+data <- sterp_df |>
+    filter(reading_type=="RSVP") |>
+    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
+    filter(between(.time, .3, .5)) |>
+    group_by(segment, participant_number, s_lp, word) |>
+    summarize(n400 = mean(.value))
+
+m1_n400_formula <- bf(n400 ~ s_lp + (s_lp || participant_number) + (s_lp || word))
+
+m1_n400_priors <- c(
+    prior(normal(0,20), class = Intercept),
+    prior(normal(0,10), class = b),
+    prior(normal(10,20), class = sigma),
+    prior(normal(0,10), class = sd)
+    )
+
+m1_n400 <- brm(m1_n400_formula,
+    family = gaussian(),
+    prior = m1_n400_priors,
+    data = data,
+    chains = 2,
+    control = list(adapt_delta = 0.9),
+    backend = "cmdstanr",
+    # file = "src/brms_models/m1_rsvp_n400"
+    )
+```
+
+```{r}
+summary(m1_n400)
+
+mcmc_plot(m1_n400, variable = "^b", regex = TRUE)
+
+plot(m1_n400, variable = "^b", regex = TRUE)
+```
+
+N400 ~ Log-probability and its spillover in RSVP for nouns, verbs, adjective, and adverbs
+```{r}
+# with mean_amplitude_df
+data <- mean_amplitude_df |>
+    filter(!(document_id %in% c(11, 12))) |>
+    filter(reading_type=="RSVP") |>
+    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV"))
+
+# with sterp_df
+data <- sterp_df |>
+    filter(reading_type=="RSVP") |>
+    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
+    filter(between(.time, .3, .5)) |>
+    group_by(segment, participant_number, s_lp, s_lp1, s_lp2, s_lp3, word) |>
+    summarize(n400 = mean(.value))
+
+m2_n400_formula <- bf(
+    n400 ~ s_lp + s_lp1 + s_lp2 + s_lp3 + 
+    (s_lp + s_lp1 + s_lp2 + s_lp3 || participant_number) + 
+    (s_lp + s_lp1 + s_lp2 + s_lp3 || word))
+
+m2_n400_priors <- c(
+    prior(normal(0,20), class = Intercept),
+    prior(normal(0,10), class = b),
+    prior(normal(10,20), class = sigma),
+    prior(normal(0,10), class = sd)
+    )
+
+m2_n400 <- brm(m2_n400_formula,
+    family = gaussian(),
+    prior = m2_n400_priors,
+    data = data,
+    chains = 2,
+    control = list(adapt_delta = 0.9),
+    backend = "cmdstanr",
+    # file = "src/brms_models/m2_rsvp_n400"
+    )
+```
+
+```{r}
+summary(m2_n400)
+
+mcmc_plot(m2_n400, variable = "^b_[^Intercept]", regex = TRUE)
+
+plot(m2_n400, variable = "^b", regex = TRUE)
+```
+
+### Plots
+N400
+```{r}
+reading_cond = "both"  # both, SPR, or RSVP 
+
+erp_df |>
+    filter(!.key %in% c("HEOG", "VEOG", "M1", "M2")) |>
+    filter(reading_type==reading_cond) |>
+    ggplot(aes(x = .time, y = .value)) +
+    stat_summary(
+        fun = "mean", geom = "line", alpha = 1, linewidth = 1,
+        aes(color = lp_quantile)
+    ) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    annotate("rect", xmin=.3, xmax=.5, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkseagreen4") +
+    theme_eeguana() +
+    theme(legend.position = "bottom")
+```
+
+```{r}
+reading_cond = "RSVP"  # both, SPR, or RSVP 
+
+erp_df |>
+    filter(.key %in% c(
+        "Cz", "Pz", "C4", "CP6", "P4", "P3", "CP5", "C3", "P8", "PO3", "PO4", "P7"
+    )) |>
+    filter(reading_type==reading_cond) |>
+    ggplot(aes(x = .time, y = .value)) +
+    # geom_line(alpha = .1, aes(group = .id, color = Condition)) +
+    stat_summary(
+        fun = "mean", geom = "line", alpha = 1, linewidth = 1,
+        aes(color = lp_quantile)
+    ) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    annotate("rect", xmin=.3, xmax=.5, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkseagreen4") +
+    eeguana::theme_eeguana() +
+    theme(legend.position = "bottom")
+
+# ggsave(paste("figs/erp_", reading_cond, "_relevant_chs.png", sep=""), width=10, height=10)
+```
+
+```{r}
+reading_cond = "RSVP"  # SPR or RSVP 
+
+sterp_df |>
+    filter(reading_type==reading_cond) |>
+    filter(!is.na(lp_quantile)) |>
+    ggplot(aes(x = .time, y = .value)) +
+    # geom_line(alpha = .1, aes(group = segment, color = reading_type)) +
+    stat_summary(
+        fun = "mean", geom = "line", alpha = 1, linewidth = 1,
+        aes(color = lp_quantile)
+    ) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    annotate("rect", xmin=.3, xmax=.5, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkseagreen4") +
+    eeguana::theme_eeguana() +
+    theme(legend.position = "bottom")
+
+# ggsave(paste("figs/sterp_", reading_cond, ".png", sep=""), width=10, height=10)
+```
+
+```{r}
+# n400
+mean_amplitude_df |>
+    filter(!(document_id %in% c(11, 12))) |>
+    ggplot(aes(x=lp, y=n400)) +
+    geom_point() +
+    geom_smooth(method="lm") +
+    theme_light()
+
+mean_amplitude_df |>
+    filter(!(document_id %in% c(11, 12))) |>
+    ggplot(aes(x=wl, y=n400)) +
+    geom_point() +
+    geom_smooth(method="lm") +
+    theme_light()
+
+# rt (NB: only in SPR)
+mean_amplitude_df |>
+    filter(reading_type=="SPR") |>
+    filter(!(document_id %in% c(11, 12))) |>
+    ggplot(aes(x=lp, y=reaction_time)) +
+    geom_point() +
+    geom_smooth(method="lm") +
+    theme_light()
+
+mean_amplitude_df |>
+    filter(reading_type=="SPR") |>
+    filter(!(document_id %in% c(11, 12))) |>
+    ggplot(aes(x=wl, y=reaction_time)) +
+    geom_point() +
+    geom_smooth(method="lm") +
+    theme_light()
+
+```
+
+Early components
+```{r}
+reading_cond = "RSVP"  # both, SPR, or RSVP
+
+erp_df |>
+    filter(.time < .5) |>
+    filter(.key %in% c("Pz", "P3", "P7", "O1", "P4", "P8", "O2")) |>
+    filter(reading_type==reading_cond) |>
+    ggplot(aes(x = .time, y = .value)) +
+    stat_summary(
+        fun = "mean", geom = "line", alpha = 1, linewidth = 1,
+        aes(color = lp_quantile)
+    ) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    annotate("rect", xmin=.05, xmax=.08, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkseagreen4") +
+    annotate("rect", xmin=.08, xmax=.12, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkorange") +
+    annotate("rect", xmin=.16, xmax=.2, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkseagreen4") +
+    annotate("rect", xmin=.2, xmax=.3, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkorange") +
+    eeguana::theme_eeguana() +
+    theme(legend.position = "bottom")
+```
+
+```{r}
+reading_cond = "RSVP"  # both, SPR, or RSVP
+
+sterp_df |>
+    filter(!is.na(lp)) |>
+    filter(.time < .5) |>
+    filter(reading_type==reading_cond) |>
+    ggplot(aes(x = .time, y = .value)) +
+    stat_summary(
+        fun = "mean", geom = "line", alpha = 1, linewidth = 1,
+        aes(color = lp_quantile)
+    ) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    annotate("rect", xmin=.05, xmax=.08, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkseagreen4") +
+    annotate("rect", xmin=.08, xmax=.12, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkorange") +
+    annotate("rect", xmin=.16, xmax=.2, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkseagreen4") +
+    annotate("rect", xmin=.2, xmax=.3, ymin=-Inf, ymax=Inf, alpha=.1, fill="darkorange") +
+    eeguana::theme_eeguana() +
+    theme(legend.position = "bottom")
+```
+
+Correlation: reading times and n400
+```{r}
+lp_quantiles <- quantile(mean_amplitude_df$lp, na.rm=TRUE, prob=c(.2,.4,.6,.8,1))
+n <- 0.2
+m <- -0.03
+mean_amplitude_df |>
+    filter(!document_id %in% c(11, 12)) |>
+    filter(reading_type=="SPR")|>
+    mutate(
+        lp_quantile=ifelse(
+            lp <= lp_quantiles[1], "0.2", ifelse(
+                lp <= lp_quantiles[2], "0.4", ifelse(
+                    lp <= lp_quantiles[3], "0.6", ifelse(
+                        lp <= lp_quantiles[4], "0.8", ifelse(
+                            lp <= lp_quantiles[5], "1", NA
+                        )
+                    )
+                )
+            )
+        ),
+        corrected_n400 = (n400 * m) + n,
+        corrected_rt = reaction_time
+    ) |> 
+    filter(!is.na(lp_quantile)) |>
+    group_by(lp_quantile) |>
+    summarize(
+        "mean_N400" = mean(corrected_n400, na.rm=TRUE),
+        "sd_N400" = sd(corrected_n400, na.rm=TRUE),
+        "mean_ReadingTime" = mean(corrected_rt),
+        "sd_ReadingTime" = sd(corrected_rt)
+    ) |>
+    pivot_longer(cols = c(starts_with("mean_"), starts_with("sd_")),
+                    names_to = c("X", "type"),
+                    names_pattern = "(.+)_(.+)") |> 
+    pivot_wider(names_from=X, values_from=value) |>  
+    ggplot(aes(x=lp_quantile, y=mean, color=type)) +
+    geom_point(size=5, shape=15, position=position_dodge(.5)) +
+    geom_errorbar(
+        aes(ymin=mean-sd, ymax=mean+sd), 
+        width=.2,position=position_dodge(.5)) +
+    geom_line(aes(group=type), position=position_dodge(.5)) +
+    scale_color_manual(values=c("darkseagreen4", "darkorange")) +
+    scale_y_continuous(
+        name = "Reading Time (ms)",  # name first axis
+        sec.axis = sec_axis( trans=~(.-n)/m, name="N400 Amplitude (microvolt)")
+    ) +
+    theme_light() +
+    labs(x="Quantile Log-Probability Words", y="", color="")
+
+# ggsave("figs/cor_n400_rt.png", width=10, height=10)
+```
+
+```{r}
+lp_quantiles <- quantile(mean_amplitude_df$lp, na.rm=TRUE, prob=c(.2,.4,.6,.8,1))
+n <- 0.2
+m <- -0.03
+mean_amplitude_df |>
+    filter(!document_id %in% c(11, 12)) |>
+    filter(reading_type=="SPR")|>
+    group_by(participant_number, document_id) |>
+    mutate(lead_rt = lead(reaction_time)) |>
+    mutate(
+        lp_quantile=ifelse(
+            lp <= lp_quantiles[1], "0.2", ifelse(
+                lp <= lp_quantiles[2], "0.4", ifelse(
+                    lp <= lp_quantiles[3], "0.6", ifelse(
+                        lp <= lp_quantiles[4], "0.8", ifelse(
+                            lp <= lp_quantiles[5], "1", NA
+                        )
+                    )
+                )
+            )
+        ),
+        corrected_n400 = (n400 * m) + n,
+        corrected_rt = lead_rt
+    ) |> 
+    filter(!is.na(lp_quantile)) |>
+    group_by(lp_quantile) |>
+    summarize(
+        "mean_N400" = mean(corrected_n400, na.rm=TRUE),
+        "sd_N400" = sd(corrected_n400, na.rm=TRUE),
+        "mean_ReadingTime" = mean(corrected_rt, na.rm=TRUE),
+        "sd_ReadingTime" = sd(corrected_rt, na.rm=TRUE)
+    ) |>
+    pivot_longer(cols = c(starts_with("mean_"), starts_with("sd_")),
+                    names_to = c("X", "type"),
+                    names_pattern = "(.+)_(.+)") |> 
+    pivot_wider(names_from=X, values_from=value) |>  
+    ggplot(aes(x=lp_quantile, y=mean, color=type)) +
+    geom_point(size=5, shape=15, position=position_dodge(.5)) +
+    geom_errorbar(
+        aes(ymin=mean-sd, ymax=mean+sd), 
+        width=.2,position=position_dodge(.5)) +
+    geom_line(aes(group=type), position=position_dodge(.5)) +
+    scale_color_manual(values=c("darkseagreen4", "darkorange")) +
+    scale_y_continuous(
+        name = "Reading Time (ms)",  # name first axis
+        sec.axis = sec_axis( trans=~(.-n)/m, name="N400 Amplitude (microvolt)")
+    ) +
+    theme_light() +
+    labs(x="Quantile Log-Probability Words", y="", color="")
+
+# ggsave("figs/cor_n400_leadrt.png", width=10, height=10)
+```
