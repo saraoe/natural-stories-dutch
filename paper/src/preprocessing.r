@@ -9,9 +9,10 @@ library(readxl)
 
 setwd("paper")
 source("src/svd_erp.r")
+source("src/file_checks.r")
 
 # files
-eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[8:12]
+eeg_files <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")
 stim <- read.csv("data/stim.csv") |>
         mutate(
             lp_quantile=ifelse(
@@ -137,6 +138,7 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs=FALSE){
 
 ## Loop over eeg-files ##
 for (eeg_file in eeg_files){
+    start.time <- Sys.time()
     n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", eeg_file))
     exclude_chs <- exclude_df |> filter(participant_number==n & !is.na(ch))
     exclude_docs <- exclude_df |> filter(participant_number==n & !is.na(document_id))
@@ -147,6 +149,7 @@ for (eeg_file in eeg_files){
     ### load files
     raw_eeg <- eeguana::read_edf(eeg_file) |>
         eeg_select(-(exclude_chs$ch))
+    raw_eeg <- fix_trigger_description(raw_eeg, n)
     rt_df <- list.files("data/spr", full.names=T, pattern=paste("rt_.*_", n, "_.*\\.csv$", sep="")) |>
         lapply(read_rt_csv) |>
         bind_rows() |>
@@ -160,6 +163,16 @@ for (eeg_file in eeg_files){
             ) |>
         arrange(trial, paragraph_n, word_n)
     rt_df$segment <- 1:nrow(rt_df)
+
+    ### test
+    if (!test_n_triggers(raw_eeg)){
+        print("Number of triggers does not match!")
+        next
+    }
+    if (!test_n_words(rt_df)){
+        print("Number of words in every story does not match!")
+        next
+    }
     
     ### preprocessing
     # using the 1020 layout
@@ -308,6 +321,9 @@ for (eeg_file in eeg_files){
     } else {
         mean_amplitude_df <- tmp_mean_amplitude
     }
+
+    end.time <- Sys.time()
+    print(paste("Time for participant", n, ":", end.time-start.time))
 
 }
 
