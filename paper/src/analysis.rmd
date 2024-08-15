@@ -9,17 +9,107 @@ setwd("paper")
 options(mc.cores = parallel::detectCores())
 ```
 
-## Behavioral data
-
-### Load data
 ```{r}
-read_rt_csv <- function(filename) {
+read_mulple_sessions_csv <- function(filename) {
     df <- read.csv(filename)
     df$session <- as.numeric(gsub(".*?([0-9]+)\\.csv$", "\\1", filename))
     return(df)
 }
 ```
 
+## Comprehension Questions
+
+### Load data
+```{r}
+responses_df <- list.files(
+    "data/spr",
+    full.names = TRUE, pattern = "responses_.*\\.csv$"
+) |>
+    lapply(read_mulple_sessions_csv) |>
+    bind_rows() |>
+    arrange(participant_number, document_id)
+```
+
+# Inspect data
+
+Familiarity
+```{r}
+familiarity_responses <- responses_df |>
+    filter(!document_id %in% c(11, 12)) |>
+    filter(question_id == 0) |> # zero is familiarity
+    filter(response > 3) |>
+    select(participant_number, document_id, response) |>
+    rename("familiarity_response" = response)
+```
+
+Content
+```{r}
+content_responses <- responses_df |>
+    filter(!document_id %in% c(11, 12)) |>
+    filter(question_id > 0) |> # zero is familiarity
+    group_by(participant_number, document_id) |>
+    summarize(
+        n_content_correct = sum(correct),
+        percent_content_correct = sum(correct) / n()
+    )
+```
+
+### Plots
+Familiarity questions
+```{r}
+# by story
+responses_df |>
+    filter(question_id == 0) |> # zero is familiarity
+    filter(!document_id %in% c(11, 12)) |>
+    ggplot() +
+    geom_histogram(aes(x = response, fill = as.numeric(response)), stat = "count") +
+    facet_wrap(. ~ story_name, nrow = 2) +
+    scale_fill_gradient(low = "lightseagreen", high = "darkseagreen4") +
+    theme_light() +
+    guides(fill = "none")
+
+# by participant
+responses_df |>
+    filter(question_id == 0) |> # zero is familiarity
+    filter(!document_id %in% c(11, 12)) |>
+    ggplot() +
+    geom_histogram(aes(x = response, fill = as.numeric(response)), stat = "count") +
+    facet_wrap(. ~ participant_number) +
+    scale_fill_gradient(low = "lightseagreen", high = "darkseagreen4") +
+    theme_light() +
+    guides(fill = "none")
+```
+
+Content quesions
+```{r}
+# by story
+responses_df |>
+    filter(question_id > 0) |> # zero is familiarity
+    filter(!document_id %in% c(11, 12)) |>
+    mutate(correct = ifelse(correct == 1, "Correct", "Incorrect")) |>
+    ggplot() +
+    geom_histogram(aes(x = correct, fill = correct), stat = "count") +
+    facet_wrap(. ~ story_name) +
+    scale_fill_manual(values = c("darkseagreen", "lightseagreen")) +
+    theme_light() +
+    guides(fill = "none")
+
+# by participant
+responses_df |>
+    filter(question_id > 0) |> # zero is familiarity
+    filter(!document_id %in% c(11, 12)) |>
+    mutate(correct = ifelse(correct == 1, "Correct", "Incorrect")) |>
+    ggplot() +
+    geom_histogram(aes(x = correct, fill = correct), stat = "count") +
+    facet_wrap(. ~ participant_number) +
+    scale_fill_manual(values = c("darkseagreen", "lightseagreen")) +
+    theme_light() +
+    guides(fill = "none")
+```
+
+## Behavioral data
+
+### Load data
 ```{r}
 stim <- read.csv("data/stim.csv") |>
     mutate(
@@ -30,10 +120,12 @@ stim <- read.csv("data/stim.csv") |>
     )
 
 rt_df <- list.files("data/spr", full.names = T, pattern = "rt_.*\\.csv$") |>
-    lapply(read_rt_csv) |>
+    lapply(read_mulple_sessions_csv) |>
     bind_rows() |>
     select(-X, -participant_id, -participant_subfix) |>
     left_join(stim, by = c("story_name", "document_id", "word_n", "paragraph_n", "word")) |>
+    left_join(familiarity_responses, by = c("document_id", "participant_number")) |>
+    left_join(content_responses, by = c("document_id", "participant_number")) |>
     mutate(
         lp_quantile = ifelse(
             lp >= quantile(lp, na.rm = TRUE)[4], "high_lp",
@@ -128,6 +220,8 @@ plot(m2_rt, variable = "^b_s_wl", regex = TRUE)
 mean_amplitude_df <- read.csv("data/mean_amplitude_RSVP.csv") |>
     select(-lp, -s_lp, -s_lp1, -s_lp2, -s_lp3) |>
     left_join(stim) |>
+    left_join(familiarity_responses, by = c("document_id", "participant_number")) |>
+    left_join(content_responses, by = c("document_id", "participant_number")) |>
     mutate(lp_quantile = factor(lp_quantile, levels = c("low_lp", "med_lp", "high_lp")))
 
 erp_df <- read.csv("data/erp_lp_RSVP.csv") |>
@@ -168,7 +262,8 @@ N400 ~ Log-probability in RSVP for nouns, verbs, adjective, and adverbs
 data <- mean_amplitude_df |>
     filter(!(document_id %in% c(11, 12))) |>
     filter(reading_type == "RSVP") |>
-    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV"))
+    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
+    filter(percent_content_correct >= .8)
 
 # with sterp_df
 data <- sterp_df |>
@@ -212,7 +307,8 @@ N400 ~ Log-probability and its spillover in RSVP for nouns, verbs, adjective, an
 data <- mean_amplitude_df |>
     filter(!(document_id %in% c(11, 12))) |>
     filter(reading_type == "RSVP") |>
-    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV"))
+    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
+    filter(percent_content_correct >= .8)
 
 # with sterp_df
 data <- sterp_df |>
@@ -290,7 +386,8 @@ erp_df |>
     geom_vline(xintercept = 0, linetype = "dashed") +
     annotate("rect", xmin = .3, xmax = .5, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkseagreen4") +
     eeguana::theme_eeguana() +
-    theme(legend.position = "bottom")
+    theme(legend.position = "bottom") +
+    facet_wrap(. ~ participant_number)
 
 # ggsave(paste("figs/erp_", reading_cond, "_relevant_chs.png", sep=""), width=10, height=10)
 ```
