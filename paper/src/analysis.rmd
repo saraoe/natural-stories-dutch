@@ -228,8 +228,7 @@ erp_df <- read.csv("data/erp_lp_RSVP.csv") |>
     mutate(
         .channel = .key,
         lp_quantile = factor(lp_quantile, levels = c("low_lp", "med_lp", "high_lp"))
-    ) |>
-    left_join(eeguana::layout_32_1020)
+    )
 ```
 
 
