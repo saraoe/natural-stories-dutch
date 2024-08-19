@@ -230,9 +230,6 @@ erp_df <- read.csv("data/erp_lp_RSVP.csv") |>
         lp_quantile = factor(lp_quantile, levels = c("low_lp", "med_lp", "high_lp"))
     ) |>
     left_join(eeguana::layout_32_1020)
-
-sterp_df <- read.csv("data/sterp.csv") |>
-    mutate(lp_quantile = factor(lp_quantile, levels = c("low_lp", "med_lp", "high_lp")))
 ```
 
 
@@ -251,8 +248,6 @@ mean_amplitude_df <- mean_amplitude_df |>
     filter(!(participant_number %in% reject_df$participant_number))
 erp_df <- erp_df |>
     filter(!(participant_number %in% reject_df$participant_number))
-sterp_df <- sterp_df |>
-    filter(!(participant_number %in% reject_df$participant_number))
 ```
 
 ### Models
@@ -264,14 +259,6 @@ data <- mean_amplitude_df |>
     filter(reading_type == "RSVP") |>
     filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
     filter(percent_content_correct >= .8)
-
-# with sterp_df
-data <- sterp_df |>
-    filter(reading_type == "RSVP") |>
-    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
-    filter(between(.time, .3, .5)) |>
-    group_by(segment, participant_number, s_lp, word) |>
-    summarize(n400 = mean(.value))
 
 m1_n400_formula <- bf(n400 ~ s_lp + (s_lp || participant_number) + (s_lp || word))
 
@@ -309,14 +296,6 @@ data <- mean_amplitude_df |>
     filter(reading_type == "RSVP") |>
     filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
     filter(percent_content_correct >= .8)
-
-# with sterp_df
-data <- sterp_df |>
-    filter(reading_type == "RSVP") |>
-    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
-    filter(between(.time, .3, .5)) |>
-    group_by(segment, participant_number, s_lp, s_lp1, s_lp2, s_lp3, word) |>
-    summarize(n400 = mean(.value))
 
 m2_n400_formula <- bf(
     n400 ~ s_lp + s_lp1 + s_lp2 + s_lp3 +
@@ -393,26 +372,6 @@ erp_df |>
 ```
 
 ```{r}
-reading_cond <- "RSVP" # SPR or RSVP
-
-sterp_df |>
-    filter(reading_type == reading_cond) |>
-    filter(!is.na(lp_quantile)) |>
-    ggplot(aes(x = .time, y = .value)) +
-    # geom_line(alpha = .1, aes(group = segment, color = reading_type)) +
-    stat_summary(
-        fun = "mean", geom = "line", alpha = 1, linewidth = 1,
-        aes(color = lp_quantile)
-    ) +
-    geom_vline(xintercept = 0, linetype = "dashed") +
-    annotate("rect", xmin = .3, xmax = .5, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkseagreen4") +
-    eeguana::theme_eeguana() +
-    theme(legend.position = "bottom")
-
-# ggsave(paste("figs/sterp_", reading_cond, ".png", sep=""), width=10, height=10)
-```
-
-```{r}
 # n400
 mean_amplitude_df |>
     filter(!(document_id %in% c(11, 12))) |>
@@ -453,27 +412,6 @@ reading_cond <- "RSVP" # both, SPR, or RSVP
 erp_df |>
     filter(.time < .5) |>
     filter(.key %in% c("Pz", "P3", "P7", "O1", "P4", "P8", "O2")) |>
-    filter(reading_type == reading_cond) |>
-    ggplot(aes(x = .time, y = .value)) +
-    stat_summary(
-        fun = "mean", geom = "line", alpha = 1, linewidth = 1,
-        aes(color = lp_quantile)
-    ) +
-    geom_vline(xintercept = 0, linetype = "dashed") +
-    annotate("rect", xmin = .05, xmax = .08, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkseagreen4") +
-    annotate("rect", xmin = .08, xmax = .12, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkorange") +
-    annotate("rect", xmin = .16, xmax = .2, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkseagreen4") +
-    annotate("rect", xmin = .2, xmax = .3, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkorange") +
-    eeguana::theme_eeguana() +
-    theme(legend.position = "bottom")
-```
-
-```{r}
-reading_cond <- "RSVP" # both, SPR, or RSVP
-
-sterp_df |>
-    filter(!is.na(lp)) |>
-    filter(.time < .5) |>
     filter(reading_type == reading_cond) |>
     ggplot(aes(x = .time, y = .value)) +
     stat_summary(
