@@ -37,7 +37,6 @@ Familiarity
 familiarity_responses <- responses_df |>
     filter(!document_id %in% c(11, 12)) |>
     filter(question_id == 0) |> # zero is familiarity
-    filter(response > 3) |>
     select(participant_number, document_id, response) |>
     rename("familiarity_response" = response)
 ```
