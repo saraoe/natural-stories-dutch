@@ -121,6 +121,7 @@ stim <- read.csv("data/stim.csv") |>
 rt_df <- list.files("data/spr", full.names = T, pattern = "rt_.*\\.csv$") |>
     lapply(read_mulple_sessions_csv) |>
     bind_rows() |>
+    mutate(word = str_replace_all(word, "\\p{quotation mark}", "'")) |> # remove fancy quotations
     select(-X, -participant_id, -participant_subfix) |>
     left_join(stim, by = c("story_name", "document_id", "word_n", "paragraph_n", "word")) |>
     left_join(familiarity_responses, by = c("document_id", "participant_number")) |>
@@ -217,8 +218,6 @@ plot(m2_rt, variable = "^b_s_wl", regex = TRUE)
 ### Load data
 ```{r}
 mean_amplitude_df <- read.csv("data/mean_amplitude_RSVP.csv") |>
-    select(-lp, -s_lp, -s_lp1, -s_lp2, -s_lp3) |>
-    left_join(stim) |>
     left_join(familiarity_responses, by = c("document_id", "participant_number")) |>
     left_join(content_responses, by = c("document_id", "participant_number")) |>
     mutate(lp_quantile = factor(lp_quantile, levels = c("low_lp", "med_lp", "high_lp")))
@@ -364,9 +363,10 @@ erp_df |>
     annotate("rect", xmin = .3, xmax = .5, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkseagreen4") +
     eeguana::theme_eeguana() +
     theme(legend.position = "bottom") +
-    facet_wrap(. ~ participant_number)
+    facet_wrap(. ~ participant_number) +
+    labs(color = "")
 
-# ggsave(paste("figs/erp_", reading_cond, "_relevant_chs.png", sep=""), width=10, height=10)
+# ggsave(paste("figs/erp_", reading_cond, "_relevant_chs.png", sep = ""), width = 10, height = 10)
 ```
 
 ```{r}

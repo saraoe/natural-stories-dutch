@@ -138,7 +138,7 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
 
 ## Loop over eeg-files ##
 for (eeg_file in eeg_files) {
-    start.time <- Sys.time()
+    start_time <- Sys.time()
     n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", eeg_file))
     exclude_chs <- exclude_df |> filter(participant_number == n & !is.na(ch))
     exclude_docs <- exclude_df |> filter(participant_number == n & !is.na(document_id))
@@ -153,6 +153,7 @@ for (eeg_file in eeg_files) {
     rt_df <- list.files("data/spr", full.names = T, pattern = paste("rt_.*_", n, "_.*\\.csv$", sep = "")) |>
         lapply(read_rt_csv) |>
         bind_rows() |>
+        mutate(word = str_replace_all(word, "\\p{quotation mark}", "'")) |> # remove fancy quotations
         select(-X, -participant_id, -participant_subfix) |>
         left_join(stim, by = c("story_name", "document_id", "word_n", "paragraph_n", "word")) |>
         mutate(
@@ -163,7 +164,7 @@ for (eeg_file in eeg_files) {
             trial = ifelse(document_id > 10, trial - 0.5, trial),
         ) |>
         arrange(trial, paragraph_n, word_n)
-    rt_df$segment <- 1:nrow(rt_df)
+    rt_df$segment <- seq - len(nrow(rt_df))
 
     ### test
     if (!test_n_triggers(raw_eeg)) {
@@ -338,8 +339,8 @@ for (eeg_file in eeg_files) {
         mean_amplitude_df <- tmp_mean_amplitude
     }
 
-    end.time <- Sys.time()
-    print(paste("Time for participant", n, ":", end.time - start.time))
+    end_time <- Sys.time()
+    print(paste("Time for participant", n, ":", end_time - start_time))
 }
 
 ### write csv
