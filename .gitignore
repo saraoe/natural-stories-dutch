@@ -14,3 +14,5 @@ paper/data/spr/*
 paper/data/*.csv
 paper/figs/preprocessing/*
 paper/src/brms_models/*
+paper/figs/*
+paper/src/cloze*
