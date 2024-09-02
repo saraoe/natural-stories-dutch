@@ -6,6 +6,7 @@ library(eeguana)
 library(ggplot2)
 library(tidytable)
 library(readxl)
+library(stringr)
 
 setwd("paper")
 source("src/svd_erp.r")
@@ -31,15 +32,18 @@ read_rt_csv <- function(filename) {
 
 inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
     reject_eyeblinks <- epochs |>
-        eeg_group_by(segment) |>
+        eeg_select(Fp1, Fp2, VEOG) |>
         events_tbl() |>
-        filter(grepl("minmax_threshold=180", .description, fixed = TRUE)) |>
+        filter(!is.na(.channel)) |>
+        filter(
+            (any(grepl("direction=below", .description, fixed = TRUE)) &
+                any(grepl("direction=above", .description, fixed = TRUE))),
+            .by = .id
+        ) |>
         group_by(.id) |>
-        summarize(N = n()) |>
-        filter(N >= 2)
+        summarize(N = n())
 
     reject_eyemovements <- epochs |>
-        eeg_group_by(segment) |>
         events_tbl() |>
         filter(grepl("step_threshold", .description, fixed = TRUE)) |>
         group_by(.id) |>
@@ -47,9 +51,8 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
         filter(!(.id %in% reject_eyeblinks$.id))
 
     reject_ptp <- epochs |>
-        eeg_group_by(segment) |>
         events_tbl() |>
-        filter(grepl("minmax_threshold=200", .description, fixed = TRUE)) |>
+        filter(grepl("minmax_threshold", .description, fixed = TRUE)) |>
         group_by(.id) |>
         summarize(N = n()) |>
         filter(N >= 3 & !(.id %in% c(reject_eyeblinks$.id, reject_eyemovements$.id)))
@@ -205,29 +208,38 @@ for (eeg_file in eeg_files) {
     artif_detect <- eeg_segment(raw_filt,
         .start = .description < 20,
         .end = .description == 203
-    ) |>
-        eeguana::eeg_artif_minmax(-HEOG, -VEOG,
+    ) |> # artifacts in EEG channels
+        eeg_artif_minmax(-HEOG, -VEOG,
             .threshold = 200,
             .window = 200,
             .unit = "ms"
-        ) |>
-        eeguana::eeg_artif_minmax(VEOG, Fp1, Fp2,
-            .threshold = 180,
-            .window = 200,
-            .unit = "ms"
-        ) |>
+        ) |> # eye movements
         eeguana::eeg_artif_step(HEOG,
             .threshold = 50,
             .window = 200,
             .unit = "ms"
+        ) |>
+        eeg_segment(
+            .description %in% c(101, 102),
+            .lim = c(-0.2, 1.2)
+        ) |> # eye blinks
+        eeg_artif_peak(Fp1, Fp2,
+            .threshold = 50,
+            .window = 200,
+            .unit = "ms",
+            .direction = "above"
+        ) |>
+        eeg_artif_peak(VEOG,
+            .threshold = 100,
+            .window = 200,
+            .unit = "ms",
+            .direction = "below"
         )
+
 
     ### create epochs
     # epoching
-    epochs <- eeguana::eeg_segment(artif_detect,
-        .description %in% c(101, 102),
-        .lim = c(-0.2, 1.2)
-    ) |>
+    epochs <- artif_detect |>
         eeg_left_join(rt_df) |>
         eeg_filter(!document_id %in% exclude_docs) |>
         # only include RSVP for preliminary analysis - delete this later!
@@ -236,7 +248,7 @@ for (eeg_file in eeg_files) {
     rt_df <- inspect_rejected(epochs,
         participant_n = n,
         rt_df = rt_df,
-        save_figs = FALSE
+        save_figs = TRUE
     )
 
     epochs <- epochs |>
