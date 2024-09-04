@@ -12,6 +12,11 @@ setwd("paper")
 source("src/svd_erp.r")
 source("src/file_checks.r")
 
+# save names
+# sterp_filename = "data/sterp.csv"
+erp_filename <- "data/erp_lp_RSVP.csv"
+mean_amplitude_filename <- "data/mean_amplitude_RSVP.csv"
+
 # files
 eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = ".bdf$")
 stim <- read.csv("data/stim.csv") |>
@@ -273,11 +278,8 @@ for (eeg_file in eeg_files) {
     #     left_join(rt_df, by="segment") |>
     #     filter(!document_id %in% exclude_docs)
 
-    # if (exists("sterp")) {
-    #     sterp <- rbind(sterp, svd_epochs)
-    # } else {
-    #     sterp <- svd_epochs
-    # }
+    # write.table(svd_epochs, erp_filename, sep = ",", col.names = !file.exists(erp_filename), row.names = FALSE, append = TRUE)
+
 
     ### create csv-files
     # ERPs for plotting
@@ -310,11 +312,14 @@ for (eeg_file in eeg_files) {
     tmp_erp <- rbind(erp_lp_all, erp_lp_spr, erp_lp_rsvp) |>
         select(-.recording)
 
-    if (exists("erp_df")) {
-        erp_df <- rbind(erp_df, tmp_erp)
-    } else {
-        erp_df <- tmp_erp
-    }
+    write.table(
+        tmp_erp,
+        erp_filename,
+        sep = ",",
+        col.names = !file.exists(erp_filename),
+        row.names = FALSE,
+        append = TRUE
+    )
 
     # mean amplitudes
     amplitude_n400 <- epochs |>
@@ -349,20 +354,22 @@ for (eeg_file in eeg_files) {
         rename(n400 = .value) |>
         select(-.key) |>
         left_join(
-            amplitude_n170 |> as_tidytable() |> rename(n170 = .value) |> select(-.key)
+            amplitude_n170 |>
+                as_tidytable() |>
+                rename(n170 = .value) |>
+                select(-.key)
         )
 
-    if (exists("mean_amplitude_df")) {
-        mean_amplitude_df <- rbind(mean_amplitude_df, tmp_mean_amplitude)
-    } else {
-        mean_amplitude_df <- tmp_mean_amplitude
-    }
+    write.table(
+        tmp_mean_amplitude,
+        mean_amplitude_filename,
+        sep = ",",
+        col.names = !file.exists(mean_amplitude_filename),
+        row.names = FALSE,
+        append = TRUE
+    )
+
 
     end_time <- Sys.time()
     print(paste("Time for participant", n, ":", end_time - start_time))
 }
-
-### write csv
-# write.csv(sterp, "data/sterp.csv")
-write.csv(erp_df, "data/erp_lp_RSVP.csv")
-write.csv(mean_amplitude_df, "data/mean_amplitude_RSVP.csv")
