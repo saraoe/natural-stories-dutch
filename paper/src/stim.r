@@ -18,7 +18,7 @@ stim <- read.csv(list.files("data/spr/",pattern = "rt_.*_1_.*\\.csv",full.names 
 
 # log probability and length of words
 causal_preload("GroNLP/gpt2-medium-dutch-embeddings")
-stim <- stim  |> 
+stim <- stim  |>
     mutate(lp = causal_lp(word,
                             by = document_id,
                             model = "GroNLP/gpt2-medium-dutch-embeddings",
