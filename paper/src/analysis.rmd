@@ -235,7 +235,7 @@ erp_df <- read.csv("data/erp_lp_RSVP.csv") |>
 reject_df <- mean_amplitude_df |>
     filter(!document_id %in% c(11, 12)) |>
     filter(!is.na(lp_quantile)) |>
-    group_by(participant_number, reading_type) |>
+    group_by(participant_number, reading_type, lp_quantile) |>
     summarize(
         "rejected_epochs" = (sum(is.na(n400)) / n()) * 100
     ) |>
@@ -250,14 +250,15 @@ erp_df <- erp_df |>
 ### Models
 N400 ~ Log-probability in RSVP for nouns, verbs, adjective, and adverbs
 ```{r}
-# with mean_amplitude_df
 data <- mean_amplitude_df |>
     filter(!(document_id %in% c(11, 12))) |>
     filter(reading_type == "RSVP") |>
     filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
     filter(percent_content_correct >= .8)
 
-m1_n400_formula <- bf(n400 ~ s_lp + (s_lp || participant_number) + (s_lp || word))
+m1_n400_formula <- bf(
+    n400 ~ s_lp + (s_lp || participant_number) #+ (s_lp || word)
+)
 
 m1_n400_priors <- c(
     prior(normal(0, 20), class = Intercept),
@@ -287,7 +288,6 @@ plot(m1_n400, variable = "^b", regex = TRUE)
 
 N400 ~ Log-probability and its spillover in RSVP for nouns, verbs, adjective, and adverbs
 ```{r}
-# with mean_amplitude_df
 data <- mean_amplitude_df |>
     filter(!(document_id %in% c(11, 12))) |>
     filter(reading_type == "RSVP") |>
@@ -325,6 +325,45 @@ mcmc_plot(m2_n400, variable = "^b_[^Intercept]", regex = TRUE)
 
 plot(m2_n400, variable = "^b", regex = TRUE)
 ```
+
+N170 ~ Log-probability in RSVP for nouns, verbs, adjective, and adverbs
+```{r}
+data <- mean_amplitude_df |>
+    filter(!(document_id %in% c(11, 12))) |>
+    filter(reading_type == "RSVP") |>
+    filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
+    filter(percent_content_correct >= .8)
+
+m1_n170_formula <- bf(
+    n170 ~ s_lp + (s_lp || participant_number) + (s_lp || word)
+)
+
+m1_n170_priors <- c(
+    prior(normal(0, 20), class = Intercept),
+    prior(normal(0, 10), class = b),
+    prior(normal(10, 20), class = sigma),
+    prior(normal(0, 10), class = sd)
+)
+
+m1_n170 <- brm(m1_n170_formula,
+    family = gaussian(),
+    prior = m1_n170_priors,
+    data = data,
+    chains = 2,
+    control = list(adapt_delta = 0.9),
+    backend = "cmdstanr",
+    # file = "src/brms_models/m1_rsvp_n170"
+)
+```
+
+```{r}
+summary(m1_n170)
+
+mcmc_plot(m1_n170, variable = "^b", regex = TRUE)
+
+plot(m1_n170, variable = "^b", regex = TRUE)
+```
+
 
 ### Plots
 N400
@@ -417,10 +456,26 @@ erp_df |>
         aes(color = lp_quantile)
     ) +
     geom_vline(xintercept = 0, linetype = "dashed") +
-    annotate("rect", xmin = .05, xmax = .08, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkseagreen4") +
-    annotate("rect", xmin = .08, xmax = .12, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkorange") +
-    annotate("rect", xmin = .16, xmax = .2, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkseagreen4") +
-    annotate("rect", xmin = .2, xmax = .3, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkorange") +
+    annotate(
+        "rect",
+        xmin = .05, xmax = .08, ymin = -Inf, ymax = Inf,
+        alpha = .1, fill = "darkseagreen4"
+    ) +
+    annotate(
+        "rect",
+        xmin = .08, xmax = .12, ymin = -Inf, ymax = Inf,
+        alpha = .1, fill = "darkorange"
+    ) +
+    annotate(
+        "rect",
+        xmin = .16, xmax = .2, ymin = -Inf, ymax = Inf,
+        alpha = .1, fill = "darkseagreen4"
+    ) +
+    annotate(
+        "rect",
+        xmin = .2, xmax = .3, ymin = -Inf, ymax = Inf,
+        alpha = .1, fill = "darkorange"
+    ) +
     eeguana::theme_eeguana() +
     theme(legend.position = "bottom")
 ```
