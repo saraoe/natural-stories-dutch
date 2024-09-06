@@ -6,17 +6,20 @@
 ├── mean_amplitude.csv  
 ├── erp_lp.csv    
 ├── spr
-│   └── ...     <- files from SPR EEG experiment
+│   └── ...     <- files from SPR-EEG experiment
 ├── cloze
 │   └── ...     <- files from Cloze Task
+└── epochs
+    └── ...     <- epochs after preprocessing
 
 ```
 
 ## Stim
 The file ``stim.csv`` includes information about the stimuli (words). 
-The log probability (lp) of the words have been extracted using a[ GPT2 based model fine-tuned for Dutch](https://huggingface.co/GroNLP/gpt2-medium-dutch-embeddings) from GroNLP and the package [Pangoling](https://github.com/bnicenboim/pangoling). 
+The log probability (lp) of the words have been extracted using a[ GPT2 based model fine-tuned for Dutch](https://huggingface.co/GroNLP/gpt2-medium-dutch-embeddings) from GroNLP and the package [Pangoling](https://github.com/bnicenboim/pangoling). This is done in ``src/stim.r``. 
 The word length (wl) is the number of characters including punctuation.
 The prefix *s_* indicates the variable has been scaled, and the subfix *n* (where n is a number) indicates the number of lag. E.g., *s_lp1* is the scaled log probability of the previous word.
+The part of speech (pos) tags of the stimuli is extracted using SpaCy and the *nl_core_news_sm* model. This is done in ``src/stim_pos.py``.
 
 ## Mean amplitude and ERP
 The csv-file ``mean_amplitude.csv`` contains the mean amplitude for specific channels in a specific time window (see table). The mean amplitudes are created in ``src/preprocessing.r``.
@@ -142,4 +145,6 @@ The **participant information** file include the following information:
     - best_reading_language: (str) *Kun je beter in het Nederlands lezen of in (een) andere taal/talen*
     - best_reading_language_named: (str) Name of the language the participant reads the best in
     - other_languages: (Dict[Dict[str or int]]) dictionary with other languages the participant speaks (keys) and when they learned and whether they speak in fluently or not (values)
-    
+
+## Epochs
+In the ``epochs`` folder, epochs created in the ``src/preprocessing.r`` are saved as RDS-files. Every files is epochs from a single participant, and the name is the participant number.
