@@ -274,7 +274,14 @@ for (eeg_file in eeg_files) {
             left_join(rt_df, by = "segment") |>
             filter(!document_id %in% exclude_docs)
 
-        write.table(svd_epochs, erp_filename, sep = ",", col.names = !file.exists(erp_filename), row.names = FALSE, append = TRUE)
+        write.table(
+            svd_epochs,
+            erp_filename,
+            sep = ",",
+            col.names = !file.exists(erp_filename),
+            row.names = FALSE,
+            append = TRUE
+        )
     }
 
     end_time <- Sys.time()
