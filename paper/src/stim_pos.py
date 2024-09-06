@@ -1,5 +1,5 @@
 """
-Cloze values from BLOOM 
+Part of speech (pos) tags of words in corpus
 """
 
 import spacy

@@ -7,14 +7,8 @@ library(brms)
 
 setwd("paper")
 options(mc.cores = parallel::detectCores())
-```
 
-```{r}
-read_mulple_sessions_csv <- function(filename) {
-    df <- read.csv(filename)
-    df$session <- as.numeric(gsub(".*?([0-9]+)\\.csv$", "\\1", filename))
-    return(df)
-}
+source("src/util.r")
 ```
 
 ## Comprehension Questions
@@ -25,24 +19,18 @@ responses_df <- list.files(
     "data/spr",
     full.names = TRUE, pattern = "responses_.*\\.csv$"
 ) |>
-    lapply(read_mulple_sessions_csv) |>
+    lapply(read_multiple_sessions_csv) |>
     bind_rows() |>
     arrange(participant_number, document_id)
-```
 
-# Inspect data
-
-Familiarity
-```{r}
+# Familiarity
 familiarity_responses <- responses_df |>
     filter(!document_id %in% c(11, 12)) |>
     filter(question_id == 0) |> # zero is familiarity
     select(participant_number, document_id, response) |>
     rename("familiarity_response" = response)
-```
 
-Content
-```{r}
+# Content
 content_responses <- responses_df |>
     filter(!document_id %in% c(11, 12)) |>
     filter(question_id > 0) |> # zero is familiarity
@@ -119,7 +107,7 @@ stim <- read.csv("data/stim.csv") |>
     )
 
 rt_df <- list.files("data/spr", full.names = T, pattern = "rt_.*\\.csv$") |>
-    lapply(read_mulple_sessions_csv) |>
+    lapply(read_multiple_sessions_csv) |>
     bind_rows() |>
     mutate(word = str_replace_all(word, "\\p{quotation mark}", "'")) |> # remove fancy quotations
     select(-X, -participant_id, -participant_subfix) |>
@@ -257,7 +245,7 @@ data <- mean_amplitude_df |>
     filter(percent_content_correct >= .8)
 
 m1_n400_formula <- bf(
-    n400 ~ s_lp + (s_lp || participant_number) #+ (s_lp || word)
+    n400 ~ s_lp + (s_lp || participant_number) + (s_lp || word)
 )
 
 m1_n400_priors <- c(
@@ -402,7 +390,7 @@ erp_df |>
     annotate("rect", xmin = .3, xmax = .5, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkseagreen4") +
     eeguana::theme_eeguana() +
     theme(legend.position = "bottom") +
-    facet_wrap(. ~ participant_number) +
+    # facet_wrap(. ~ participant_number) +
     labs(color = "")
 
 # ggsave(paste("figs/erp_", reading_cond, "_relevant_chs.png", sep = ""), width = 10, height = 10)

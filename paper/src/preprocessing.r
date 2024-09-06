@@ -11,11 +11,11 @@ library(stringr)
 setwd("paper")
 source("src/svd_erp.r")
 source("src/file_checks.r")
+source("src/util.r")
 
-# save names
-# sterp_filename = "data/sterp.csv"
-erp_filename <- "data/erp_lp_RSVP.csv"
-mean_amplitude_filename <- "data/mean_amplitude_RSVP.csv"
+# single trial erps
+do_sterp <- FALSE
+sterp_filename <- "data/sterp.csv"
 
 # files
 eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = ".bdf$")
@@ -29,12 +29,6 @@ stim <- read.csv("data/stim.csv") |>
 exclude_df <- read_excel("data/exclude.xlsx")
 
 ## functions ##
-read_rt_csv <- function(filename) {
-    df <- read.csv(filename)
-    df$session <- as.numeric(gsub(".*?([0-9]+)\\.csv$", "\\1", filename))
-    return(df)
-}
-
 inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
     reject_eyeblinks <- epochs |>
         eeg_select(Fp1, Fp2, VEOG) |>
@@ -164,7 +158,7 @@ for (eeg_file in eeg_files) {
         full.names = TRUE,
         pattern = paste("rt_.*_", n, "_.*\\.csv$", sep = "")
     ) |>
-        lapply(read_rt_csv) |>
+        lapply(read_multiple_sessions_csv) |>
         bind_rows() |>
         mutate( # remove fancy quotations
             word = str_replace_all(word, "\\p{quotation mark}", "'")
@@ -271,104 +265,19 @@ for (eeg_file in eeg_files) {
             .drop_events = TRUE, .n_chs = 3
         )
 
-    # svd_epochs <- epochs |>
-    #     eeg_filter(!document_id %in% c(11, 12)) |>  # remove practice texts
-    #     eeg_select(-M1, -M2, -VEOG, -HEOG) |>
-    #     svd_erp() |>
-    #     left_join(rt_df, by="segment") |>
-    #     filter(!document_id %in% exclude_docs)
+    # save epochs
+    saveRDS(epochs, paste("data/epochs/", n, ".rds", sep = ""))
 
-    # write.table(svd_epochs, erp_filename, sep = ",", col.names = !file.exists(erp_filename), row.names = FALSE, append = TRUE)
+    if (do_sterp) {
+        svd_epochs <- epochs |>
+            eeg_filter(!document_id %in% c(11, 12)) |> # remove practice texts
+            eeg_select(-M1, -M2, -VEOG, -HEOG) |>
+            svd_erp() |>
+            left_join(rt_df, by = "segment") |>
+            filter(!document_id %in% exclude_docs)
 
-
-    ### create csv-files
-    # ERPs for plotting
-    erp_lp_all <- epochs |>
-        eeg_filter(!is.na(lp_quantile)) |>
-        eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
-        eeg_group_by(.sample, lp_quantile, participant_number) |>
-        eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
-        as_tidytable() |>
-        mutate("reading_type" = "both")
-
-    erp_lp_spr <- epochs |>
-        eeg_filter(reading_type == "SPR") |>
-        eeg_filter(!is.na(lp_quantile)) |>
-        eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
-        eeg_group_by(.sample, lp_quantile, participant_number) |>
-        eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
-        as_tidytable() |>
-        mutate("reading_type" = "SPR")
-
-    erp_lp_rsvp <- epochs |>
-        eeg_filter(reading_type == "RSVP") |>
-        eeg_filter(!is.na(lp_quantile)) |>
-        eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
-        eeg_group_by(.sample, lp_quantile, participant_number) |>
-        eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
-        as_tidytable() |>
-        mutate("reading_type" = "RSVP")
-
-    tmp_erp <- rbind(erp_lp_all, erp_lp_spr, erp_lp_rsvp) |>
-        select(-.recording)
-
-    write.table(
-        tmp_erp,
-        erp_filename,
-        sep = ",",
-        col.names = !file.exists(erp_filename),
-        row.names = FALSE,
-        append = TRUE
-    )
-
-    # mean amplitudes
-    amplitude_n400 <- epochs |>
-        eeg_filter(between(as_time(.sample, .unit = "s"), .3, .5)) |>
-        eeg_group_by(segment, .sample) |>
-        eeg_summarize(
-            "mean_amplitude_sample" = chs_mean(across(c(
-                "Cz", "Pz", "C4", "CP6", "P4", "P3", "CP5", "C3", "P8", "PO3", "PO4", "P7"
-            )), na.rm = TRUE)
-        ) |>
-        eeg_group_by(segment) |>
-        eeg_summarize(
-            "mean_amplitude" = mean(mean_amplitude_sample)
-        )
-
-    amplitude_n170 <- epochs |>
-        eeg_filter(between(as_time(.sample, .unit = "s"), .16, .21)) |>
-        eeg_group_by(segment, .sample) |>
-        eeg_summarize(
-            "mean_amplitude_sample" = chs_mean(across(c(
-                "O1", "Oz", "O2"
-            )), na.rm = TRUE)
-        ) |>
-        eeg_group_by(segment) |>
-        eeg_summarize(
-            "n170_mean_amplitude" = mean(mean_amplitude_sample)
-        ) |>
-        eeg_left_join(rt_df, by = "segment")
-
-    tmp_mean_amplitude <- amplitude_n400 |>
-        as_tidytable() |>
-        rename(n400 = .value) |>
-        select(-.key) |>
-        left_join(
-            amplitude_n170 |>
-                as_tidytable() |>
-                rename(n170 = .value) |>
-                select(-.key)
-        )
-
-    write.table(
-        tmp_mean_amplitude,
-        mean_amplitude_filename,
-        sep = ",",
-        col.names = !file.exists(mean_amplitude_filename),
-        row.names = FALSE,
-        append = TRUE
-    )
-
+        write.table(svd_epochs, erp_filename, sep = ",", col.names = !file.exists(erp_filename), row.names = FALSE, append = TRUE)
+    }
 
     end_time <- Sys.time()
     print(paste("Time for participant", n, ":", end_time - start_time))
