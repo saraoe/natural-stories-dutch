@@ -240,9 +240,7 @@ for (eeg_file in eeg_files) {
     # epoching
     epochs <- artif_detect |>
         eeg_left_join(rt_df) |>
-        eeg_filter(!document_id %in% exclude_docs) |>
-        # only include RSVP for preliminary analysis - delete this later!
-        eeg_filter(reading_type == "RSVP")
+        eeg_filter(!document_id %in% exclude_docs)
 
     rt_df <- inspect_rejected(epochs,
         participant_n = n,

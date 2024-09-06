@@ -12,8 +12,8 @@ setwd("paper")
 source("src/util.r")
 
 # save names
-erp_filename <- "data/erp_lp.csv"
-mean_amplitude_filename <- "data/mean_amplitude.csv"
+erp_filename <- "data/erp_lp_RSVP.csv"
+mean_amplitude_filename <- "data/mean_amplitude_RSVP.csv"
 
 ### files
 epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = ".rds$")
@@ -144,7 +144,9 @@ for (epoch_file in epoch_files) {
 
     # load data
     exclude_chs <- exclude_df |> filter(participant_number == n & !is.na(ch))
-    epochs <- readRDS(epoch_file)
+    epochs <- readRDS(epoch_file) |>
+        # only include RSVP for preliminary analysis - delete this later!
+        eeg_filter(reading_type == "RSVP")
     rt_df <- list.files(
         "data/spr",
         full.names = TRUE,
