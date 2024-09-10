@@ -180,6 +180,10 @@ for (eeg_file in eeg_files) {
         print("Number of words in every story does not match!")
         next
     }
+    if (!test_order_stories(rt_df, raw_eeg)) {
+        print("Order of stories in raw_eeg and rt_df does not match!")
+        next
+    }
 
     ### preprocessing
     # using the 1020 layout

@@ -58,6 +58,14 @@ test_n_words <- function(rt_df, n_words) {
   return(all(check_df$check))
 }
 
+test_order_stories <- function(rt_df, raw_eeg) {
+  story_events <- raw_eeg |>
+    events_tbl() |>
+    filter(.description < 20)
+
+  return(all(unique(rt_df$document_id) == story_events$.description))
+}
+
 
 
 fix_trigger_description <- function(raw_eeg, participant_number) {
