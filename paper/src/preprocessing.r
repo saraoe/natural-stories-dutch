@@ -18,7 +18,7 @@ do_sterp <- FALSE
 sterp_filename <- "data/sterp.csv"
 
 # files
-eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = ".bdf$")[10]
+eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")
 stim <- read.csv("data/stim.csv") |>
     mutate(
         lp_quantile = ifelse(
