@@ -219,6 +219,20 @@ erp_df <- read.csv("data/erp_lp_RSVP.csv") |>
 
 
 ```{r}
+# how many epochs was removed due to artifacts?
+mean_amplitude_df |>
+    filter(!document_id %in% c(11, 12)) |>
+    group_by(participant_number) |>
+    mutate("n_epochs" = n()) |>
+    filter(!is.na(reject_reason)) |>
+    group_by(participant_number, reject_reason) |>
+    summarize(
+        "percent_rejected" = (n() / unique(n_epochs)) * 100,
+        n(),
+        unique(n_epochs)
+    ) |>
+    filter(percent_rejected > 20)
+
 # filter based on amount of rejected epochs
 reject_df <- mean_amplitude_df |>
     filter(!document_id %in% c(11, 12)) |>

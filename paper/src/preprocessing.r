@@ -18,7 +18,7 @@ do_sterp <- FALSE
 sterp_filename <- "data/sterp.csv"
 
 # files
-eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = ".bdf$")
+eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = ".bdf$")[10]
 stim <- read.csv("data/stim.csv") |>
     mutate(
         lp_quantile = ifelse(
@@ -247,19 +247,20 @@ for (eeg_file in eeg_files) {
         rt_df = rt_df,
         save_figs = TRUE
     )
+    eyeblink_segments <- rt_df |> filter(reject_reason == "eyeblink")
 
     epochs <- epochs |>
         eeguana::eeg_baseline() |>
-        eeg_events_to_NA( # if threhold is exceeded in two channels Fp1, Fp2, and VEOG
-            grepl("minmax_threshold=180", .description, fixed = TRUE),
+        eeg_events_to_NA( # if above in one of Fp1 or Fp2 and below in VEOG
+            .id %in% eyeblink_segments$segment,
             .drop_events = TRUE, .n_chs = 2
         ) |>
         eeg_events_to_NA( # eyemovements detected in HEOG
             grepl("step_threshold", .description, fixed = TRUE),
             .drop_events = TRUE, .n_chs = 1
         ) |>
-        eeg_events_to_NA( # other signal with a ptp above 150
-            grepl("minmax_threshold=200", .description, fixed = TRUE),
+        eeg_events_to_NA( # other signal with a ptp above 200
+            grepl("minmax_threshold", .description, fixed = TRUE),
             .drop_events = TRUE, .n_chs = 3
         )
 
