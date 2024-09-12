@@ -266,7 +266,8 @@ for (eeg_file in eeg_files) {
         eeg_events_to_NA( # other signal with a ptp above 200
             grepl("minmax_threshold", .description, fixed = TRUE),
             .drop_events = TRUE, .n_chs = 3
-        )
+        ) |>
+        eeg_left_join(rt_df, by = "segment")
 
     # save epochs
     saveRDS(epochs, paste("data/epochs/", n, ".rds", sep = ""))

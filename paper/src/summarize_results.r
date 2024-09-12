@@ -12,8 +12,8 @@ setwd("paper")
 source("src/util.r")
 
 # save names
-erp_filename <- "data/erp_lp_RSVP.csv"
-mean_amplitude_filename <- "data/mean_amplitude_RSVP.csv"
+erp_filename <- "data/erp_lp.csv"
+mean_amplitude_filename <- "data/mean_amplitude.csv"
 
 ### files
 epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = ".rds$")
@@ -29,43 +29,66 @@ exclude_df <- read_excel("data/exclude.xlsx")
 if (file.exists(erp_filename)) {
     cur_erp_df <- read.csv(erp_filename)
     cur_erp_participants <- unique(cur_erp_df$participant_number)
+} else {
+    cur_erp_participants <- c()
 }
 if (file.exists(mean_amplitude_filename)) {
     cur_mean_df <- read.csv(mean_amplitude_filename)
     cur_mean_participants <- unique(cur_mean_df$participant_number)
+} else {
+    cur_mean_participants <- c()
 }
 
 ### functions
-make_erps <- function(epochs, filename) {
+make_erps <- function(epochs, reading_cond, filter_action_words) {
+    if (filter_action_words) {
+        erps <- epochs |>
+            eeg_filter(reading_type == reading_cond) |>
+            eeg_filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
+            eeg_filter(!is.na(lp_quantile)) |>
+            eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
+            eeg_group_by(.sample, lp_quantile, participant_number) |>
+            eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
+            as_tidytable() |>
+            select(-.recording, -.id) |>
+            mutate("reading_type" = reading_cond) |>
+            rename(".value_action_words" = .value)
+    } else {
+        erps <- epochs |>
+            eeg_filter(reading_type == reading_cond) |>
+            eeg_filter(!is.na(lp_quantile)) |>
+            eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
+            eeg_group_by(.sample, lp_quantile, participant_number) |>
+            eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
+            as_tidytable() |>
+            select(-.recording, -.id) |>
+            mutate("reading_type" = reading_cond)
+    }
+    return(erps)
+}
+
+write_erps <- function(epochs, filename) {
     print(">>> ERPs")
-    erp_lp_all <- epochs |>
-        eeg_filter(!is.na(lp_quantile)) |>
-        eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
-        eeg_group_by(.sample, lp_quantile, participant_number) |>
-        eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
-        as_tidytable() |>
-        mutate("reading_type" = "both")
 
-    erp_lp_spr <- epochs |>
-        eeg_filter(reading_type == "SPR") |>
-        eeg_filter(!is.na(lp_quantile)) |>
-        eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
-        eeg_group_by(.sample, lp_quantile, participant_number) |>
-        eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
-        as_tidytable() |>
-        mutate("reading_type" = "SPR")
+    erp_lp_spr <- make_erps(
+        epochs,
+        reading_cond = "SPR", filter_action_words = FALSE
+    )
+    erp_lp_rsvp <- make_erps(
+        epochs,
+        reading_cond = "RSVP", filter_action_words = FALSE
+    )
+    erp_lp_spr_aw <- make_erps(
+        epochs,
+        reading_cond = "SPR", filter_action_words = TRUE
+    )
+    erp_lp_rsvp_aw <- make_erps(
+        epochs,
+        reading_cond = "RSVP", filter_action_words = TRUE
+    )
 
-    erp_lp_rsvp <- epochs |>
-        eeg_filter(reading_type == "RSVP") |>
-        eeg_filter(!is.na(lp_quantile)) |>
-        eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
-        eeg_group_by(.sample, lp_quantile, participant_number) |>
-        eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
-        as_tidytable() |>
-        mutate("reading_type" = "RSVP")
-
-    tmp_erp <- rbind(erp_lp_all, erp_lp_spr, erp_lp_rsvp) |>
-        select(-.recording)
+    tmp_erp <- rbind(erp_lp_spr, erp_lp_rsvp) |>
+        left_join(rbind(erp_lp_spr_aw, erp_lp_rsvp_aw))
 
     write.table(
         tmp_erp,
@@ -77,7 +100,7 @@ make_erps <- function(epochs, filename) {
     )
 }
 
-calc_mean_amplitude <- function(epochs, rt_df, exclude_chs, filename) {
+write_mean_amplitude <- function(epochs, rt_df, exclude_chs, filename) {
     print(">>> mean amplitude")
     n400_chs <- c(
         "Cz", "Pz", "C4", "CP6", "P4", "P3",
@@ -144,9 +167,9 @@ for (epoch_file in epoch_files) {
 
     # load data
     exclude_chs <- exclude_df |> filter(participant_number == n & !is.na(ch))
-    epochs <- readRDS(epoch_file) |>
-        # only include RSVP for preliminary analysis - delete this later!
-        eeg_filter(reading_type == "RSVP")
+    epochs <- readRDS(epoch_file) #|>
+    # only include RSVP for preliminary analysis - delete this later!
+    # eeg_filter(reading_type == "RSVP")
     rt_df <- list.files(
         "data/spr",
         full.names = TRUE,
@@ -164,15 +187,21 @@ for (epoch_file in epoch_files) {
         ) |>
         arrange(trial, paragraph_n, word_n)
     rt_df$segment <- seq_len(nrow(rt_df))
+    reject_reasons <- epochs |>
+        segments_tbl() |>
+        select(reject_reason, segment)
+    rt_df <- rt_df |> left_join(reject_reasons)
 
     # summarize results
     if (!n %in% cur_erp_participants) {
-        make_erps(epochs, erp_filename)
+        write_erps(epochs, erp_filename)
     } else {
         print(paste("Participant", n, "is already in", erp_filename))
     }
     if (!n %in% cur_mean_participants) {
-        calc_mean_amplitude(epochs, rt_df, exclude_chs, mean_amplitude_filename)
+        write_mean_amplitude(
+            epochs, rt_df, exclude_chs, mean_amplitude_filename
+        )
     } else {
         print(paste("Participant", n, "is already in", mean_amplitude_filename))
     }
