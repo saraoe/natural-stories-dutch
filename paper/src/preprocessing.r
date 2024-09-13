@@ -267,7 +267,7 @@ for (eeg_file in eeg_files) {
             grepl("minmax_threshold", .description, fixed = TRUE),
             .drop_events = TRUE, .n_chs = 3
         ) |>
-        eeg_left_join(rt_df, by = "segment")
+        eeg_left_join(rt_df)
 
     # save epochs
     saveRDS(epochs, paste("data/epochs/", n, ".rds", sep = ""))
