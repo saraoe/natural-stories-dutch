@@ -161,7 +161,8 @@ for (eeg_file in eeg_files) {
         lapply(read_multiple_sessions_csv) |>
         bind_rows() |>
         mutate( # remove fancy quotations
-            word = str_replace_all(word, "\\p{quotation mark}", "'")
+            word = str_replace_all(word, "\\p{quotation mark}", "'"),
+            trial = ifelse(document_id > 10, trial - 0.5, trial)
         ) |>
         select(-X, -participant_id, -participant_subfix) |>
         left_join(
