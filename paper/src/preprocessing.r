@@ -203,7 +203,8 @@ for (eeg_file in eeg_files) {
         raw_eeg,
         -VEOG, -HEOG,
         .ref = c("M1", "M2")
-    )
+    ) |>
+        eeg_select(-M1, -M2)
 
     # filtering
     raw_filt <- eeguana::eeg_filt_band_pass(raw_eeg, .freq = c(.1, 30))
@@ -276,7 +277,7 @@ for (eeg_file in eeg_files) {
     if (do_sterp) {
         svd_epochs <- epochs |>
             eeg_filter(!document_id %in% c(11, 12)) |> # remove practice texts
-            eeg_select(-M1, -M2, -VEOG, -HEOG) |>
+            eeg_select(-VEOG, -HEOG) |>
             svd_erp() |>
             left_join(rt_df, by = "segment") |>
             filter(!document_id %in% exclude_docs)
