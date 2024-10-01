@@ -167,9 +167,10 @@ for (epoch_file in epoch_files) {
 
     # load data
     exclude_chs <- exclude_df |> filter(participant_number == n & !is.na(ch))
-    epochs <- readRDS(epoch_file) #|>
-    # only include RSVP for preliminary analysis - delete this later!
-    # eeg_filter(reading_type == "RSVP")
+    epochs <- readRDS(epoch_file) |>
+        # only include RSVP for preliminary analysis - delete this later!
+        # eeg_filter(reading_type == "RSVP") |>
+        as_eeg_lst()
     rt_df <- list.files(
         "data/spr",
         full.names = TRUE,
@@ -178,7 +179,8 @@ for (epoch_file in epoch_files) {
         lapply(read_multiple_sessions_csv) |>
         bind_rows() |>
         mutate( # remove fancy quotations
-            word = str_replace_all(word, "\\p{quotation mark}", "'")
+            word = str_replace_all(word, "\\p{quotation mark}", "'"),
+            trial = ifelse(document_id > 10, trial - 0.5, trial)
         ) |>
         select(-X, -participant_id, -participant_subfix) |>
         left_join(
