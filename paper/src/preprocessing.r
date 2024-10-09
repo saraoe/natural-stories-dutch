@@ -18,7 +18,7 @@ do_sterp <- FALSE
 sterp_filename <- "data/sterp.csv"
 
 # files
-eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")
+eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")[23:25]
 stim <- read.csv("data/stim.csv") |>
     mutate(
         lp_quantile = ifelse(
@@ -142,16 +142,19 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
 for (eeg_file in eeg_files) {
     start_time <- Sys.time()
     n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", eeg_file))
-    exclude_chs <- exclude_df |> filter(participant_number == n & !is.na(ch))
+    exclude_chs <- exclude_df |>
+        filter(participant_number == n & !is.na(ch)) |>
+        pull(ch)
     exclude_docs <- exclude_df |>
-        filter(participant_number == n & !is.na(document_id))
+        filter(participant_number == n & !is.na(document_id)) |>
+        pull(document_id)
     print(
         paste("Running participant: ", n, sep = "")
     )
 
     ### load files
     raw_eeg <- eeguana::read_edf(eeg_file) |>
-        eeg_select(-(exclude_chs$ch))
+        eeg_select(-(exclude_chs))
     raw_eeg <- fix_trigger_description(raw_eeg, n)
     rt_df <- list.files(
         "data/spr",
