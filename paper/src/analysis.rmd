@@ -107,13 +107,22 @@ stim <- read.csv("data/stim.csv") |>
         ),
     )
 
-rt_df <- list.files("data/spr", full.names = T, pattern = "rt_.*\\.csv$") |>
+rt_df <- list.files("data/spr",
+    full.names = TRUE,
+    pattern = "rt_.*\\.csv$"
+) |>
     lapply(read_multiple_sessions_csv) |>
     bind_rows() |>
-    mutate(word = str_replace_all(word, "\\p{quotation mark}", "'")) |> # remove fancy quotations
+    mutate( # remove fancy quotations
+        word = str_replace_all(word, "\\p{quotation mark}", "'")
+    ) |>
     select(-X, -participant_id, -participant_subfix) |>
-    left_join(stim, by = c("story_name", "document_id", "word_n", "paragraph_n", "word")) |>
-    left_join(familiarity_responses, by = c("document_id", "participant_number")) |>
+    left_join(stim,
+        by = c("story_name", "document_id", "word_n", "paragraph_n", "word")
+    ) |>
+    left_join(familiarity_responses,
+        by = c("document_id", "participant_number")
+    ) |>
     left_join(content_responses, by = c("document_id", "participant_number")) |>
     mutate(
         lp_quantile = ifelse(
