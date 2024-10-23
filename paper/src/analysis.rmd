@@ -1,6 +1,7 @@
 # Analysis of SPR-EEG data
 ```{r}
 library(ggplot2)
+library(eeguana)
 library(tidytable)
 library(stringr)
 library(brms)
@@ -462,11 +463,12 @@ erp_df |>
         aes(color = lp_quantile)
     ) +
     geom_vline(xintercept = 0, linetype = "dashed") +
-    annotate("rect", xmin = .3, xmax = .5, ymin = -Inf, ymax = Inf, alpha = .1, fill = "darkseagreen4") +
+    annotate("rect", xmin = .3, xmax = .5, ymin = -Inf, ymax = Inf, alpha = .1, fill = "slategray4") +
     eeguana::theme_eeguana() +
     theme(legend.position = "bottom") +
     # facet_wrap(. ~ participant_number) +
-    labs(color = "")
+    labs(color = "", y = "") +
+    scale_color_manual(values = c("steelblue1", "steelblue3", "steelblue4"))
 
 # ggsave(paste("figs/erp_", reading_cond, "_relevant_chs.png", sep = ""), width = 10, height = 10)
 ```
