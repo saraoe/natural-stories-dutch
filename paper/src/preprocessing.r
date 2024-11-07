@@ -18,7 +18,7 @@ do_sterp <- FALSE
 sterp_filename <- "data/sterp.csv"
 
 # files
-eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")[23:25]
+eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")[27:71]
 stim <- read.csv("data/stim.csv") |>
     mutate(
         lp_quantile = ifelse(
@@ -213,37 +213,45 @@ for (eeg_file in eeg_files) {
     raw_filt <- eeguana::eeg_filt_band_pass(raw_eeg, .freq = c(.1, 30))
 
     # artifact detection
-    artif_detect <- eeg_segment(raw_filt,
-        .start = .description < 20,
-        .end = .description == 203
-    ) |> # artifacts in EEG channels
-        eeg_artif_minmax(-HEOG, -VEOG,
-            .threshold = 200,
-            .window = 200,
-            .unit = "ms"
-        ) |> # eye movements
-        eeguana::eeg_artif_step(HEOG,
-            .threshold = 50,
-            .window = 200,
-            .unit = "ms"
-        ) |>
-        eeg_segment(
-            .description %in% c(101, 102),
-            .lim = c(-0.2, 1.2)
-        ) |> # eye blinks
-        eeg_artif_peak(Fp1, Fp2,
-            .threshold = 50,
-            .window = 200,
-            .unit = "ms",
-            .direction = "above"
-        ) |>
-        eeg_artif_peak(VEOG,
-            .threshold = 100,
-            .window = 200,
-            .unit = "ms",
-            .direction = "below"
-        )
-
+    tryCatch( # try catch in case there is an error in the data
+        expr = {
+            artif_detect <- eeg_segment(raw_filt,
+                .start = .description < 20,
+                .end = .description == 203
+            ) |> # artifacts in EEG channels
+                eeg_artif_minmax(-HEOG, -VEOG,
+                    .threshold = 200,
+                    .window = 200,
+                    .unit = "ms"
+                ) |> # eye movements
+                eeguana::eeg_artif_step(HEOG,
+                    .threshold = 50,
+                    .window = 200,
+                    .unit = "ms"
+                ) |>
+                eeg_segment(
+                    .description %in% c(101, 102),
+                    .lim = c(-0.2, 1.2)
+                ) |> # eye blinks
+                eeg_artif_peak(Fp1, Fp2,
+                    .threshold = 50,
+                    .window = 200,
+                    .unit = "ms",
+                    .direction = "above"
+                ) |>
+                eeg_artif_peak(VEOG,
+                    .threshold = 100,
+                    .window = 200,
+                    .unit = "ms",
+                    .direction = "below"
+                )
+        },
+        error = function(e) {
+            print("artifact detection error")
+            print(paste("participant number:", n))
+            next
+        }
+    )
 
     ### create epochs
     # epoching
