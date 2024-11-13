@@ -283,7 +283,8 @@ for (eeg_file in eeg_files) {
         eeg_left_join(rt_df)
 
     # save epochs
-    saveRDS(epochs, paste("data/epochs/", n, ".rds", sep = ""))
+    number <- ifelse(n < 10, paste("0", n, sep = ""), as.character(n))
+    saveRDS(epochs, paste("data/epochs/", number, ".rds", sep = ""))
 
     if (do_sterp) {
         svd_epochs <- epochs |>

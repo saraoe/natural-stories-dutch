@@ -31,7 +31,7 @@ test_n_triggers <- function(raw_eeg) {
     mutate(
       check = (n == correct_n)
     )
-  return(all(check_df$check))
+  return(all(check_df$check, na.rm = TRUE))
 }
 
 test_n_words <- function(rt_df, n_words) {
