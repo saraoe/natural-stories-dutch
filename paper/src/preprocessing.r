@@ -18,12 +18,14 @@ do_sterp <- FALSE
 sterp_filename <- "data/sterp.csv"
 
 # files
-eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")[27:71]
+eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")[1]
 stim <- read.csv("data/stim.csv") |>
     mutate(
-        lp_quantile = ifelse(
-            lp >= quantile(lp, na.rm = TRUE)[4], "high_lp",
-            ifelse(lp <= quantile(lp, na.rm = TRUE)[2], "low_lp", "med_lp")
+        lp_quantile = case_when(
+            lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
+            lp <= quantile(lp, na.rm = TRUE)[2] ~ "low_lp",
+            (lp > quantile(lp, na.rm = TRUE)[2] &
+                lp < quantile(lp, na.rm = TRUE)[4]) ~ "med_lp"
         ),
     )
 exclude_df <- read_excel("data/exclude.xlsx")
@@ -40,43 +42,66 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
             .by = .id
         ) |>
         group_by(.id) |>
-        summarize(N = n())
+        summarize(N = n()) |>
+        pull(.id)
 
     reject_eyemovements <- epochs |>
         events_tbl() |>
         filter(grepl("step_threshold", .description, fixed = TRUE)) |>
         group_by(.id) |>
         summarize(N = n()) |>
-        filter(!(.id %in% reject_eyeblinks$.id))
+        filter(!(.id %in% reject_eyeblinks)) |>
+        pull(.id)
 
-    reject_ptp <- epochs |>
+    reject_ptp_200 <- epochs |>
         events_tbl() |>
-        filter(grepl("minmax_threshold", .description, fixed = TRUE)) |>
+        filter(grepl("minmax_threshold=200", .description, fixed = TRUE)) |>
         group_by(.id) |>
         summarize(N = n()) |>
-        filter(N >= 3 & !(.id %in% c(reject_eyeblinks$.id, reject_eyemovements$.id)))
+        filter(
+            N >= 3 &
+                !(.id %in% c(reject_eyeblinks, reject_eyemovements))
+        ) |>
+        pull(.id)
 
-    n_reject <- nrow(reject_eyeblinks) + nrow(reject_eyemovements) + nrow(reject_ptp)
+    reject_ptp_400 <- epochs |>
+        events_tbl() |>
+        filter(grepl("minmax_threshold=400", .description, fixed = TRUE)) |>
+        group_by(.id) |>
+        summarize(N = n()) |>
+        filter(
+            !(.id %in% c(
+                reject_eyeblinks,
+                reject_eyemovements,
+                reject_ptp_200
+            ))
+        ) |>
+        pull(.id)
+
+    reject_ptp <- c(reject_ptp_200, reject_ptp_400)
+
+    n_reject <- (length(reject_eyeblinks) +
+        length(reject_eyemovements) +
+        length(reject_ptp))
     print(paste("#Rejected epochs:", n_reject))
     print(paste("%Rejected epochs:", n_reject / nrow(segments_tbl(epochs))))
 
     epochs <- epochs |>
         eeg_mutate(
-            "reject_reason" = ifelse(
-                segment %in% reject_eyeblinks$.id, "eyeblink", ifelse(
-                    segment %in% reject_eyemovements$.id, "eyemovement", ifelse(
-                        segment %in% reject_ptp$.id, "ptp", NA
-                    )
-                )
+            "reject_reason" = case_when(
+                segment %in% reject_eyeblinks ~ "eyeblink",
+                segment %in% reject_eyemovements ~ "eyemovement",
+                segment %in% reject_ptp ~ "ptp",
+                .default = NA
             )
         )
 
     if (save_figs) {
-        if (nrow(reject_eyeblinks) > 0) {
+        if (length(reject_eyeblinks) > 0) {
             p_artif_eyeblink <- epochs |>
                 eeg_filter(reject_reason == "eyeblink") |>
                 eeg_select(VEOG, Fp1, Fp2) |>
-                eeg_filter(segment %in% unique(reject_eyeblinks$.id)[1:200]) |> # only plot 200
+                eeg_filter(segment %in% unique(reject_eyeblinks)[1:200]) |> # only plot 200
                 ggplot(aes(x = .time, y = .value, color = .key)) +
                 geom_line() +
                 facet_wrap(~segment) +
@@ -89,11 +114,11 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
             )
         }
 
-        if (nrow(reject_eyemovements) > 0) {
+        if (length(reject_eyemovements) > 0) {
             p_artif_eyemovement <- epochs |>
                 eeg_filter(reject_reason == "eyemovement") |>
                 eeg_select(HEOG, VEOG) |>
-                eeg_filter(segment %in% unique(reject_eyemovements$.id)[1:200]) |> # only plot 200
+                eeg_filter(segment %in% unique(reject_eyemovements)[1:200]) |> # only plot 200
                 ggplot(aes(x = .time, y = .value, color = .key)) +
                 geom_line() +
                 facet_wrap(~segment) +
@@ -106,11 +131,11 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
             )
         }
 
-        if (nrow(reject_ptp) > 0) {
+        if (length(reject_ptp) > 0) {
             p_artif_ptp <- epochs |>
                 eeg_filter(reject_reason == "ptp") |>
                 eeg_select(-HEOG, -VEOG) |>
-                eeg_filter(segment %in% unique(reject_ptp$.id)[1:200]) |> # only plot 200
+                eeg_filter(segment %in% unique(reject_ptp)[1:200]) |> # only plot 200
                 ggplot(aes(x = .time, y = .value, color = .key)) +
                 geom_line() +
                 facet_wrap(~segment) +
@@ -126,12 +151,11 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
 
     rt_df <- rt_df |>
         mutate(
-            "reject_reason" = ifelse(
-                segment %in% reject_eyeblinks$.id, "eyeblink", ifelse(
-                    segment %in% reject_eyemovements$.id, "eyemovement", ifelse(
-                        segment %in% reject_ptp$.id, "ptp", NA
-                    )
-                )
+            "reject_reason" = case_when(
+                segment %in% reject_eyeblinks ~ "eyeblink",
+                segment %in% reject_eyemovements ~ "eyemovement",
+                segment %in% reject_ptp ~ "ptp",
+                .default = NA
             )
         )
     return(rt_df)
@@ -220,6 +244,11 @@ for (eeg_file in eeg_files) {
                 .end = .description == 203
             ) |> # artifacts in EEG channels
                 eeg_artif_minmax(-HEOG, -VEOG,
+                    .threshold = 400,
+                    .window = 200,
+                    .unit = "ms"
+                ) |>
+                eeg_artif_minmax(-HEOG, -VEOG,
                     .threshold = 200,
                     .window = 200,
                     .unit = "ms"
@@ -264,21 +293,27 @@ for (eeg_file in eeg_files) {
         rt_df = rt_df,
         save_figs = TRUE
     )
-    eyeblink_segments <- rt_df |> filter(reject_reason == "eyeblink")
+    eyeblink_segments <- rt_df |>
+        filter(reject_reason == "eyeblink") |>
+        pull(segment)
 
     epochs <- epochs |>
         eeguana::eeg_baseline() |>
         eeg_events_to_NA( # if above in one of Fp1 or Fp2 and below in VEOG
-            .id %in% eyeblink_segments$segment,
+            .id %in% eyeblink_segments,
             .drop_events = TRUE, .n_chs = 2
         ) |>
         eeg_events_to_NA( # eyemovements detected in HEOG
             grepl("step_threshold", .description, fixed = TRUE),
             .drop_events = TRUE, .n_chs = 1
         ) |>
-        eeg_events_to_NA( # other signal with a ptp above 200
-            grepl("minmax_threshold", .description, fixed = TRUE),
+        eeg_events_to_NA( # ptp above 200 in all eeg channels
+            grepl("minmax_threshold=200", .description, fixed = TRUE),
             .drop_events = TRUE, .n_chs = 3
+        ) |>
+        eeg_events_to_NA( # ptp above 400 in all eeg channels
+            grepl("minmax_threshold=400", .description, fixed = TRUE),
+            .drop_events = TRUE, .n_chs = 1
         ) |>
         eeg_left_join(rt_df)
 
