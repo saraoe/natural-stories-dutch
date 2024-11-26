@@ -18,7 +18,7 @@ do_sterp <- FALSE
 sterp_filename <- "data/sterp.csv"
 
 # files
-eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")[1]
+eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")
 stim <- read.csv("data/stim.csv") |>
     mutate(
         lp_quantile = case_when(
@@ -166,6 +166,9 @@ inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
 for (eeg_file in eeg_files) {
     start_time <- Sys.time()
     n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", eeg_file))
+    if (n %in% c(23, 24)) { # doesnt have eog channels
+        next
+    }
     exclude_chs <- exclude_df |>
         filter(participant_number == n & !is.na(ch)) |>
         pull(ch)
@@ -237,6 +240,7 @@ for (eeg_file in eeg_files) {
     raw_filt <- eeguana::eeg_filt_band_pass(raw_eeg, .freq = c(.1, 30))
 
     # artifact detection
+    artif_detect_error <- FALSE
     tryCatch( # try catch in case there is an error in the data
         expr = {
             artif_detect <- eeg_segment(raw_filt,
@@ -278,9 +282,12 @@ for (eeg_file in eeg_files) {
         error = function(e) {
             print("artifact detection error")
             print(paste("participant number:", n))
-            next
+            artif_detect_error <<- TRUE
         }
     )
+    if (artif_detect_error) {
+        next
+    }
 
     ### create epochs
     # epoching
