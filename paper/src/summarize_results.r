@@ -19,9 +19,11 @@ mean_amplitude_filename <- "data/mean_amplitude.csv"
 epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = ".rds$")
 stim <- read.csv("data/stim.csv") |>
     mutate(
-        lp_quantile = ifelse(
-            lp >= quantile(lp, na.rm = TRUE)[4], "high_lp",
-            ifelse(lp <= quantile(lp, na.rm = TRUE)[2], "low_lp", "med_lp")
+        lp_quantile = case_when(
+            lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
+            lp <= quantile(lp, na.rm = TRUE)[2] ~ "low_lp",
+            (lp > quantile(lp, na.rm = TRUE)[2] &
+                lp < quantile(lp, na.rm = TRUE)[4]) ~ "med_lp"
         ),
     )
 exclude_df <- read_excel("data/exclude.xlsx")
@@ -106,7 +108,7 @@ write_mean_amplitude <- function(epochs, rt_df, exclude_chs, filename) {
         "Cz", "Pz", "C4", "CP6", "P4", "P3",
         "CP5", "C3", "P8", "PO3", "PO4", "P7"
     )
-    n400_chs <- n400_chs[!n400_chs %in% exclude_chs$ch] # exclude
+    n400_chs <- n400_chs[!n400_chs %in% exclude_chs] # exclude
     amplitude_n400 <- epochs |>
         eeg_filter(between(as_time(.sample, .unit = "s"), .3, .5)) |>
         eeg_group_by(segment, .sample) |>
@@ -121,7 +123,7 @@ write_mean_amplitude <- function(epochs, rt_df, exclude_chs, filename) {
         )
 
     n170_chs <- c("O1", "Oz", "O2")
-    n170_chs <- n170_chs[!n170_chs %in% exclude_chs$ch] # exclude
+    n170_chs <- n170_chs[!n170_chs %in% exclude_chs] # exclude
     amplitude_n170 <- epochs |>
         eeg_filter(between(as_time(.sample, .unit = "s"), .16, .21)) |>
         eeg_group_by(segment, .sample) |>
@@ -166,10 +168,10 @@ for (epoch_file in epoch_files) {
     )
 
     # load data
-    exclude_chs <- exclude_df |> filter(participant_number == n & !is.na(ch))
+    exclude_chs <- exclude_df |>
+        filter(participant_number == n & !is.na(ch)) |>
+        pull(ch)
     epochs <- readRDS(epoch_file) |>
-        # only include RSVP for preliminary analysis - delete this later!
-        # eeg_filter(reading_type == "RSVP") |>
         as_eeg_lst()
     rt_df <- list.files(
         "data/spr",
