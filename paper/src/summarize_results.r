@@ -12,7 +12,7 @@ setwd("paper")
 source("src/util.r")
 
 # save names
-erp_filename <- "data/erp_lp.csv"
+erp_folder <- "data/erps"
 mean_amplitude_filename <- "data/mean_amplitude.csv"
 
 ### files
@@ -28,78 +28,35 @@ stim <- read.csv("data/stim.csv") |>
     )
 exclude_df <- read_excel("data/exclude.xlsx")
 
-if (file.exists(erp_filename)) {
-    cur_erp_df <- read.csv(erp_filename)
-    cur_erp_participants <- unique(cur_erp_df$participant_number)
-} else {
-    cur_erp_participants <- c()
-}
-if (file.exists(mean_amplitude_filename)) {
-    cur_mean_df <- read.csv(mean_amplitude_filename)
-    cur_mean_participants <- unique(cur_mean_df$participant_number)
-} else {
-    cur_mean_participants <- c()
-}
-
 ### functions
-make_erps <- function(epochs, reading_cond, filter_action_words) {
-    if (filter_action_words) {
-        erps <- epochs |>
-            eeg_filter(reading_type == reading_cond) |>
-            eeg_filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
-            eeg_filter(!is.na(lp_quantile)) |>
-            eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
-            eeg_group_by(.sample, lp_quantile, participant_number) |>
-            eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
-            as_tidytable() |>
-            select(-.recording, -.id) |>
-            mutate("reading_type" = reading_cond) |>
-            rename(".value_action_words" = .value)
-    } else {
-        erps <- epochs |>
-            eeg_filter(reading_type == reading_cond) |>
-            eeg_filter(!is.na(lp_quantile)) |>
-            eeg_filter(!(document_id %in% c(11, 12))) |> # exclude practice texts
-            eeg_group_by(.sample, lp_quantile, participant_number) |>
-            eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
-            as_tidytable() |>
-            select(-.recording, -.id) |>
-            mutate("reading_type" = reading_cond)
-    }
-    return(erps)
+get_participant_n <- function(file) {
+    return(gsub(".*?([0-9]+).*", "\\1", file))
 }
 
 write_erps <- function(epochs, filename) {
     print(">>> ERPs")
 
-    erp_lp_spr <- make_erps(
-        epochs,
-        reading_cond = "SPR", filter_action_words = FALSE
-    )
-    erp_lp_rsvp <- make_erps(
-        epochs,
-        reading_cond = "RSVP", filter_action_words = FALSE
-    )
-    erp_lp_spr_aw <- make_erps(
-        epochs,
-        reading_cond = "SPR", filter_action_words = TRUE
-    )
-    erp_lp_rsvp_aw <- make_erps(
-        epochs,
-        reading_cond = "RSVP", filter_action_words = TRUE
-    )
+    erps_all <- epochs |>
+        eeg_group_by(
+            .sample, lp_quantile, participant_number, document_id, reading_type
+        ) |>
+        eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
+        as_tidytable() |>
+        select(-.recording, -.id)
 
-    tmp_erp <- rbind(erp_lp_spr, erp_lp_rsvp) |>
-        left_join(rbind(erp_lp_spr_aw, erp_lp_rsvp_aw))
+    erps_action_words <- epochs |>
+        eeg_filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
+        eeg_group_by(
+            .sample, lp_quantile, participant_number, document_id, reading_type
+        ) |>
+        eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
+        as_tidytable() |>
+        select(-.recording, -.id) |>
+        rename(".value_action_words" = .value)
 
-    write.table(
-        tmp_erp,
-        filename,
-        sep = ",",
-        col.names = !file.exists(filename),
-        row.names = FALSE,
-        append = TRUE
-    )
+    erps <- erps_all |> left_join(erps_action_words)
+
+    write.csv(erps, file = filename)
 }
 
 write_mean_amplitude <- function(epochs, rt_df, exclude_chs, filename) {
@@ -159,10 +116,27 @@ write_mean_amplitude <- function(epochs, rt_df, exclude_chs, filename) {
     )
 }
 
+# skip already summarized participants
+erp_files <- list.files(erp_folder, full.names = TRUE, pattern = ".csv$")
+if (length(erp_files) > 0) {
+    cur_erp_participants <- erp_files |>
+        get_participant_n() |>
+        as.numeric()
+} else {
+    cur_erp_participants <- c()
+}
+if (file.exists(mean_amplitude_filename)) {
+    cur_mean_df <- read.csv(mean_amplitude_filename)
+    cur_mean_participants <- unique(cur_mean_df$participant_number)
+} else {
+    cur_mean_participants <- c()
+}
+
 ## loop through files
 for (epoch_file in epoch_files) {
     start_time <- Sys.time()
-    n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", epoch_file))
+    char_n <- get_participant_n(epoch_file)
+    n <- as.numeric(char_n)
     print(
         paste("Running participant: ", n, sep = "")
     )
@@ -198,9 +172,12 @@ for (epoch_file in epoch_files) {
 
     # summarize results
     if (!n %in% cur_erp_participants) {
-        write_erps(epochs, erp_filename)
+        write_erps(
+            epochs,
+            filename = paste(erp_folder, "/erps_", char_n, ".csv", sep = "")
+        )
     } else {
-        print(paste("Participant", n, "is already in", erp_filename))
+        print(paste("Participant", n, "is already in", erp_folder))
     }
     if (!n %in% cur_mean_participants) {
         write_mean_amplitude(

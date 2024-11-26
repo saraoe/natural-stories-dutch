@@ -21,14 +21,15 @@ The word length (wl) is the number of characters including punctuation.
 The prefix *s_* indicates the variable has been scaled, and the subfix *n* (where n is a number) indicates the number of lag. E.g., *s_lp1* is the scaled log probability of the previous word.
 The part of speech (pos) tags of the stimuli is extracted using SpaCy and the *nl_core_news_sm* model. This is done in ``src/stim_pos.py``.
 
-## Mean amplitude and ERP
-The csv-file ``mean_amplitude.csv`` contains the mean amplitude for specific channels in a specific time window (see table). The mean amplitudes are created in ``src/preprocessing.r``.
+## Mean amplitude and ERPs
+The csv-file ``mean_amplitude.csv`` contains the mean amplitude for specific channels in a specific time window (see table). The mean amplitudes are created in ``src/summarize_results.r``.
 
 | colname | channels | time window | 
 | --- | --- | --- |
-| n400 | Cz, Pz, C4, CP6, P4, P3, CP5, C3, P8, PO3, PO4, P7 | 300-500ms |
+| n400 | Cz, Pz, C4, CP6, P4, P3, CP5, C3, P8, PO3, PO4, P7 | 300-500 ms |
+| n170 | O1, Oz, O2 | 160-210 ms |
 
-The csv-file ``erp_lp.csv`` is also created in ``src/preprocessing.r``. This file contains ERP averaged for three different conditions: *high_lp* (log-probability of word in highest quartile), *low_lp* (log-probability of word in lowest quartile), and *med_lp* (words with log-probability between lowest and highest quartile). These ERPs have been averaged for trials with SPR, RSVP or both (indicated by the ``reading_type`` column).
+The csv-file ``erp_lp.csv`` is made in ``src/analysis.rmd`` and relies on the files from the ``erps/`` folder, which is created in ``src/summarize_results.r``. This file contains ERPs averaged for three different conditions: *high_lp* (log-probability of word in highest quartile), *low_lp* (log-probability of word in lowest quartile), and *med_lp* (words with log-probability between lowest and highest quartile). These ERPs have been averaged for trials with SPR, RSVP or both (indicated by the ``reading_type`` column) for either all words (``.value``) or only action words (``.value_action_words``).
 
 
 ## SPR EEG

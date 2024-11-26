@@ -12,6 +12,7 @@ experiment/src/test.py
 paper/data/cloze/*
 paper/data/spr/*
 paper/data/epochs/*
+paper/data/erps/*
 paper/data/*.csv
 paper/figs/preprocessing/*
 paper/figs/*

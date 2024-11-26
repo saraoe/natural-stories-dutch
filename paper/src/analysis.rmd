@@ -162,6 +162,8 @@ m1_rt <- brm(m1_rt_formula,
     backend = "cmdstanr",
     file = "src/brms_models/m1_rt"
 )
+
+pp_check(m1_rt)
 ```
 
 ```{r}
@@ -200,6 +202,8 @@ m2_rt <- brm(m2_rt_formula,
     backend = "cmdstanr",
     file = "src/brms_models/m2_rt"
 )
+
+pp_check(m2_rt)
 ```
 
 ```{r}
@@ -215,6 +219,7 @@ plot(m2_rt, variable = "^b_s_wl", regex = TRUE)
 
 ### Load data
 ```{r}
+# read mean_amplitudes
 mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
     left_join(
         familiarity_responses,
@@ -225,14 +230,6 @@ mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
         by = c("document_id", "participant_number")
     ) |>
     mutate(
-        lp_quantile = factor(lp_quantile,
-            levels = c("low_lp", "med_lp", "high_lp")
-        )
-    )
-
-erp_df <- read.csv("data/erp_lp.csv") |>
-    mutate(
-        .channel = .key,
         lp_quantile = factor(lp_quantile,
             levels = c("low_lp", "med_lp", "high_lp")
         )
@@ -272,6 +269,20 @@ mean_amplitude_df <- mean_amplitude_df |>
     left_join(reject_df, by = c("participant_number", "document_id"))
 ```
 
+```{r}
+# read erps
+erp_df <- read_filt_erps("data/erps/",
+    filename = "data/erp_lp.csv",
+    reject_df = reject_df
+) |>
+    mutate(
+        .channel = .key,
+        lp_quantile = factor(lp_quantile,
+            levels = c("low_lp", "med_lp", "high_lp")
+        )
+    )
+```
+
 ### Models
 N400 ~ Log-probability in RSVP for nouns, verbs, adjective, and adverbs
 ```{r}
@@ -300,7 +311,7 @@ m1_n400 <- brm(m1_n400_formula,
     control = list(adapt_delta = 0.9),
     backend = "cmdstanr",
     seed = 246,
-    # file = "src/brms_models/m1_rsvp_n400"
+    file = "src/brms_models/m1_rsvp_n400"
 )
 
 pp_check(m1_n400)
@@ -341,7 +352,7 @@ m2_n400 <- brm(m2_n400_formula,
     control = list(adapt_delta = 0.9),
     backend = "cmdstanr",
     seed = 246,
-    # file = "src/brms_models/m2_spr_n400"
+    file = "src/brms_models/m2_spr_n400"
 )
 
 pp_check(m2_n400)
@@ -466,7 +477,6 @@ erp_df |>
     )) |>
     filter(reading_type == reading_cond) |>
     ggplot(aes(x = .time, y = .value_action_words)) +
-    # geom_line(alpha = .1, aes(group = .id, color = Condition)) +
     stat_summary(
         fun = "mean", geom = "line", alpha = 1, linewidth = 1,
         aes(color = lp_quantile)
