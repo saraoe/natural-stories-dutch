@@ -43,18 +43,18 @@ read_filt_erps <- function(erp_folder, filename, reject_df, overwrite = FALSE) {
             tmp_erp <- rbind(erp_lp_spr, erp_lp_rsvp)
 
             # save for return
-            if (exists("erp_df")) {
-                erp_df <- rbind(erp_df, tmp_erp)
+            if (exists("erp_df_")) {
+                erp_df_ <- rbind(erp_df_, tmp_erp)
             } else {
-                erp_df <- tmp_erp
+                erp_df_ <- tmp_erp
             }
         }
         # save global erp file
-        write.csv(erp_df, filename)
+        write.csv(erp_df_, filename)
     } else {
-        erp_df <- read.csv(filename) |>
+        erp_df_ <- read.csv(filename) |>
             select(-X)
     }
 
-    return(erp_df)
+    return(erp_df_)
 }

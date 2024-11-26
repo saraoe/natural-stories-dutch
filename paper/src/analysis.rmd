@@ -273,7 +273,8 @@ mean_amplitude_df <- mean_amplitude_df |>
 # read erps
 erp_df <- read_filt_erps("data/erps/",
     filename = "data/erp_lp.csv",
-    reject_df = reject_df
+    reject_df = reject_df,
+    overwrite = FALSE
 ) |>
     mutate(
         .channel = .key,
