@@ -10,34 +10,37 @@ library(tidytable)
 library(stringr)
 
 # read csv
-stim <- read.csv(list.files("data/spr/",pattern = "rt_.*_1_.*\\.csv",full.names = TRUE)[1]) |>
+stim <- read.csv(list.files("data/spr/", pattern = "rt_.*_1_.*\\.csv", full.names = TRUE)[1]) |>
     select(story_name, document_id, word, word_n, paragraph_n) |>
-    mutate(word = str_replace_all(word, "\\p{quotation mark}", "'")) |>  # remove fancy quotations
+    mutate(word = str_replace_all(word, "\\p{quotation mark}", "'")) |> # remove fancy quotations
     arrange(document_id, paragraph_n, word_n)
 
 
 # log probability and length of words
 causal_preload("GroNLP/gpt2-medium-dutch-embeddings")
-stim <- stim  |>
+stim <- stim |>
     mutate(lp = causal_lp(word,
-                            by = document_id,
-                            model = "GroNLP/gpt2-medium-dutch-embeddings",
-                            batch_size = 10))
+        by = document_id,
+        model = "GroNLP/gpt2-medium-dutch-embeddings",
+        batch_size = 10
+    ))
 
 stim <- stim |>
     mutate(
         wl = nchar(word),
         s_lp = scale(lp),
+        s_wl = scale(wl),
+    ) |>
+    group_by(document_id) |>
+    mutate(
         s_lp1 = lag(s_lp),
         s_lp2 = lag(s_lp, 2),
         s_lp3 = lag(s_lp, 3),
-        s_wl = scale(wl),
         s_wl1 = lag(s_wl),
         s_wl2 = lag(s_wl, 2),
         s_wl3 = lag(s_wl, 3)
     ) |>
-    mutate(word = gsub("\"", "", word))  # rm newline
-
+    mutate(word = gsub("\"", "", word)) # rm newline
 
 # add the number of the word within every text
 stim$number_word <- c(
@@ -49,8 +52,8 @@ stim$number_word <- c(
     1:597, # 6
     1:600, # 7
     1:600, # 8
-    1:98,  # 11
-    1:74   # 12
+    1:98, # 11
+    1:74 # 12
 )
 
 
