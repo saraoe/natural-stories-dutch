@@ -8,7 +8,7 @@ filter_erps <- function(erps, reading_cond) {
         group_by(.time, .key, lp_quantile) |>
         summarize(
             ".value" = mean(.value),
-            ".value_action_words" = mean(.value_action_words)
+            ".value_content_words" = mean(.value_content_words)
         ) |>
         mutate("reading_type" = reading_cond)
     return(filt_erps)
@@ -18,7 +18,7 @@ update_erp_df <- function(cur_df, new_df) {
     new_df <- new_df |>
         rename(
             "value_new" = .value,
-            "value_aw_new" = .value_action_words
+            "value_cw_new" = .value_content_words
         ) |>
         mutate("n_subjects_new" = 1)
 
@@ -27,14 +27,14 @@ update_erp_df <- function(cur_df, new_df) {
         rowwise() |>
         mutate(
             ".value" = sum(.value, value_new, na.rm = TRUE),
-            ".value_action_words" = sum(
-                .value_action_words,
-                value_aw_new,
+            ".value_content_words" = sum(
+                .value_content_words,
+                value_cw_new,
                 na.rm = TRUE
             ),
             "n_subjects" = sum(n_subjects, n_subjects_new, na.rm = TRUE)
         ) |>
-        select(-value_new, -value_aw_new, -n_subjects_new)
+        select(-value_new, -value_cw_new, -n_subjects_new)
 
     return(updated_df)
 }
@@ -74,7 +74,7 @@ read_filt_erps <- function(erp_folder, filename, reject_df, overwrite = FALSE) {
         erp_df_ <- erp_df_ |>
             mutate(
                 ".value" = .value / n_subjects,
-                ".value_action_words" = .value_action_words / n_subjects
+                ".value_content_words" = .value_content_words / n_subjects
             )
 
         # save global erp file
@@ -85,4 +85,20 @@ read_filt_erps <- function(erp_folder, filename, reject_df, overwrite = FALSE) {
     }
 
     return(erp_df_)
+}
+
+
+erp_files <- list.files(
+    "data/erps/",
+    full.names = TRUE,
+    pattern = ".csv$"
+)
+
+for (erp_file in erp_files) {
+    print(erp_file)
+    df <- read.csv(erp_file) |>
+        select(-X) |>
+        rename(".value_content_words" = .value_action_words)
+
+    write.csv(df, file = erp_file)
 }

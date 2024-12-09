@@ -32,14 +32,14 @@ familiarity_responses <- responses_df |>
     select(participant_number, document_id, response) |>
     rename("familiarity_response" = response)
 
-# Content
-content_responses <- responses_df |>
+# Comprehension
+comprehension_responses <- responses_df |>
     filter(!document_id %in% c(11, 12)) |>
     filter(question_id > 0) |> # zero is familiarity
     group_by(participant_number, document_id) |>
     summarize(
-        n_content_correct = sum(correct),
-        percent_content_correct = sum(correct) / n()
+        n_comprehension_correct = sum(correct),
+        percent_comprehension_correct = sum(correct) / n()
     )
 ```
 
@@ -69,7 +69,7 @@ responses_df |>
     guides(fill = "none")
 ```
 
-Content quesions
+Comprehension quesions
 ```{r}
 # by story
 responses_df |>
@@ -124,7 +124,7 @@ rt_df <- list.files("data/spr",
     left_join(familiarity_responses,
         by = c("document_id", "participant_number")
     ) |>
-    left_join(content_responses, by = c("document_id", "participant_number")) |>
+    left_join(comprehension_responses, by = c("document_id", "participant_number")) |>
     mutate(
         lp_quantile = ifelse(
             lp >= quantile(lp, na.rm = TRUE)[4], "high_lp",
@@ -230,7 +230,7 @@ mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
         by = c("document_id", "participant_number")
     ) |>
     left_join(
-        content_responses,
+        comprehension_responses,
         by = c("document_id", "participant_number")
     ) |>
     mutate(
@@ -522,7 +522,7 @@ erp_df |>
         "Cz", "Pz", "C4", "CP6", "P4", "P3", "CP5", "C3", "P8", "PO3", "PO4", "P7"
     )) |>
     filter(reading_type == reading_cond) |>
-    # ggplot(aes(x = .time, y = .value_action_words)) +
+    # ggplot(aes(x = .time, y = .value_content_words)) +
     ggplot(aes(x = .time, y = .value)) +
     stat_summary(
         fun = "mean", geom = "line", alpha = 1, linewidth = 1,

@@ -44,7 +44,7 @@ write_erps <- function(epochs, filename) {
         as_tidytable() |>
         select(-.recording, -.id)
 
-    erps_action_words <- epochs |>
+    erps_content_words <- epochs |>
         eeg_filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
         eeg_group_by(
             .sample, lp_quantile, participant_number, document_id, reading_type
@@ -52,9 +52,9 @@ write_erps <- function(epochs, filename) {
         eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
         as_tidytable() |>
         select(-.recording, -.id) |>
-        rename(".value_action_words" = .value)
+        rename(".value_content_words" = .value)
 
-    erps <- erps_all |> left_join(erps_action_words)
+    erps <- erps_all |> left_join(erps_content_words)
 
     write.csv(erps, file = filename)
 }
