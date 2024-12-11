@@ -86,19 +86,3 @@ read_filt_erps <- function(erp_folder, filename, reject_df, overwrite = FALSE) {
 
     return(erp_df_)
 }
-
-
-erp_files <- list.files(
-    "data/erps/",
-    full.names = TRUE,
-    pattern = ".csv$"
-)
-
-for (erp_file in erp_files) {
-    print(erp_file)
-    df <- read.csv(erp_file) |>
-        select(-X) |>
-        rename(".value_content_words" = .value_action_words)
-
-    write.csv(df, file = erp_file)
-}
