@@ -1,0 +1,104 @@
+# Summaries of corpus on word levels
+
+```{r}
+library(tidytable)
+library(stringr)
+library(ggplot2)
+```
+
+## Load data
+```{r}
+corpus_df <- read.csv("data/words_corpus.csv")
+```
+
+## Tables
+```{r}
+# summaries of word length, frequency (zipf),
+# and log probability (mean over all models)
+corpus_df |>
+    filter(document_id < 10) |>
+    group_by(document_id) |>
+    summarize(
+        "mean_word_length" = mean(wl),
+        "sd_word_length" = sd(wl),
+        "mean_freq" = mean(zipf_freq),
+        "sd_freq" = sd(zipf_freq),
+        "mean_lp" = mean(lp, na.rm = TRUE),
+        "sd_lp" = sd(lp, na.rm = TRUE)
+    )
+```
+
+```{r}
+# Number of words not in frequency corpus
+corpus_df |>
+    filter(document_id < 10) |>
+    group_by(document_id) |>
+    summarize(
+        "N" = sum(zero_freq),
+        "proportion" = sum(zero_freq) / n()
+    )
+```
+
+```{r}
+# sentence length
+corpus_df |>
+    filter(str_detect(word, "[.!?]")) |>
+    group_by(document_id) |>
+    mutate("sl" = number_word - lag(number_word)) |>
+    mutate("sl" = ifelse(is.na(sl), number_word, sl)) |>
+    filter(document_id < 10) |>
+    summarize(
+        "mean_sl" = mean(sl),
+        "sd_sl" = sd(sl),
+        "N" = n()
+    )
+```
+
+## Plots
+```{r}
+# word length
+corpus_df |>
+    filter(document_id < 10) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(aes(x = wl), fill = "darkseagreen", color = "black") +
+    facet_wrap(. ~ story_name, ncol = 4) +
+    theme_minimal()
+```
+
+```{r}
+# word frequency
+corpus_df |>
+    filter(document_id < 10) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(aes(x = zipf_freq), fill = "darkseagreen", color = "black") +
+    facet_wrap(. ~ story_name, ncol = 4) +
+    theme_minimal()
+```
+
+```{r}
+# log probability
+corpus_df |>
+    filter(document_id < 10) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(aes(x = lp), fill = "darkseagreen", color = "black") +
+    facet_wrap(. ~ story_name, ncol = 4) +
+    theme_minimal()
+```
+
+```{r}
+# Sentence lengths
+corpus_df |>
+    filter(str_detect(word, "[.!?]")) |>
+    group_by(document_id) |>
+    mutate("sl" = number_word - lag(number_word)) |>
+    mutate("sl" = ifelse(is.na(sl), number_word, sl)) |>
+    filter(document_id < 10) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(aes(x = sl), fill = "darkseagreen", color = "black") +
+    facet_wrap(. ~ story_name, ncol = 4) +
+    theme_minimal()
+```
