@@ -31,6 +31,8 @@ def fix_filename(file_name: str):
 
 
 def fix_types(text_type: list):
+    if isinstance(text_type, float):  # if nan
+        return None
     text_type = text_type.lower()
     if text_type[-1] == " ":
         return text_type[:-1]
