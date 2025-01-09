@@ -16,6 +16,9 @@ paper/data/erps/*
 paper/data/*.csv
 paper/figs/preprocessing/*
 paper/figs/*
-paper/src/eeg_analysis.rmd
 paper/src/cloze*
 paper/src/brms_models/*
+paper/src/eeg_analysis.rmd
+paper/src/artifact_detection.r
+paper/src/inspect_*
+paper/src/preprocessing_*
