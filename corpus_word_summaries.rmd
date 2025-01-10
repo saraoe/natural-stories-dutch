@@ -63,7 +63,10 @@ corpus_df |>
     ggplot() +
     geom_histogram(aes(x = wl), fill = "darkseagreen", color = "black") +
     facet_wrap(. ~ story_name, ncol = 4) +
-    theme_minimal()
+    theme_minimal() +
+    labs(x = "Word Length")
+
+ggsave("figs/hist_wl.png", height = 10, width = 15)
 ```
 
 ```{r}
@@ -74,7 +77,10 @@ corpus_df |>
     ggplot() +
     geom_histogram(aes(x = zipf_freq), fill = "darkseagreen", color = "black") +
     facet_wrap(. ~ story_name, ncol = 4) +
-    theme_minimal()
+    theme_minimal() +
+    labs(x = "Word Frequency")
+
+ggsave("figs/hist_freq.png", height = 10, width = 15)
 ```
 
 ```{r}
@@ -85,7 +91,10 @@ corpus_df |>
     ggplot() +
     geom_histogram(aes(x = lp), fill = "darkseagreen", color = "black") +
     facet_wrap(. ~ story_name, ncol = 4) +
-    theme_minimal()
+    theme_minimal() +
+    labs(x = "Log Probability")
+
+ggsave("figs/hist_lp.png", height = 10, width = 15)
 ```
 
 ```{r}
@@ -100,5 +109,8 @@ corpus_df |>
     ggplot() +
     geom_histogram(aes(x = sl), fill = "darkseagreen", color = "black") +
     facet_wrap(. ~ story_name, ncol = 4) +
-    theme_minimal()
+    theme_minimal() +
+    labs(x = "Sentence Length")
+
+ggsave("figs/hist_sl.png", height = 10, width = 15)
 ```
