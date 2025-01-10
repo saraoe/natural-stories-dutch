@@ -30,5 +30,13 @@ e.g.
 
 There are different kinds of ambiguity - see Futrell et al. (2021) for examples. 
 
+## Dependencies
+To install python packages pip install requirements.
+```
+pip install -r requirements.txt
+```
+
+The script ``src/corpus_words.r`` requires the word frequencies from [SUBTLEX-NL](https://osf.io/3d8cx/). Download the file called ``SUBTLEX-NL with pos and Zipf cd minimally 2.xlsx`` from the OSF repository and save it as ``data/SUBTLEX-NL.xlsx``
+
 ## References
 - Futrell, R., Gibson, E., Tily, H.J. et al. The Natural Stories corpus: a reading-time corpus of English texts containing rare syntactic constructions. *Lang Resources & Evaluation 55*, 63–77 (2021). https://doi.org/10.1007/s10579-020-09503-7
