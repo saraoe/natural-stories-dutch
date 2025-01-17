@@ -9,6 +9,13 @@ library(ggplot2)
 ## Load data
 ```{r}
 corpus_df <- read.csv("data/words_corpus.csv")
+
+nat_stories_df <- read.csv("data/natural_stories_RT.tsv", sep = "\t") |>
+    select(item, word, zone) |>
+    distinct() |>
+    mutate(
+        "wl" = nchar(word)
+    )
 ```
 
 ## Tables
@@ -63,6 +70,24 @@ corpus_df |>
     ggplot() +
     geom_histogram(aes(x = wl), fill = "darkseagreen", color = "black") +
     facet_wrap(. ~ story_name, ncol = 4) +
+    theme_minimal()
+
+# compared to natural stories
+corpus_df |>
+    filter(document_id < 10) |>
+    select(word, wl) |>
+    mutate("Corpus" = "SPR-EEG") |>
+    rbind(nat_stories_df |>
+        select(word, wl) |>
+        mutate("Corpus" = "Natural Stories")) |>
+    ggplot(aes(x = wl, fill = Corpus)) +
+    geom_histogram(
+        aes(y = after_stat(density)),
+        binwidth = 1,
+        color = "black",
+        position = "dodge"
+    ) +
+    scale_fill_manual(values = c("steelblue1", "steelblue4")) +
     theme_minimal()
 ```
 
