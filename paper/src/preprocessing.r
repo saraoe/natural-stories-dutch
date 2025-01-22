@@ -19,7 +19,8 @@ sterp_filename <- "data/sterp.csv"
 
 # files
 eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")
-stim <- read.csv("data/stim.csv") |>
+stim <- read.csv("../data/words_corpus.csv") |>
+    select(-X) |>
     mutate(
         lp_quantile = case_when(
             lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",

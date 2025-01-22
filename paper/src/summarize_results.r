@@ -19,6 +19,7 @@ dir.create(file.path(getwd(), erp_folder), showWarnings = FALSE)
 ### files
 epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = ".rds$")
 stim <- read.csv("../data/words_corpus.csv") |>
+    select(-X) |>
     mutate(
         lp_quantile = case_when(
             lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
