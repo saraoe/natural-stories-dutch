@@ -8,7 +8,7 @@ library(tidytable)
 library(readxl)
 library(stringr)
 
-setwd("paper")
+# setwd("paper")
 source("src/svd_erp.r")
 source("src/file_checks.r")
 source("src/util.r")
@@ -33,6 +33,7 @@ exclude_df <- read_excel("data/exclude.xlsx")
 
 # create out folder
 dir.create(file.path(getwd(), "data/epochs"), showWarnings = FALSE)
+dir.create(file.path(getwd(), "figs/preprocessing"), showWarnings = FALSE)
 
 ## functions ##
 inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
