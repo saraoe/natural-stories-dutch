@@ -8,7 +8,7 @@ library(tidytable)
 library(readxl)
 library(stringr)
 
-setwd("paper")
+# setwd("paper")
 source("src/util.r")
 
 # save names
