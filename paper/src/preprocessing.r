@@ -32,8 +32,9 @@ stim <- read.csv("../data/words_corpus.csv") |>
 exclude_df <- read_excel("data/exclude.xlsx")
 
 # create out folder
-dir.create(file.path(getwd(), "data/epochs"), showWarnings = FALSE)
-dir.create(file.path(getwd(), "figs/preprocessing"), showWarnings = FALSE)
+dir.create(file.path(getwd(), "data/epochs"), showWarnings = TRUE)
+dir.create(file.path(getwd(), "figs"), showWarnings = TRUE)
+dir.create(file.path(getwd(), "figs/preprocessing"), showWarnings = TRUE)
 
 ## functions ##
 inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
