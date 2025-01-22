@@ -31,6 +31,9 @@ stim <- read.csv("../data/words_corpus.csv") |>
     )
 exclude_df <- read_excel("data/exclude.xlsx")
 
+# create out folder
+dir.create(file.path(getwd(), "data/epochs"), showWarnings = FALSE)
+
 ## functions ##
 inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {
     reject_eyeblinks <- epochs |>
