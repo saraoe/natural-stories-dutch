@@ -8,16 +8,18 @@ library(tidytable)
 library(readxl)
 library(stringr)
 
-setwd("paper")
+# setwd("paper")
 source("src/util.r")
 
 # save names
 erp_folder <- "data/erps"
 mean_amplitude_filename <- "data/mean_amplitude.csv"
+dir.create(file.path(getwd(), erp_folder), showWarnings = FALSE)
 
 ### files
 epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = ".rds$")
-stim <- read.csv("data/stim.csv") |>
+stim <- read.csv("../data/words_corpus.csv") |>
+    select(-X) |>
     mutate(
         lp_quantile = case_when(
             lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
