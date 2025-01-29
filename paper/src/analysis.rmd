@@ -9,7 +9,7 @@ library(brms)
 setwd("paper")
 options(mc.cores = parallel::detectCores())
 
-source("src/create_erps.r")
+source("src/summarize_erps.r")
 source("src/util.r")
 ```
 
@@ -100,12 +100,13 @@ responses_df |>
 
 ### Load data
 ```{r}
-stim <- read.csv("data/stim.csv") |>
+stim <- read.csv("../data/words_corpus.csv") |>
     mutate(
         lp_quantile = ifelse(
             lp >= quantile(lp, na.rm = TRUE)[4], "high_lp",
             ifelse(lp <= quantile(lp, na.rm = TRUE)[2], "low_lp", "med_lp")
         ),
+        zero_freq = as.logical(zero_freq)
     )
 
 rt_df <- list.files("data/spr",
@@ -240,7 +241,8 @@ mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
     mutate(
         lp_quantile = factor(lp_quantile,
             levels = c("low_lp", "med_lp", "high_lp")
-        )
+        ),
+        zero_freq = as.logical(zero_freq)
     )
 ```
 
