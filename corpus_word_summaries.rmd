@@ -8,7 +8,14 @@ library(ggplot2)
 
 ## Load data
 ```{r}
-corpus_df <- read.csv("data/words_corpus.csv")
+corpus_df <- read.csv("data/words_corpus.csv") |>
+    mutate("type" = case_when(
+        document_id %in% c(1, 2) ~ "Fairy Tale",
+        document_id %in% c(3) ~ "History",
+        document_id %in% c(4) ~ "Novel",
+        document_id %in% c(5, 6, 7) ~ "Technical Text",
+        document_id %in% c(8) ~ "Synopsis Show"
+    ))
 ```
 
 ## Tables
