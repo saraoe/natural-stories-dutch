@@ -11,6 +11,8 @@ options(mc.cores = parallel::detectCores())
 
 source("src/summarize_erps.r")
 source("src/util.r")
+
+dir.create(file.path(getwd(), "src/brms_models"), showWarnings = TRUE)
 ```
 
 ## Comprehension Questions
