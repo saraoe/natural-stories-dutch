@@ -8,6 +8,7 @@ library(brms)
 
 setwd("paper")
 options(mc.cores = parallel::detectCores())
+options(brms.backend = "rstan")
 
 source("src/summarize_erps.r")
 source("src/util.r")
@@ -170,7 +171,6 @@ m1_rt <- brm(m1_rt_formula,
     data = data,
     chains = 2,
     control = list(adapt_delta = 0.9),
-    backend = "cmdstanr",
     file = "src/brms_models/m1_rt"
 )
 
@@ -210,7 +210,6 @@ m2_rt <- brm(m2_rt_formula,
     data = data,
     chains = 2,
     control = list(adapt_delta = 0.9),
-    backend = "cmdstanr",
     file = "src/brms_models/m2_rt"
 )
 
@@ -338,7 +337,6 @@ m1_n400 <- brm(m_n400_formula,
     data = data,
     chains = 2,
     control = list(adapt_delta = 0.9),
-    backend = "cmdstanr",
     seed = 246,
     file = "src/brms_models/m1_rsvp_n400"
 )
@@ -368,7 +366,6 @@ m2_n400 <- brm(m_n400_formula,
     data = data,
     chains = 2,
     control = list(adapt_delta = 0.9),
-    backend = "cmdstanr",
     seed = 246,
     file = "src/brms_models/m2_spr_n400"
 )
@@ -397,7 +394,6 @@ m3_n400 <- brm(m_n400_formula,
     data = data,
     chains = 2,
     control = list(adapt_delta = 0.9),
-    backend = "cmdstanr",
     seed = 246,
     file = "src/brms_models/m3_rsvp_n400"
 )
@@ -426,7 +422,6 @@ m4_n400 <- brm(m_n400_formula,
     data = data,
     chains = 2,
     control = list(adapt_delta = 0.9),
-    backend = "cmdstanr",
     seed = 246,
     file = "src/brms_models/m4_spr_n400"
 )
@@ -456,7 +451,6 @@ m1_n170 <- brm(m_n170_formula,
     data = data,
     chains = 2,
     control = list(adapt_delta = 0.9),
-    backend = "cmdstanr",
     seed = 246,
     file = "src/brms_models/m1_rsvp_n170"
 )
@@ -486,7 +480,6 @@ m2_n170 <- brm(m_n170_formula,
     data = data,
     chains = 2,
     control = list(adapt_delta = 0.9),
-    backend = "cmdstanr",
     seed = 246,
     file = "src/brms_models/m2_spr_n170"
 )
