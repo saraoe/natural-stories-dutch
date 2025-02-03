@@ -20,6 +20,7 @@ dir.create(file.path(getwd(), erp_folder), showWarnings = FALSE)
 epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = ".rds$")
 stim <- read.csv("../data/words_corpus.csv") |>
     select(-X) |>
+    mutate(content_word = ifelse(pos %in% c("NOUN", "VERB", "ADJ", "ADV"), TRUE, FALSE)) |>
     mutate(
         lp_quantile = case_when(
             lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
@@ -27,6 +28,18 @@ stim <- read.csv("../data/words_corpus.csv") |>
             (lp > quantile(lp, na.rm = TRUE)[2] &
                 lp < quantile(lp, na.rm = TRUE)[4]) ~ "med_lp"
         ),
+        lp_quantile_content = case_when(
+            content_word == TRUE ~ case_when(
+                (lp >= quantile(lp[content_word == TRUE], na.rm = TRUE)[4]
+                ~ "high_lp"),
+                (lp <= quantile(lp[content_word == TRUE], na.rm = TRUE)[2]
+                ~ "low_lp"),
+                (lp > quantile(lp[content_word == TRUE], na.rm = TRUE)[2] &
+                    lp < quantile(lp[content_word == TRUE], na.rm = TRUE)[4])
+                ~ "med_lp"
+            ),
+            TRUE ~ NA_character_
+        )
     )
 exclude_df <- read_excel("data/exclude.xlsx")
 
@@ -49,16 +62,37 @@ write_erps <- function(epochs, filename) {
     erps_content_words <- epochs |>
         eeg_filter(pos %in% c("NOUN", "VERB", "ADJ", "ADV")) |>
         eeg_group_by(
-            .sample, lp_quantile, participant_number, document_id, reading_type
+            .sample, lp_quantile_content,
+            participant_number, document_id, reading_type
         ) |>
         eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
         as_tidytable() |>
         select(-.recording, -.id) |>
-        rename(".value_content_words" = .value)
+        rename(
+            ".value_content_words" = .value,
+            "lp_quantile" = lp_quantile_content
+        )
 
     erps <- erps_all |> left_join(erps_content_words)
 
     write.csv(erps, file = filename)
+}
+
+cal_mean_amplitude <- function(epochs, chs, time_from, time_to, time_unit) {
+    amplitude_mean <- epochs |>
+        eeg_filter(between(as_time(.sample, .unit = time_unit), time_from, time_to)) |>
+        eeg_group_by(segment, .sample) |>
+        eeg_summarize(
+            "mean_amplitude_sample" = chs_mean(across(
+                chs
+            ), na.rm = TRUE)
+        ) |>
+        eeg_group_by(segment) |>
+        eeg_summarize(
+            "mean_amplitude" = mean(mean_amplitude_sample)
+        )
+
+    return(amplitude_mean)
 }
 
 write_mean_amplitude <- function(epochs, rt_df, exclude_chs, filename) {
@@ -68,39 +102,49 @@ write_mean_amplitude <- function(epochs, rt_df, exclude_chs, filename) {
         "CP5", "C3", "P8", "PO3", "PO4", "P7"
     )
     n400_chs <- n400_chs[!n400_chs %in% exclude_chs] # exclude
-    amplitude_n400 <- epochs |>
-        eeg_filter(between(as_time(.sample, .unit = "s"), .3, .5)) |>
-        eeg_group_by(segment, .sample) |>
-        eeg_summarize(
-            "mean_amplitude_sample" = chs_mean(across(
-                n400_chs
-            ), na.rm = TRUE)
-        ) |>
-        eeg_group_by(segment) |>
-        eeg_summarize(
-            "mean_amplitude" = mean(mean_amplitude_sample)
-        )
+    amplitude_n400 <- cal_mean_amplitude(
+        epochs,
+        chs = n400_chs,
+        time_from = .3,
+        time_to = .5,
+        time_unit = "s"
+    )
+
+    p600_chs <- c(
+        "Cz", "CP2", "Pz", "CP1", "C4", "CP6",
+        "P4", "P3", "CP5", "C3", "T8", "TP8",
+        "P8", "PO3", "PO4", "P7", "TP7", "T7"
+    )
+    p600_chs <- p600_chs[!p600_chs %in% exclude_chs] # exclude
+    amplitude_p600 <- cal_mean_amplitude(
+        epochs,
+        chs = p600_chs,
+        time_from = .5,
+        time_to = .7,
+        time_unit = "s"
+    )
 
     n170_chs <- c("O1", "Oz", "O2")
     n170_chs <- n170_chs[!n170_chs %in% exclude_chs] # exclude
-    amplitude_n170 <- epochs |>
-        eeg_filter(between(as_time(.sample, .unit = "s"), .16, .21)) |>
-        eeg_group_by(segment, .sample) |>
-        eeg_summarize(
-            "mean_amplitude_sample" = chs_mean(across(
-                n170_chs
-            ), na.rm = TRUE)
-        ) |>
-        eeg_group_by(segment) |>
-        eeg_summarize(
-            "n170_mean_amplitude" = mean(mean_amplitude_sample)
-        ) |>
+    amplitude_n170 <- cal_mean_amplitude(
+        epochs,
+        chs = n170_chs,
+        time_from = .16,
+        time_to = .21,
+        time_unit = "s"
+    ) |>
         eeg_left_join(rt_df, by = "segment")
 
     tmp_mean_amplitude <- amplitude_n400 |>
         as_tidytable() |>
         rename(n400 = .value) |>
         select(-.key) |>
+        left_join(
+            amplitude_p600 |>
+                as_tidytable() |>
+                rename(p600 = .value) |>
+                select(-.key)
+        ) |>
         left_join(
             amplitude_n170 |>
                 as_tidytable() |>
@@ -148,7 +192,8 @@ for (epoch_file in epoch_files) {
         filter(participant_number == n & !is.na(ch)) |>
         pull(ch)
     epochs <- readRDS(epoch_file) |>
-        as_eeg_lst()
+        as_eeg_lst() |>
+        eeg_left_join(stim)
     rt_df <- list.files(
         "data/spr",
         full.names = TRUE,
