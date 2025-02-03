@@ -3,12 +3,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.8  # Specify your Python version here
-  - psychopy
-  - pandas
+  - python=3.8.1  # Specify your Python version here
   - pip
   - pip:
-      # List any pip-only packages here. If your custom modules have dependencies not available in Conda, specify them here.
-      # Example:
-      # - some-pip-package==1.2.3
+      psychopy==2022.2.5
 
