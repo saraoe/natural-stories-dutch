@@ -2,7 +2,7 @@
 .vscode/*
 pandoc*
 
-slum/*
+slurm/*
 
 stories/*
 texts/*.txt
