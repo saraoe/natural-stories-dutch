@@ -8,7 +8,7 @@ library(tidytable)
 library(readxl)
 library(stringr)
 
-setwd("paper")
+# setwd("paper")
 source("src/svd_erp.r")
 source("src/file_checks.r")
 source("src/util.r")
@@ -19,8 +19,13 @@ sterp_filename <- "data/sterp.csv"
 
 # files
 eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")
+<<<<<<< HEAD
 stim <- read.csv("data/stim.csv") |>
     mutate("zero_freq" = as.logical(zero_freq)) |>
+=======
+stim <- read.csv("../data/words_corpus.csv") |>
+    select(-X) |>
+>>>>>>> 3ef51f6f63a4459b202de4521680eed53fc6fafa
     mutate(
         lp_quantile = case_when(
             lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
@@ -30,6 +35,11 @@ stim <- read.csv("data/stim.csv") |>
         ),
     )
 exclude_df <- read_excel("data/exclude.xlsx")
+
+# create out folder
+dir.create(file.path(getwd(), "data/epochs"), showWarnings = TRUE)
+dir.create(file.path(getwd(), "figs"), showWarnings = TRUE)
+dir.create(file.path(getwd(), "figs/preprocessing"), showWarnings = TRUE)
 
 ## functions ##
 inspect_rejected <- function(epochs, participant_n, rt_df, save_figs = FALSE) {

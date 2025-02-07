@@ -26,7 +26,11 @@ def main(df: pd.DataFrame, out_path: str):
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD:paper/src/stim_pos.py
     filepath = os.path.join("..", "data", "words_corpus.csv")
+=======
+    filepath = os.path.join("data", "words_corpus.csv")
+>>>>>>> 3ef51f6f63a4459b202de4521680eed53fc6fafa:src/stim_pos.py
     stim_df = pd.read_csv(filepath, index_col=[0])
 
     main(stim_df, out_path=filepath)
