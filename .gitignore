@@ -4,6 +4,7 @@ pandoc*
 
 stories/*
 texts/*.txt
+data/natural_stories_RT.tsv
 
 experiment/data/cloze/*
 experiment/data/spr/*
