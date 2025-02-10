@@ -12,7 +12,7 @@ This study aims to explore the neural correlates of surprisal and the connection
 ## Install dependencies
 To run the analysis install the following dependencies
 ```bash
-conda create -n spreeg r-rstan r-brms r-stringr r-tidytable r-readxl r-ggplot2 r-devtools
+conda create -n spreeg r-rstan r-cmdstanr r-brms r-stringr r-tidytable r-readxl r-ggplot2 r-devtools
 ```
 
 This environment can also be installed using the ``environment.yml`` file
@@ -26,3 +26,5 @@ library(devtools)
 
 devtools::install_github("bnicenboim/eeguana@peak")
 ```
+
+*NB: cmdstan must be installed for the environment to work. It can be installed using [cmdstanr](https://mc-stan.org/cmdstanr/articles/cmdstanr.html)*
