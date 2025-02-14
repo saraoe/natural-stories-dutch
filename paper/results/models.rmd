@@ -1,0 +1,45 @@
+# Results of Bayesian Hierarchical Models
+```{r}
+library(tidytable)
+library(brms)
+library(ggplot2)
+
+setwd("paper")
+
+models_path <- file.path("src", "brms_models")
+fig_path <- "figs"
+```
+
+## read models
+Dependent variables (dep_var) are reading times (rt), N400 (n400), and P600 (p600).
+For the two EEG models, n400 and p600, models were fit seperately for RSVP and SPR reading conditions.
+Model formula 1 (m1): dep_var ~ s_lp + s_wl + s_freq
+Model formula 2 (m2): dep_var ~ (s_lp + s_wl + s_freq) * content_word (NB: only for EEG models)
+```{r}
+# dependent variable (rt, n400, or p600)
+dep_var <- "p600"
+# SPR or RSVP (for rt only RSVP)
+reading_cond <- "SPR"
+# m1 only main effects, m2 interaction effects with content_word
+# (for rt only m1)
+model_formula <- "m2"
+
+m <- readRDS(file.path(
+    models_path,
+    paste(dep_var, "_", reading_cond, "_", model_formula, ".rds", sep = "")
+))
+```
+
+# Model checks
+```{r}
+pp_check(m)
+
+plot(m, variable = "^b", regex = TRUE)
+```
+
+# results
+```{r}
+summary(m)
+
+mcmc_plot(m, variable = "^b", regex = TRUE)
+```
