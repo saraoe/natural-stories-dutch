@@ -18,11 +18,11 @@ Model formula 2 (m2): dep_var ~ (s_lp + s_wl + s_freq) * content_word (NB: only 
 ```{r}
 # dependent variable (rt, n400, or p600)
 dep_var <- "p600"
-# SPR or RSVP (for rt only RSVP)
+# SPR or RSVP (for rt only SPR)
 reading_cond <- "SPR"
 # m1 only main effects, m2 interaction effects with content_word
 # (for rt only m1)
-model_formula <- "m2"
+model_formula <- "m1"
 
 m <- readRDS(file.path(
     models_path,
