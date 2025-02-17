@@ -108,6 +108,7 @@ m1_rt_formula <- bf(
 )
 
 if (run_rt) {
+    print(">>> Reading Time Model <<<")
     m <- brm(m1_rt_formula,
         family = lognormal(),
         prior = m_rt_priors,
@@ -142,14 +143,25 @@ m2_n400_formula <- bf(
         (s_lp * content_word || word)
 )
 
+m3_n400_formula <- bf(
+    n400 ~ (s_lp + s_freq) * content_word +
+        ((s_lp + s_freq) * content_word || participant_number) +
+        ((s_lp + s_freq) * content_word || document_id) +
+        (s_lp * content_word || word)
+)
+
 if (run_n400) {
+    print(">>> N400 Models <<<")
     reading_conds <- c("RSVP", "SPR")
     for (reading_cond in reading_conds) {
-        for (i in seq_len(2)) {
+        for (i in seq_len(3)) {
+            print(paste("Reading condition", reading_cond, "and model formula", i))
             if (i == 1) {
                 formula <- m1_n400_formula
             } else if (i == 2) {
                 formula <- m2_n400_formula
+            } else if (i == 3) {
+                formula <- m3_n400_formula
             }
 
             m <- brm(formula,
@@ -187,14 +199,26 @@ m2_p600_formula <- bf(
         (s_lp * content_word || word)
 )
 
+m3_p600_formula <- bf(
+    p600 ~ (s_lp + s_freq) * content_word +
+        ((s_lp + s_freq) * content_word || participant_number) +
+        ((s_lp + s_freq) * content_word || document_id) +
+        (s_lp * content_word || word)
+)
+
+
 if (run_p600) {
+    print(">>> P600 Models <<<")
     reading_conds <- c("RSVP", "SPR")
     for (reading_cond in reading_conds) {
-        for (i in seq_len(2)) {
+        for (i in seq_len(3)) {
+            print(paste("Reading condition", reading_cond, "and model formula", i))
             if (i == 1) {
                 formula <- m1_p600_formula
             } else if (i == 2) {
                 formula <- m2_p600_formula
+            } else if (i == 3) {
+                formula <- m3_p600_formula
             }
 
             m <- brm(formula,
