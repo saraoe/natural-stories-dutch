@@ -144,10 +144,10 @@ m2_n400_formula <- bf(
 )
 
 m3_n400_formula <- bf(
-    n400 ~ (s_lp + s_freq) * content_word +
-        ((s_lp + s_freq) * content_word || participant_number) +
-        ((s_lp + s_freq) * content_word || document_id) +
-        (s_lp * content_word || word)
+    n400 ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp + s_freq || document_id) +
+        (s_lp || word)
 )
 
 if (run_n400) {
@@ -200,10 +200,10 @@ m2_p600_formula <- bf(
 )
 
 m3_p600_formula <- bf(
-    p600 ~ (s_lp + s_freq) * content_word +
-        ((s_lp + s_freq) * content_word || participant_number) +
-        ((s_lp + s_freq) * content_word || document_id) +
-        (s_lp * content_word || word)
+    p600 ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp + s_freq || document_id) +
+        (s_lp || word)
 )
 
 
