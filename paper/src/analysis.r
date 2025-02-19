@@ -114,8 +114,8 @@ if (run_rt) {
         prior = m_rt_priors,
         data = rt_df |> filter(reading_type == "SPR"),
         chains = 4,
-        control = list(adapt_delta = 0.9),
-        file = "src/brms_models/rt_m1"
+        control = list(adapt_delta = 0.9999),
+        file = "src/brms_models/rt_SPR_m1"
     )
     print(summary(m))
 }
@@ -155,7 +155,10 @@ if (run_n400) {
     reading_conds <- c("RSVP", "SPR")
     for (reading_cond in reading_conds) {
         for (i in seq_len(3)) {
-            print(paste("Reading condition", reading_cond, "and model formula", i))
+            print(
+                paste("Reading condition", reading_cond, "and model formula", i)
+            )
+
             if (i == 1) {
                 formula <- m1_n400_formula
             } else if (i == 2) {
@@ -170,7 +173,7 @@ if (run_n400) {
                 data = mean_amplitude_df |>
                     filter(reading_type == reading_cond),
                 chains = 4,
-                control = list(adapt_delta = 0.9),
+                control = list(adapt_delta = 0.9999),
                 seed = 246,
                 file = paste(
                     "src/brms_models/n400_", reading_cond, "_m", i,
@@ -212,7 +215,10 @@ if (run_p600) {
     reading_conds <- c("RSVP", "SPR")
     for (reading_cond in reading_conds) {
         for (i in seq_len(3)) {
-            print(paste("Reading condition", reading_cond, "and model formula", i))
+            print(
+                paste("Reading condition", reading_cond, "and model formula", i)
+            )
+
             if (i == 1) {
                 formula <- m1_p600_formula
             } else if (i == 2) {
@@ -227,7 +233,7 @@ if (run_p600) {
                 data = mean_amplitude_df |>
                     filter(reading_type == reading_cond),
                 chains = 4,
-                control = list(adapt_delta = 0.9),
+                control = list(adapt_delta = 0.9999),
                 seed = 246,
                 file = paste(
                     "src/brms_models/p600_", reading_cond, "_m", i,
