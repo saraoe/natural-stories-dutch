@@ -159,10 +159,13 @@ m1_rt_formula <- bf(
 )
 
 m2_rt_formula <- bf(
-    rt ~ (s_lp + s_wl + s_freq) * content_word +
-        ((s_lp + s_wl + s_freq) * content_word || participant_number) +
-        ((s_lp + s_wl + s_freq) * content_word || document_id) +
-        (s_lp * content_word || word)
+    rt ~ -1 + content_word +
+        content_word:s_lp + content_word:s_freq +
+        (content_word + content_word:s_lp +
+            content_word:s_freq || participant_number) +
+        (content_word + content_word:s_lp +
+            content_word:s_freq || document_id) +
+        (content_word + content_word:s_lp || word)
 )
 
 m3_rt_formula <- bf(
@@ -192,8 +195,10 @@ if (run_rt) {
             prior = m_rt_priors,
             data = rt_df |> filter(reading_type == "SPR"),
             chains = 4,
+            sample_prior = TRUE,
             control = list(adapt_delta = 0.9999),
-            file = "src/brms_models/rt_SPR_m1"
+            seed = 246,
+            file = paste("src/brms_models/rt_SPR_m", i, sep = "")
         )
         print(summary(m))
     }
@@ -216,10 +221,13 @@ m1_n400_formula <- bf(
 )
 
 m2_n400_formula <- bf(
-    n400 ~ (s_lp + s_wl + s_freq) * content_word +
-        ((s_lp + s_wl + s_freq) * content_word || participant_number) +
-        ((s_lp + s_wl + s_freq) * content_word || document_id) +
-        (s_lp * content_word || word)
+    n400 ~ -1 + content_word +
+        content_word:s_lp + content_word:s_freq +
+        (content_word + content_word:s_lp +
+            content_word:s_freq || participant_number) +
+        (content_word + content_word:s_lp +
+            content_word:s_freq || document_id) +
+        (content_word + content_word:s_lp || word)
 )
 
 m3_n400_formula <- bf(
@@ -252,6 +260,7 @@ if (run_n400) {
                 data = mean_amplitude_df |>
                     filter(reading_type == reading_cond),
                 chains = 4,
+                sample_prior = TRUE,
                 control = list(adapt_delta = 0.9999),
                 seed = 246,
                 file = paste(
@@ -275,10 +284,13 @@ m1_p600_formula <- bf(
 )
 
 m2_p600_formula <- bf(
-    p600 ~ (s_lp + s_wl + s_freq) * content_word +
-        ((s_lp + s_wl + s_freq) * content_word || participant_number) +
-        ((s_lp + s_wl + s_freq) * content_word || document_id) +
-        (s_lp * content_word || word)
+    p600 ~ -1 + content_word +
+        content_word:s_lp + content_word:s_freq +
+        (content_word + content_word:s_lp +
+            content_word:s_freq || participant_number) +
+        (content_word + content_word:s_lp +
+            content_word:s_freq || document_id) +
+        (content_word + content_word:s_lp || word)
 )
 
 m3_p600_formula <- bf(
@@ -312,6 +324,7 @@ if (run_p600) {
                 data = mean_amplitude_df |>
                     filter(reading_type == reading_cond),
                 chains = 4,
+                sample_prior = TRUE,
                 control = list(adapt_delta = 0.9999),
                 seed = 246,
                 file = paste(
