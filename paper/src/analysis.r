@@ -98,6 +98,7 @@ rt_df <- rt_df |>
     filter(!(participant_number == 17 &
         document_id == 1 &
         number_word == 154)) |>
+    filter(participant_number != 64) |> # exclude participant 64
     # filter based on reject
     filter(rt > rt_threshold[1] & rt < rt_threshold[2]) |>
     # only include SPR
@@ -123,6 +124,11 @@ if (!test_n_words_per_participants(mean_amplitude_df)) {
 
 # filter
 mean_amplitude_df <- mean_amplitude_df |>
+    # filter word where participant 17 was stopped
+    filter(!(participant_number == 17 &
+        document_id == 1 &
+        number_word == 154)) |>
+    filter(participant_number != 64) |> # exclude participant 64
     # reject based on artifact threshold
     group_by(participant_number, document_id) |>
     mutate(
