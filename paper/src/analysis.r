@@ -4,6 +4,7 @@ library(eeguana)
 library(tidytable)
 library(stringr)
 library(brms)
+library(argparse)
 
 # setwd("paper")
 options(mc.cores = parallel::detectCores())
@@ -15,10 +16,33 @@ source("src/util.r")
 
 dir.create(file.path(getwd(), "src/brms_models"), showWarnings = TRUE)
 
-## Specify models to run
-run_rt <- TRUE
-run_n400 <- TRUE
-run_p600 <- TRUE
+## Specify models to run using argparse
+parser <- ArgumentParser(description = "Run brms models")
+parser$add_argument("--rt",
+    type = "logical",
+    default = FALSE,
+    help = "Which models to run (rt, n400, and p600)"
+)
+parser$add_argument("--n400",
+    type = "logical",
+    default = FALSE,
+    help = "Which models to run (rt, n400, and p600)"
+)
+parser$add_argument("--p600",
+    type = "logical",
+    default = FALSE,
+    help = "Which models to run (rt, n400, and p600)"
+)
+
+args <- parser$parse_args()
+run_rt <- args$rt
+run_n400 <- args$n400
+run_p600 <- args$p600
+print(paste(
+    "Running Models: ",
+    "rt=", run_rt, ", n400=", run_n400, ", p600=", run_p600,
+    sep = ""
+))
 
 ## Rejection thresholds
 # percent of rejected artifacts in one story for the entire story to be rejected
