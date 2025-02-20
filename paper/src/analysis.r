@@ -10,6 +10,7 @@ options(mc.cores = parallel::detectCores())
 options(brms.backend = "cmdstan")
 
 source("src/summarize_erps.r")
+source("src/file_checks.r")
 source("src/util.r")
 
 dir.create(file.path(getwd(), "src/brms_models"), showWarnings = TRUE)
@@ -28,6 +29,7 @@ rt_threshold <- c(100, 3000)
 ## Load data
 content_words <- c("NOUN", "VERB", "ADJ", "ADV")
 
+## load reading times
 stim <- read.csv("../data/words_corpus.csv") |>
     mutate(zero_freq = as.logical(zero_freq))
 
@@ -57,7 +59,16 @@ rt_df <- list.files("data/spr",
             levels = c("low_lp", "med_lp", "high_lp")
         ),
         content_word = ifelse(pos %in% content_words, TRUE, FALSE)
-    ) |>
+    )
+
+# check number of words per participant is correct
+if (!test_n_words_per_participants(rt_df)) {
+    print("Number of words per participant in rt_df not correct!")
+    quit()
+}
+
+# filter df
+rt_df <- rt_df |>
     mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
     # filter word where participant 17 was stopped
     filter(!(participant_number == 17 &
@@ -69,6 +80,7 @@ rt_df <- list.files("data/spr",
     filter(reading_type == "SPR") |>
     filter(document_id < 10) # filter out practice texts
 
+# load EEG components
 mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
     mutate(
         lp_quantile = factor(lp_quantile,
@@ -77,7 +89,16 @@ mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
         zero_freq = as.logical(zero_freq),
         content_word = ifelse(pos %in% content_words, TRUE, FALSE)
     ) |>
-    filter(document_id < 10) |> # filter out practice texts
+    filter(document_id < 10) # filter out practice texts
+
+# check number of words per participant is correct
+if (!test_n_words_per_participants(mean_amplitude_df)) {
+    print("Number of words per participant in mean_amplitude_df not correct!")
+    quit()
+}
+
+# filter
+mean_amplitude_df <- mean_amplitude_df |>
     # reject based on artifact threshold
     group_by(participant_number, document_id) |>
     mutate(
@@ -107,17 +128,45 @@ m1_rt_formula <- bf(
         (s_lp || word)
 )
 
+m2_rt_formula <- bf(
+    rt ~ (s_lp + s_wl + s_freq) * content_word +
+        ((s_lp + s_wl + s_freq) * content_word || participant_number) +
+        ((s_lp + s_wl + s_freq) * content_word || document_id) +
+        (s_lp * content_word || word)
+)
+
+m3_rt_formula <- bf(
+    rt ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp + s_freq || document_id) +
+        (s_lp || word)
+)
+
 if (run_rt) {
     print(">>> Reading Time Model <<<")
-    m <- brm(m1_rt_formula,
-        family = lognormal(),
-        prior = m_rt_priors,
-        data = rt_df |> filter(reading_type == "SPR"),
-        chains = 4,
-        control = list(adapt_delta = 0.9999),
-        file = "src/brms_models/rt_SPR_m1"
-    )
-    print(summary(m))
+    for (i in seq_len(3)) {
+        print(
+            paste("Reading condition SPR and model formula", i)
+        )
+
+        if (i == 1) {
+            formula <- m1_rt_formula
+        } else if (i == 2) {
+            formula <- m2_rt_formula
+        } else if (i == 3) {
+            formula <- m3_rt_formula
+        }
+
+        m <- brm(formula,
+            family = lognormal(),
+            prior = m_rt_priors,
+            data = rt_df |> filter(reading_type == "SPR"),
+            chains = 4,
+            control = list(adapt_delta = 0.9999),
+            file = "src/brms_models/rt_SPR_m1"
+        )
+        print(summary(m))
+    }
 }
 
 
