@@ -212,6 +212,7 @@ m_n400_priors <- c(
     prior(normal(10, 20), class = sigma),
     prior(normal(0, 10), class = sd)
 )
+m_n400_priors_no_intercept <- m_n400_priors[2:4,] 
 
 m1_n400_formula <- bf(
     n400 ~ s_lp + s_wl + s_freq +
@@ -248,15 +249,18 @@ if (run_n400) {
 
             if (i == 1) {
                 formula <- m1_n400_formula
+                priors <- m_n400_priors
             } else if (i == 2) {
                 formula <- m2_n400_formula
+                priors <- m_n400_priors_no_intercept
             } else if (i == 3) {
                 formula <- m3_n400_formula
+                priors <- m_n400_priors
             }
 
             m <- brm(formula,
                 family = gaussian(),
-                prior = m_n400_priors,
+                prior = priors,
                 data = mean_amplitude_df |>
                     filter(reading_type == reading_cond),
                 chains = 4,
@@ -275,6 +279,7 @@ if (run_n400) {
 
 ## P600
 m_p600_priors <- m_n400_priors
+m_p600_priors_no_intercept <- m_n400_priors_no_intercept
 
 m1_p600_formula <- bf(
     p600 ~ s_lp + s_wl + s_freq +
@@ -312,15 +317,18 @@ if (run_p600) {
 
             if (i == 1) {
                 formula <- m1_p600_formula
+                priors <- m_p600_priors
             } else if (i == 2) {
                 formula <- m2_p600_formula
+                priors <- m_p600_priors_no_intercept
             } else if (i == 3) {
                 formula <- m3_p600_formula
+                priors <- m_p600_priors
             }
 
             m <- brm(formula,
                 family = gaussian(),
-                prior = m_p600_priors,
+                prior = priors,
                 data = mean_amplitude_df |>
                     filter(reading_type == reading_cond),
                 chains = 4,
