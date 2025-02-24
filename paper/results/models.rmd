@@ -20,7 +20,7 @@ Model formula 3 (m3): dep_var ~ s_lp + s_freq
 # dependent variable (rt, n400, or p600)
 dep_var <- "n400"
 # SPR or RSVP (for rt only SPR)
-reading_cond <- "RSVP"
+reading_cond <- "SPR"
 # m1 only main effects, m2 interaction effects with content_word
 # (for rt only m1)
 model_formula <- "m1"
@@ -63,7 +63,7 @@ draws_posterior_b |>
 
 Intercept
 ```{r}
-ggplot(m_draws) +
+ggplot(draws) +
     geom_density(aes(x = prior_Intercept), fill = "red", alpha = .5) +
     geom_density(aes(x = b_Intercept), fill = "blue", alpha = .5) +
     theme_minimal()
