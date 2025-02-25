@@ -150,6 +150,7 @@ m_rt_priors <- c(
     prior(normal(.5, .1), class = sigma),
     prior(normal(0, .5), class = sd)
 )
+m_rt_priors_no_intercept <- m_rt_priors[2:4,] 
 
 m1_rt_formula <- bf(
     rt ~ s_lp + s_wl + s_freq +
@@ -184,10 +185,13 @@ if (run_rt) {
 
         if (i == 1) {
             formula <- m1_rt_formula
+            prior <- m_rt_priors
         } else if (i == 2) {
             formula <- m2_rt_formula
+            prior <- m_rt_priors_no_intercept
         } else if (i == 3) {
             formula <- m3_rt_formula
+            prior <- m_rt_priors
         }
 
         m <- brm(formula,
