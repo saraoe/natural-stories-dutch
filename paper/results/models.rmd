@@ -20,9 +20,8 @@ Model formula 3 (m3): dep_var ~ s_lp + s_freq
 # dependent variable (rt, n400, or p600)
 dep_var <- "n400"
 # SPR or RSVP (for rt only SPR)
-reading_cond <- "SPR"
-# m1 only main effects, m2 interaction effects with content_word
-# (for rt only m1)
+reading_cond <- "RSVP"
+# model formula (m1, m2, or m3)
 model_formula <- "m1"
 
 m <- readRDS(file.path(
@@ -41,13 +40,10 @@ plot(m, variable = "^b", regex = TRUE)
 ## Prior-poserior update
 ```{r}
 draws <- as.data.frame(m)
-```
 
-Beta coefficients
-```{r}
 draws_posterior_b <- draws |>
     pivot_longer(
-        cols = starts_with("b_s_"),
+        cols = starts_with("b_"),
         names_to = "parameter", values_to = "posterior"
     ) |>
     rename("prior" = prior_b) |>
@@ -61,17 +57,9 @@ draws_posterior_b |>
     theme_minimal()
 ```
 
-Intercept
-```{r}
-ggplot(draws) +
-    geom_density(aes(x = prior_Intercept), fill = "red", alpha = .5) +
-    geom_density(aes(x = b_Intercept), fill = "blue", alpha = .5) +
-    theme_minimal()
-```
-
 # results
 ```{r}
 summary(m)
 
-mcmc_plot(m, variable = "^b_[^Intercept]", regex = TRUE)
+mcmc_plot(m, variable = "^b", regex = TRUE)
 ```
