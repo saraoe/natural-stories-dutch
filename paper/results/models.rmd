@@ -13,14 +13,14 @@ fig_path <- "figs"
 ## read models
 Dependent variables (dep_var) are reading times (rt), N400 (n400), and P600 (p600).
 For the two EEG models, n400 and p600, models were fit seperately for RSVP and SPR reading conditions.
-Model formula 1 (m1): dep_var ~ s_lp + s_wl + s_freq
+Model formula 1 (m1): dep_var ~ s_lp + s_freq
 Model formula 2 (m2): dep_var ~ -1 + content_word + content_word:s_lp + content_word:s_freq 
-Model formula 3 (m3): dep_var ~ s_lp + s_freq
+Model formula 3 (m3): dep_var ~ s_lp + s_wl + s_freq
 ```{r}
 # dependent variable (rt, n400, or p600)
 dep_var <- "n400"
 # SPR or RSVP (for rt only SPR)
-reading_cond <- "RSVP"
+reading_cond <- "SPR"
 # model formula (m1, m2, or m3)
 model_formula <- "m1"
 
