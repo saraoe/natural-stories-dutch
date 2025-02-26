@@ -4,6 +4,9 @@ library(tidytable)
 library(ggplot2)
 
 setwd("paper")
+
+figs_path <- file.path("figs", "erps")
+dir.create(figs_path)
 ```
 
 ## load data
@@ -84,11 +87,34 @@ p600_timewindow <- c(.5, .7)
 ```
 
 ```{r}
+reading_cond <- "RSVP"
+erp_component <- "p600"
+only_content_words <- FALSE
+
+if (erp_component == "n400") {
+    chs <- n400_chs
+    timewindow <- n400_timewindow
+} else if (erp_component == "p600") {
+    chs <- p600_chs
+    timewindow <- p600_timewindow
+}
+
 erp_plot(
     df = erp_df,
     reading_cond = "SPR",
-    channels = p600_chs,
-    content_words = FALSE,
-    annotate_timewindow = p600_timewindow
+    channels = chs,
+    content_words = only_content_words,
+    annotate_timewindow = timewindow
+)
+
+ggsave(
+    file.path(
+        figs_path,
+        paste(reading_cond, "_", erp_component, "_contentwords",
+            only_content_words, ".png",
+            sep = ""
+        )
+    ),
+    width = 10, height = 10
 )
 ```
