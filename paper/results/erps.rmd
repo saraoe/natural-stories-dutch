@@ -1,0 +1,94 @@
+# Plot of ERPS
+```{r}
+library(tidytable)
+library(ggplot2)
+
+setwd("paper")
+```
+
+## load data
+```{r}
+erp_df <- read.csv("data/erp_lp.csv") |>
+    mutate(
+        lp_quantile = factor(lp_quantile,
+            levels = c("low_lp", "med_lp", "high_lp")
+        )
+    )
+```
+
+## plot function
+```{r}
+erp_plot <- function(
+    df,
+    reading_cond,
+    channels = c("all"),
+    content_words = FALSE,
+    annotate_timewindow = FALSE) {
+    # filter channels
+    if (channels[1] == "all" && length(channels) == 1) {
+        df <- df |>
+            filter(!.key %in% c("HEOG", "VEOG", "M1", "M2"))
+    } else {
+        df <- df |>
+            filter(.key %in% channels)
+    }
+
+    # specify value col
+    if (content_words) {
+        df <- df |>
+            mutate("value" = .value_content_words)
+    } else {
+        df <- df |>
+            mutate("value" = .value)
+    }
+
+    p <- df |>
+        filter(reading_type == reading_cond) |>
+        ggplot(aes(x = .time, y = value)) +
+        stat_summary(
+            fun = "mean", geom = "line", alpha = 1, linewidth = 1,
+            aes(color = lp_quantile)
+        ) +
+        geom_vline(xintercept = 0, linetype = "dashed") +
+        eeguana::theme_eeguana() +
+        theme(legend.position = "bottom") +
+        labs(color = "", y = "") +
+        scale_color_manual(values = c("steelblue1", "steelblue3", "steelblue4"))
+
+    if (!isFALSE(annotate_timewindow)) {
+        p <- p + annotate("rect",
+            xmin = annotate_timewindow[1], xmax = annotate_timewindow[2],
+            ymin = -Inf, ymax = Inf,
+            alpha = .1, fill = "slategray4"
+        )
+    }
+
+    return(p)
+}
+```
+
+## Plots
+```{r}
+n400_chs <- c(
+    "Cz", "Pz", "C4", "CP6", "P4", "P3",
+    "CP5", "C3", "P8", "PO3", "PO4", "P7"
+)
+p600_chs <- c(
+    "Cz", "CP2", "Pz", "CP1", "C4", "CP6",
+    "P4", "P3", "CP5", "C3", "T8", "TP8",
+    "P8", "PO3", "PO4", "P7", "TP7", "T7"
+)
+
+n400_timewindow <- c(.3, .5)
+p600_timewindow <- c(.5, .7)
+```
+
+```{r}
+erp_plot(
+    df = erp_df,
+    reading_cond = "SPR",
+    channels = p600_chs,
+    content_words = FALSE,
+    annotate_timewindow = p600_timewindow
+)
+```
