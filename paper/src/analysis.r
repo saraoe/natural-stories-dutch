@@ -153,9 +153,9 @@ m_rt_priors <- c(
 m_rt_priors_no_intercept <- m_rt_priors[2:4,] 
 
 m1_rt_formula <- bf(
-    rt ~ s_lp + s_wl + s_freq +
-        (s_lp + s_wl + s_freq || participant_number) +
-        (s_lp + s_wl + s_freq || document_id) +
+    rt ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp + s_freq || document_id) +
         (s_lp || word)
 )
 
@@ -170,9 +170,9 @@ m2_rt_formula <- bf(
 )
 
 m3_rt_formula <- bf(
-    rt ~ s_lp + s_freq +
-        (s_lp + s_freq || participant_number) +
-        (s_lp + s_freq || document_id) +
+    rt ~ s_lp + s_wl + s_freq +
+        (s_lp + s_wl + s_freq || participant_number) +
+        (s_lp + s_wl + s_freq || document_id) +
         (s_lp || word)
 )
 
@@ -219,9 +219,9 @@ m_n400_priors <- c(
 m_n400_priors_no_intercept <- m_n400_priors[2:4,] 
 
 m1_n400_formula <- bf(
-    n400 ~ s_lp + s_wl + s_freq +
-        (s_lp + s_wl + s_freq || participant_number) +
-        (s_lp + s_wl + s_freq || document_id) +
+    n400 ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp + s_freq || document_id) +
         (s_lp || word)
 )
 
@@ -236,9 +236,9 @@ m2_n400_formula <- bf(
 )
 
 m3_n400_formula <- bf(
-    n400 ~ s_lp + s_freq +
-        (s_lp + s_freq || participant_number) +
-        (s_lp + s_freq || document_id) +
+    n400 ~ s_lp + s_wl + s_freq +
+        (s_lp + s_wl + s_freq || participant_number) +
+        (s_lp + s_wl + s_freq || document_id) +
         (s_lp || word)
 )
 
@@ -286,9 +286,9 @@ m_p600_priors <- m_n400_priors
 m_p600_priors_no_intercept <- m_n400_priors_no_intercept
 
 m1_p600_formula <- bf(
-    p600 ~ s_lp + s_wl + s_freq +
-        (s_lp + s_wl + s_freq || participant_number) +
-        (s_lp + s_wl + s_freq || document_id) +
+    p600 ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp + s_freq || document_id) +
         (s_lp || word)
 )
 
@@ -303,9 +303,9 @@ m2_p600_formula <- bf(
 )
 
 m3_p600_formula <- bf(
-    p600 ~ s_lp + s_freq +
-        (s_lp + s_freq || participant_number) +
-        (s_lp + s_freq || document_id) +
+    p600 ~ s_lp + s_wl + s_freq +
+        (s_lp + s_wl + s_freq || participant_number) +
+        (s_lp + s_wl + s_freq || document_id) +
         (s_lp || word)
 )
 
