@@ -2,6 +2,7 @@
 ```{r}
 library(tidytable)
 library(ggplot2)
+library(eeguana)
 
 setwd("paper")
 
@@ -19,9 +20,9 @@ erp_df <- read.csv("data/erp_lp.csv") |>
     )
 ```
 
-## plot function
+## plotting functions
 ```{r}
-erp_plot <- function(
+erp_mean_plot <- function(
     df,
     reading_cond,
     channels = c("all"),
@@ -70,6 +71,54 @@ erp_plot <- function(
 }
 ```
 
+```{r}
+erp_facet_plot <- function(
+    df,
+    reading_cond,
+    channels = c("all"),
+    content_words = FALSE,
+    annotate_timewindow = FALSE) {
+    # filter channels
+    if (channels[1] == "all" && length(channels) == 1) {
+        df <- df |>
+            filter(!.key %in% c("HEOG", "VEOG", "M1", "M2"))
+    } else {
+        df <- df |>
+            filter(.key %in% channels)
+    }
+
+    # specify value col
+    if (content_words) {
+        df <- df |>
+            mutate("value" = .value_content_words)
+    } else {
+        df <- df |>
+            mutate("value" = .value)
+    }
+
+    p <- df |>
+        filter(reading_type == reading_cond) |>
+        ggplot(aes(x = .time, y = value)) +
+        geom_line(aes(color = lp_quantile), linewidth = 1) +
+        geom_vline(xintercept = 0, linetype = "dashed") +
+        eeguana::theme_eeguana() +
+        facet_wrap(. ~ .key) +
+        theme(legend.position = "bottom") +
+        labs(color = "", y = "") +
+        scale_color_manual(values = c("steelblue1", "steelblue3", "steelblue4"))
+
+    if (!isFALSE(annotate_timewindow)) {
+        p <- p + annotate("rect",
+            xmin = annotate_timewindow[1], xmax = annotate_timewindow[2],
+            ymin = -Inf, ymax = Inf,
+            alpha = .1, fill = "slategray4"
+        )
+    }
+
+    return(p)
+}
+```
+
 ## Plots
 ```{r}
 n400_chs <- c(
@@ -87,8 +136,8 @@ p600_timewindow <- c(.5, .7)
 ```
 
 ```{r}
-reading_cond <- "RSVP"
-erp_component <- "p600"
+reading_cond <- "SPR"
+erp_component <- "n400"
 only_content_words <- FALSE
 
 if (erp_component == "n400") {
@@ -99,7 +148,7 @@ if (erp_component == "n400") {
     timewindow <- p600_timewindow
 }
 
-erp_plot(
+erp_mean_plot(
     df = erp_df,
     reading_cond = "SPR",
     channels = chs,
@@ -112,6 +161,39 @@ ggsave(
         figs_path,
         paste(reading_cond, "_", erp_component, "_contentwords",
             only_content_words, ".png",
+            sep = ""
+        )
+    ),
+    width = 10, height = 10
+)
+```
+
+```{r}
+reading_cond <- "SPR"
+erp_component <- "N400"
+only_content_words <- FALSE
+
+if (erp_component == "n400") {
+    chs <- n400_chs
+    timewindow <- n400_timewindow
+} else if (erp_component == "p600") {
+    chs <- p600_chs
+    timewindow <- p600_timewindow
+}
+
+erp_facet_plot(
+    df = erp_df,
+    reading_cond = "SPR",
+    channels = chs,
+    content_words = only_content_words,
+    annotate_timewindow = timewindow
+)
+
+ggsave(
+    file.path(
+        figs_path,
+        paste(reading_cond, "_", erp_component, "_contentwords",
+            only_content_words, "_facet_chs.png",
             sep = ""
         )
     ),
