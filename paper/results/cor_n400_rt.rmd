@@ -1,0 +1,179 @@
+# Plots of N400 together with reading times
+
+```{r}
+library(tidytable)
+library(ggplot2)
+
+setwd("paper")
+
+figs_path <- file.path("figs")
+dir.create(figs_path)
+
+source("src/file_checks.r")
+```
+
+## load data
+*NB: Code below is copied from src/analysis.r*
+```{r}
+## Rejection thresholds
+# percent of rejected artifacts in one story for the entire story to be rejected
+artifact_threshold <- .3
+# reject reading times that are below or above (in ms)
+rt_threshold <- c(100, 3000)
+```
+
+Mean amplitude df
+```{r}
+content_words <- c("NOUN", "VERB", "ADJ", "ADV")
+
+mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
+    mutate(
+        lp_quantile = factor(lp_quantile,
+            levels = c("low_lp", "med_lp", "high_lp")
+        ),
+        content_word = ifelse(pos %in% content_words, TRUE, FALSE)
+    ) |>
+    filter(document_id < 10) # filter out practice texts
+
+# check number of words per participant is correct
+if (!test_n_words_per_participants(mean_amplitude_df)) {
+    print("Number of words per participant in mean_amplitude_df not correct!")
+    quit()
+}
+
+# filter
+mean_amplitude_df <- mean_amplitude_df |>
+    # filter word where participant 17 was stopped
+    filter(!(participant_number == 17 &
+        document_id == 1 &
+        number_word == 154)) |>
+    filter(participant_number != 64) |> # exclude participant 64
+    # reject based on artifact threshold
+    group_by(participant_number, document_id) |>
+    mutate(
+        "rejected_epochs" = (sum(is.na(n400)) / n())
+    ) |>
+    filter(rejected_epochs < artifact_threshold) |>
+    ungroup() |>
+    # filter based on reject rt
+    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    filter(rt > rt_threshold[1] & rt < rt_threshold[2]) |>
+    filter(reading_type == "SPR") # we only need SPR for these plots
+```
+
+## Quantile plots
+Log-probability quantiles
+```{r}
+lp_quantiles <- quantile(
+    mean_amplitude_df |>
+        filter(content_word) |>
+        pull(lp),
+    na.rm = TRUE,
+    prob = c(.2, .4, .6, .8, 1)
+)
+
+n <- 300
+m <- -20
+mean_amplitude_df |>
+    filter(content_word) |>
+    mutate(
+        "lp_quantile" = case_when(
+            lp <= lp_quantiles[1] ~ "0.2",
+            lp <= lp_quantiles[2] ~ "0.4",
+            lp <= lp_quantiles[3] ~ "0.6",
+            lp <= lp_quantiles[4] ~ "0.8",
+            lp <= lp_quantiles[5] ~ "1",
+            .default = NA
+        ),
+        "corrected_n400" = (n400 * m) + n
+    ) |> # update scale of n400
+    filter(!is.na(lp_quantile)) |>
+    group_by(lp_quantile) |>
+    summarize(
+        "mean_N400" = mean(corrected_n400, na.rm = TRUE),
+        "sd_N400" = sd(corrected_n400, na.rm = TRUE),
+        "mean_ReadingTime" = mean(rt),
+        "sd_ReadingTime" = sd(rt)
+    ) |>
+    pivot_longer(
+        cols = c(starts_with("mean_"), starts_with("sd_")),
+        names_to = c("X", "type"),
+        names_pattern = "(.+)_(.+)"
+    ) |>
+    pivot_wider(names_from = X, values_from = value) |>
+    ggplot(aes(x = lp_quantile, y = mean, color = type)) +
+    geom_line(aes(group = type), position = position_dodge(.5)) +
+    geom_point(size = 5, shape = 15, position = position_dodge(.5)) +
+    geom_errorbar(
+        aes(ymin = mean - sd, ymax = mean + sd),
+        width = .2, position = position_dodge(.5)
+    ) +
+    scale_color_manual(values = c("steelblue2", "steelblue4")) +
+    scale_y_continuous(
+        name = "Reading Time (ms)", # name first axis
+        sec.axis = sec_axis(trans = ~ (. - n) / m, name = "N400 Amplitude (microvolt)")
+    ) +
+    theme_light() +
+    theme(legend.position = "bottom") +
+    labs(x = "Quantile Log-Probability Words", y = "", color = "")
+
+ggsave(file.path(figs_path, "rt_n400_lp_contentwords.png"), width = 7, height = 7)
+```
+
+Word frequency quantiles
+```{r}
+freq_quantiles <- quantile(
+    mean_amplitude_df |>
+        filter(content_word) |>
+        pull(zipf_freq),
+    na.rm = TRUE,
+    prob = c(.2, .4, .6, .8, 1)
+)
+
+n <- 300
+m <- -20
+mean_amplitude_df |>
+    filter(content_word) |>
+    mutate(
+        "freq_quantile" = case_when(
+            zipf_freq <= freq_quantiles[1] ~ "0.2",
+            zipf_freq <= freq_quantiles[2] ~ "0.4",
+            zipf_freq <= freq_quantiles[3] ~ "0.6",
+            zipf_freq <= freq_quantiles[4] ~ "0.8",
+            zipf_freq <= freq_quantiles[5] ~ "1",
+            .default = NA
+        ),
+        "corrected_n400" = (n400 * m) + n
+    ) |> # update scale of n400
+    filter(!is.na(freq_quantile)) |>
+    group_by(freq_quantile) |>
+    summarize(
+        "mean_N400" = mean(corrected_n400, na.rm = TRUE),
+        "sd_N400" = sd(corrected_n400, na.rm = TRUE),
+        "mean_ReadingTime" = mean(rt),
+        "sd_ReadingTime" = sd(rt)
+    ) |>
+    pivot_longer(
+        cols = c(starts_with("mean_"), starts_with("sd_")),
+        names_to = c("X", "type"),
+        names_pattern = "(.+)_(.+)"
+    ) |>
+    pivot_wider(names_from = X, values_from = value) |>
+    ggplot(aes(x = freq_quantile, y = mean, color = type)) +
+    geom_line(aes(group = type), position = position_dodge(.5)) +
+    geom_point(size = 5, shape = 15, position = position_dodge(.5)) +
+    geom_errorbar(
+        aes(ymin = mean - sd, ymax = mean + sd),
+        width = .2, position = position_dodge(.5)
+    ) +
+    scale_color_manual(values = c("steelblue2", "steelblue4")) +
+    scale_y_continuous(
+        name = "Reading Time (ms)", # name first axis
+        sec.axis = sec_axis(trans = ~ (. - n) / m, name = "N400 Amplitude (microvolt)")
+    ) +
+    theme_light() +
+    theme(legend.position = "bottom") +
+    labs(x = "Quantile Zipf Frequency Words", y = "", color = "")
+
+ggsave(file.path(figs_path, "rt_n400_freq_contentwords.png"), width = 7, height = 7)
+```
