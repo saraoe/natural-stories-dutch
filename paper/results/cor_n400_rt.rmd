@@ -177,3 +177,55 @@ mean_amplitude_df |>
 
 ggsave(file.path(figs_path, "rt_n400_freq_contentwords.png"), width = 7, height = 7)
 ```
+
+log-probability scatter plot
+```{r}
+n <- 300
+m <- -20
+mean_amplitude_df |>
+    filter(content_word) |>
+    mutate("corrected_n400" = (n400 * m) + n) |> # update scale of n400
+    select(lp, corrected_n400, rt) |>
+    rename("N400" = corrected_n400, "Reading Time" = rt) |>
+    pivot_longer(
+        cols = c("N400", "Reading Time"),
+        names_to = c("type"),
+    ) |>
+    ggplot(aes(x = lp, y = value, color = type)) +
+    geom_point(alpha = .1) +
+    geom_smooth(method = "lm") +
+    scale_color_manual(values = c("steelblue2", "steelblue4")) +
+    scale_y_continuous(
+        name = "Reading Time (ms)", # name first axis
+        sec.axis = sec_axis(trans = ~ (. - n) / m, name = "N400 Amplitude (microvolt)")
+    ) +
+    theme_light() +
+    theme(legend.position = "bottom") +
+    labs(x = "Log-Probability Words", y = "", color = "")
+```
+
+frequency scatter plot
+```{r}
+n <- 300
+m <- -20
+mean_amplitude_df |>
+    filter(content_word) |>
+    mutate("corrected_n400" = (n400 * m) + n) |> # update scale of n400
+    select(zipf_freq, corrected_n400, rt) |>
+    rename("N400" = corrected_n400, "Reading Time" = rt) |>
+    pivot_longer(
+        cols = c("N400", "Reading Time"),
+        names_to = c("type"),
+    ) |>
+    ggplot(aes(x = zipf_freq, y = value, color = type)) +
+    geom_point(alpha = .1) +
+    geom_smooth(method = "lm") +
+    scale_color_manual(values = c("steelblue2", "steelblue4")) +
+    scale_y_continuous(
+        name = "Reading Time (ms)", # name first axis
+        sec.axis = sec_axis(trans = ~ (. - n) / m, name = "N400 Amplitude (microvolt)")
+    ) +
+    theme_light() +
+    theme(legend.position = "bottom") +
+    labs(x = "Zipf Frequency Words", y = "", color = "")
+```
