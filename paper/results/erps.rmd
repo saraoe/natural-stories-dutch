@@ -120,6 +120,17 @@ erp_facet_plot <- function(
 ```
 
 ## Plots
+ERP averaged over all channels for all words
+```{r}
+reading_cond <- "SPR"
+
+erp_mean_plot(
+    df = erp_df,
+    reading_cond = reading_cond
+)
+```
+
+ERPs averaged over channels used for calculating mean amplitudes of components (n400 and p600)
 ```{r}
 n400_chs <- c(
     "Cz", "Pz", "C4", "CP6", "P4", "P3",
@@ -168,6 +179,7 @@ ggsave(
 )
 ```
 
+ERPs in channels seperately
 ```{r}
 reading_cond <- "SPR"
 erp_component <- "N400"
