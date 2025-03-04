@@ -338,7 +338,7 @@ if (run_p600) {
                 chains = 4,
                 sample_prior = TRUE,
                 control = list(adapt_delta = 0.9999),
-                iter = ifelse(reading_cond == "RSVP" & i == 1, 3000, 2000)  # adding more iterations for RSVP M1 model
+                iter = ifelse(reading_cond == "RSVP" & i == 1, 3000, 2000),  # adding more iterations for RSVP M1 model
                 seed = 246,
                 file = paste(
                     "src/brms_models/p600_", reading_cond, "_m", i,
