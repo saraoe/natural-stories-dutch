@@ -67,6 +67,8 @@ Log-probability quantiles
 lp_quantiles <- quantile(
     mean_amplitude_df |>
         filter(content_word) |>
+        filter(!is.na(rt)) |>
+        filter(!is.na(n400)) |>
         pull(lp),
     na.rm = TRUE,
     prob = c(.2, .4, .6, .8, 1)
@@ -120,11 +122,72 @@ mean_amplitude_df |>
 ggsave(file.path(figs_path, "rt_n400_lp_contentwords.png"), width = 7, height = 7)
 ```
 
++ lead of rt
+```{r}
+lp_quantiles <- quantile(
+    mean_amplitude_df |>
+        filter(content_word) |>
+        filter(!is.na(rt)) |>
+        filter(!is.na(n400)) |>
+        pull(lp),
+    na.rm = TRUE,
+    prob = c(.2, .4, .6, .8, 1)
+)
+
+n <- 300
+m <- -20
+mean_amplitude_df |>
+    filter(content_word) |>
+    mutate(
+        "lp_quantile" = case_when(
+            lp <= lp_quantiles[1] ~ "0.2",
+            lp <= lp_quantiles[2] ~ "0.4",
+            lp <= lp_quantiles[3] ~ "0.6",
+            lp <= lp_quantiles[4] ~ "0.8",
+            lp <= lp_quantiles[5] ~ "1",
+            .default = NA
+        ),
+        "corrected_n400" = (n400 * m) + n,
+        "rt" = lead(rt)
+    ) |> # update scale of n400
+    filter(!is.na(lp_quantile)) |>
+    group_by(lp_quantile) |>
+    summarize(
+        "mean_N400" = mean(corrected_n400, na.rm = TRUE),
+        "sd_N400" = sd(corrected_n400, na.rm = TRUE),
+        "mean_ReadingTime" = mean(rt, na.rm = TRUE),
+        "sd_ReadingTime" = sd(rt, na.rm = TRUE)
+    ) |>
+    pivot_longer(
+        cols = c(starts_with("mean_"), starts_with("sd_")),
+        names_to = c("X", "type"),
+        names_pattern = "(.+)_(.+)"
+    ) |>
+    pivot_wider(names_from = X, values_from = value) |>
+    ggplot(aes(x = lp_quantile, y = mean, color = type)) +
+    geom_line(aes(group = type), position = position_dodge(.5)) +
+    geom_point(size = 5, shape = 15, position = position_dodge(.5)) +
+    geom_errorbar(
+        aes(ymin = mean - sd, ymax = mean + sd),
+        width = .2, position = position_dodge(.5)
+    ) +
+    scale_color_manual(values = c("steelblue2", "steelblue4")) +
+    scale_y_continuous(
+        name = "Reading Time (ms)", # name first axis
+        sec.axis = sec_axis(trans = ~ (. - n) / m, name = "N400 Amplitude (microvolt)")
+    ) +
+    theme_light() +
+    theme(legend.position = "bottom") +
+    labs(x = "Quantile Log-Probability Words", y = "", color = "")
+```
+
 Word frequency quantiles
 ```{r}
 freq_quantiles <- quantile(
     mean_amplitude_df |>
         filter(content_word) |>
+        filter(!is.na(rt)) |>
+        filter(!is.na(n400)) |>
         pull(zipf_freq),
     na.rm = TRUE,
     prob = c(.2, .4, .6, .8, 1)
@@ -178,6 +241,7 @@ mean_amplitude_df |>
 ggsave(file.path(figs_path, "rt_n400_freq_contentwords.png"), width = 7, height = 7)
 ```
 
+# Scatter plots
 log-probability scatter plot
 ```{r}
 n <- 300
@@ -189,6 +253,34 @@ mean_amplitude_df |>
     rename("N400" = corrected_n400, "Reading Time" = rt) |>
     pivot_longer(
         cols = c("N400", "Reading Time"),
+        names_to = c("type"),
+    ) |>
+    ggplot(aes(x = lp, y = value, color = type)) +
+    geom_point(alpha = .1) +
+    geom_smooth(method = "lm") +
+    scale_color_manual(values = c("steelblue2", "steelblue4")) +
+    scale_y_continuous(
+        name = "Reading Time (ms)", # name first axis
+        sec.axis = sec_axis(trans = ~ (. - n) / m, name = "N400 Amplitude (microvolt)")
+    ) +
+    theme_light() +
+    theme(legend.position = "bottom") +
+    labs(x = "Log-Probability Words", y = "", color = "")
+```
+
++ lead of rt
+```{r}
+n <- 300
+m <- -20
+mean_amplitude_df |>
+    filter(content_word) |>
+    mutate(
+        "corrected_n400" = (n400 * m) + n, # update scale of n400
+        "l_rt" = lead(rt)) |>
+    select(lp, corrected_n400, l_rt) |>
+    rename("N400 (n)" = corrected_n400, "Reading Time (n+1)" = l_rt) |>
+    pivot_longer(
+        cols = c("N400 (n)", "Reading Time (n+1)"),
         names_to = c("type"),
     ) |>
     ggplot(aes(x = lp, y = value, color = type)) +
