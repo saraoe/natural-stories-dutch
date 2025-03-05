@@ -180,7 +180,7 @@ if (run_rt) {
     print(">>> Reading Time Model <<<")
     for (i in seq_len(3)) {
         print(
-            paste("Reading condition SPR and model formula", i)
+            paste("Model formula", i)
         )
 
         if (i == 1) {
@@ -209,7 +209,7 @@ if (run_rt) {
 }
 
 
-## N400
+## N400 SPR
 m_n400_priors <- c(
     prior(normal(0, 20), class = Intercept),
     prior(normal(0, 10), class = b),
@@ -243,45 +243,101 @@ m3_n400_formula <- bf(
 )
 
 if (run_n400) {
-    print(">>> N400 Models <<<")
-    reading_conds <- c("RSVP", "SPR")
-    for (reading_cond in reading_conds) {
-        for (i in seq_len(3)) {
-            print(
-                paste("Reading condition", reading_cond, "and model formula", i)
-            )
+    print(">>> N400 SPR Models <<<")
+    for (i in seq_len(3)) {
+        print(
+            paste("Model formula", i)
+        )
 
-            if (i == 1) {
-                formula <- m1_n400_formula
-                priors <- m_n400_priors
-            } else if (i == 2) {
-                formula <- m2_n400_formula
-                priors <- m_n400_priors_no_intercept
-            } else if (i == 3) {
-                formula <- m3_n400_formula
-                priors <- m_n400_priors
-            }
-
-            m <- brm(formula,
-                family = gaussian(),
-                prior = priors,
-                data = mean_amplitude_df |>
-                    filter(reading_type == reading_cond),
-                chains = 4,
-                sample_prior = TRUE,
-                control = list(adapt_delta = 0.9999),
-                seed = 246,
-                file = paste(
-                    "src/brms_models/n400_", reading_cond, "_m", i,
-                    sep = ""
-                )
-            )
-            print(summary(m))
+        if (i == 1) {
+            formula <- m1_n400_formula
+            priors <- m_n400_priors
+        } else if (i == 2) {
+            formula <- m2_n400_formula
+            priors <- m_n400_priors_no_intercept
+        } else if (i == 3) {
+            formula <- m3_n400_formula
+            priors <- m_n400_priors
         }
+
+        m <- brm(formula,
+            family = gaussian(),
+            prior = priors,
+            data = mean_amplitude_df |>
+                filter(reading_type == "SPR"),
+            chains = 4,
+            sample_prior = TRUE,
+            control = list(adapt_delta = 0.9999),
+            seed = 246,
+            file = paste(
+                "src/brms_models/n400_SPR_m", i,
+                sep = ""
+            )
+        )
+        print(summary(m))
     }
 }
 
-## P600
+
+## N400 RSVP (formulas without document id random effects)
+m1_n400_rsvp_formula <- bf(
+    n400 ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp || word)
+)
+
+m2_n400_rsvp_formula <- bf(
+    n400 ~ -1 + content_word +
+        content_word:s_lp + content_word:s_freq +
+        (content_word + content_word:s_lp +
+            content_word:s_freq || participant_number) +
+        (content_word + content_word:s_lp || word)
+)
+
+m3_n400_rsvp_formula <- bf(
+    n400 ~ s_lp + s_wl + s_freq +
+        (s_lp + s_wl + s_freq || participant_number) +
+        (s_lp || word)
+)
+
+if (run_n400) {
+    print(">>> N400 RSVP Models <<<")
+    for (i in seq_len(3)) {
+        print(
+            paste("Model formula", i)
+        )
+
+        if (i == 1) {
+            formula <- m1_n400_rsvp_formula
+            priors <- m_n400_priors
+        } else if (i == 2) {
+            formula <- m2_n400_rsvp_formula
+            priors <- m_n400_priors_no_intercept
+        } else if (i == 3) {
+            formula <- m3_n400_rsvp_formula
+            priors <- m_n400_priors
+        }
+
+        m <- brm(formula,
+            family = gaussian(),
+            prior = priors,
+            data = mean_amplitude_df |>
+                filter(reading_type == "RSVP"),
+            chains = 4,
+            sample_prior = TRUE,
+            control = list(adapt_delta = 0.9999),
+            seed = 246,
+            file = paste(
+                "src/brms_models/n400_RSVP_m", i,
+                sep = ""
+            )
+        )
+        print(summary(m))
+    }
+}
+
+
+## P600 SPR
 m_p600_priors <- m_n400_priors
 m_p600_priors_no_intercept <- m_n400_priors_no_intercept
 
@@ -311,41 +367,95 @@ m3_p600_formula <- bf(
 
 
 if (run_p600) {
-    print(">>> P600 Models <<<")
-    reading_conds <- c("RSVP", "SPR")
-    for (reading_cond in reading_conds) {
-        for (i in seq_len(3)) {
-            print(
-                paste("Reading condition", reading_cond, "and model formula", i)
-            )
+    print(">>> P600 SPR Models <<<")
+    for (i in seq_len(3)) {
+        print(
+            paste("Model formula", i)
+        )
 
-            if (i == 1) {
-                formula <- m1_p600_formula
-                priors <- m_p600_priors
-            } else if (i == 2) {
-                formula <- m2_p600_formula
-                priors <- m_p600_priors_no_intercept
-            } else if (i == 3) {
-                formula <- m3_p600_formula
-                priors <- m_p600_priors
-            }
-
-            m <- brm(formula,
-                family = gaussian(),
-                prior = priors,
-                data = mean_amplitude_df |>
-                    filter(reading_type == reading_cond),
-                chains = 4,
-                sample_prior = TRUE,
-                control = list(adapt_delta = 0.9999),
-                iter = ifelse(reading_cond == "RSVP" & i == 1, 3000, 2000),  # adding more iterations for RSVP M1 model
-                seed = 246,
-                file = paste(
-                    "src/brms_models/p600_", reading_cond, "_m", i,
-                    sep = ""
-                )
-            )
-            print(summary(m))
+        if (i == 1) {
+            formula <- m1_p600_formula
+            priors <- m_p600_priors
+        } else if (i == 2) {
+            formula <- m2_p600_formula
+            priors <- m_p600_priors_no_intercept
+        } else if (i == 3) {
+            formula <- m3_p600_formula
+            priors <- m_p600_priors
         }
+
+        m <- brm(formula,
+            family = gaussian(),
+            prior = priors,
+            data = mean_amplitude_df |>
+                filter(reading_type == "SPR"),
+            chains = 4,
+            sample_prior = TRUE,
+            control = list(adapt_delta = 0.9999),
+            seed = 246,
+            file = paste(
+                "src/brms_models/p600_SPR_m", i,
+                sep = ""
+            )
+        )
+        print(summary(m))
+    }
+}
+
+
+## P600 RSVP (formulas without document id random effects)
+m1_p600_rsvp_formula <- bf(
+    p600 ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp || word)
+)
+
+m2_p600_rsvp_formula <- bf(
+    p600 ~ -1 + content_word +
+        content_word:s_lp + content_word:s_freq +
+        (content_word + content_word:s_lp +
+            content_word:s_freq || participant_number) +
+        (content_word + content_word:s_lp || word)
+)
+
+m3_p600_rsvp_formula <- bf(
+    p600 ~ s_lp + s_wl + s_freq +
+        (s_lp + s_wl + s_freq || participant_number) +
+        (s_lp || word)
+)
+
+if (run_p600) {
+    print(">>> p600 RSVP Models <<<")
+    for (i in seq_len(3)) {
+        print(
+            paste("Model formula", i)
+        )
+
+        if (i == 1) {
+            formula <- m1_p600_rsvp_formula
+            priors <- m_p600_priors
+        } else if (i == 2) {
+            formula <- m2_p600_rsvp_formula
+            priors <- m_p600_priors_no_intercept
+        } else if (i == 3) {
+            formula <- m3_p600_rsvp_formula
+            priors <- m_p600_priors
+        }
+
+        m <- brm(formula,
+            family = gaussian(),
+            prior = priors,
+            data = mean_amplitude_df |>
+                filter(reading_type == "RSVP"),
+            chains = 4,
+            sample_prior = TRUE,
+            control = list(adapt_delta = 0.9999),
+            seed = 246,
+            file = paste(
+                "src/brms_models/p600_RSVP_m", i,
+                sep = ""
+            )
+        )
+        print(summary(m))
     }
 }
