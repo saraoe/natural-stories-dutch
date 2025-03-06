@@ -1,5 +1,6 @@
-# Check of EEG files before preprocessing
+# Test files
 
+# Check of EEG files before preprocessing
 
 test_n_triggers <- function(raw_eeg) {
   n_triggers <- c(
@@ -34,7 +35,7 @@ test_n_triggers <- function(raw_eeg) {
   return(all(check_df$check, na.rm = TRUE))
 }
 
-test_n_words <- function(rt_df, n_words) {
+test_n_words <- function(rt_df) {
   n_words <- c(
     "1" = 600,
     "2" = 594,
@@ -80,4 +81,30 @@ fix_trigger_description <- function(raw_eeg, participant_number) {
   }
 
   return(raw_eeg)
+}
+
+
+# check mean amplitude df
+test_n_words_per_participants <- function(df) {
+  n_words <- c(
+    "1" = 600,
+    "2" = 594,
+    "3" = 600,
+    "4" = 598,
+    "5" = 597,
+    "6" = 597,
+    "7" = 600,
+    "8" = 600,
+    "11" = 98,
+    "12" = 74
+  )
+
+  check_df <- df |>
+    group_by(document_id, participant_number) |>
+    summarize(N = n()) |>
+    mutate(
+      doc_id = as.character(document_id),
+      check = (N == n_words[doc_id])
+    )
+  return(all(check_df$check))
 }

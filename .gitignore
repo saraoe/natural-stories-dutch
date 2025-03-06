@@ -2,6 +2,8 @@
 .vscode/*
 pandoc*
 
+slurm/*
+
 stories/*
 texts/*.txt
 data/natural_stories_RT.tsv
