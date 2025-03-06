@@ -280,21 +280,6 @@ mean_amplitude_df <- mean_amplitude_df |>
     left_join(reject_df, by = c("participant_number", "document_id"))
 ```
 
-```{r}
-# read erps
-erp_df <- read_filt_erps("data/erps/",
-    filename = "data/erp_lp.csv",
-    reject_df = reject_df,
-    overwrite = FALSE
-) |>
-    mutate(
-        .channel = .key,
-        lp_quantile = factor(lp_quantile,
-            levels = c("low_lp", "med_lp", "high_lp")
-        )
-    )
-```
-
 ### Models
 formulas and priors
 ```{r}
@@ -497,6 +482,11 @@ plot(m2_n170, variable = "^b", regex = TRUE)
 
 
 ### Plots
+```{r}
+# read erps
+erp_df <- read.csv("data/erp_lp.csv")
+```
+
 N400
 ```{r}
 reading_cond <- "RSVP" # SPR or RSVP
@@ -516,7 +506,7 @@ erp_df |>
 ```
 
 ```{r}
-reading_cond <- "SPR" # SPR or RSVP
+reading_cond <- "RSVP" # SPR or RSVP
 
 erp_df |>
     filter(.key %in% c(
