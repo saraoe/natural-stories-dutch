@@ -38,7 +38,8 @@ models <- c(
     "GroNLP/gpt2-medium-dutch-embeddings",
     "GroNLP/gpt2-small-dutch",
     "yhavinga/gpt2-large-dutch",
-    "yhavinga/gpt-neo-125M-dutch"
+    "yhavinga/gpt-neo-125M-dutch",
+    "BramVanroy/fietje-2"
 )
 
 
@@ -47,7 +48,7 @@ for (model_name in models) {
     print(model_name)
     causal_preload(model_name)
     corpus_df <- corpus_df |>
-        mutate(lp = causal_lp(word,
+        mutate(lp = causal_words_pred(word,
             by = document_id,
             model = model_name,
             batch_size = 10
