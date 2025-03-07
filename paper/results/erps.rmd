@@ -212,3 +212,41 @@ ggsave(
     width = 10, height = 10
 )
 ```
+
+## N170
+```{r}
+reading_cond <- "SPR"
+only_content_words <- FALSE
+
+
+chs <- c("O1", "Oz", "O2")
+timewindow <- c(.16, .21)
+
+erp_mean_plot(
+    df = erp_df,
+    reading_cond = reading_cond,
+    channels = chs,
+    content_words = only_content_words,
+    annotate_timewindow = timewindow
+)
+```
+
+```{r}
+reading_cond <- "SPR"
+only_content_words <- FALSE
+
+chs <- c(
+    "Pz", # midline-anterior
+    "P3", "P7", "O1", # left-posterior
+    "P4", "P8", "O2" # right-posterior
+)
+time_window <- c(0.16, 0.20)
+
+erp_mean_plot(
+    df = erp_df,
+    reading_cond = reading_cond,
+    channels = n400_chs,
+    content_words = only_content_words,
+    annotate_timewindow = timewindow
+)
+```
