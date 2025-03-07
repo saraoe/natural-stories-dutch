@@ -10,7 +10,6 @@ library(argparse)
 options(mc.cores = parallel::detectCores())
 options(brms.backend = "cmdstan")
 
-source("src/summarize_erps.r")
 source("src/file_checks.r")
 source("src/util.r")
 
