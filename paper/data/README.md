@@ -2,7 +2,6 @@
 
 ```
 ├── README.md
-├── stim.csv  
 ├── mean_amplitude.csv  
 ├── erp_lp.csv 
 ├── exclude.xlsx    
@@ -16,13 +15,6 @@
     └── ...     <- erps for every participant
 
 ```
-
-## Stim
-The file ``stim.csv`` includes information about the stimuli (words). 
-The log probability (lp) of the words have been extracted using a[ GPT2 based model fine-tuned for Dutch](https://huggingface.co/GroNLP/gpt2-medium-dutch-embeddings) from GroNLP and the package [Pangoling](https://github.com/bnicenboim/pangoling). This is done in ``src/stim.r``. 
-The word length (wl) is the number of characters including punctuation.
-The prefix *s_* indicates the variable has been scaled, and the subfix *n* (where n is a number) indicates the number of lag. E.g., *s_lp1* is the scaled log probability of the previous word.
-The part of speech (pos) tags of the stimuli is extracted using SpaCy and the *nl_core_news_sm* model. This is done in ``src/stim_pos.py``.
 
 ## Mean amplitude and ERPs
 The csv-file ``mean_amplitude.csv`` contains the mean amplitude for specific channels in a specific time window (see table). The mean amplitudes are created in ``src/summarize_eeg.r``.
