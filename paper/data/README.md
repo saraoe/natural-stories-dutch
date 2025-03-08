@@ -4,13 +4,16 @@
 ├── README.md
 ├── stim.csv  
 ├── mean_amplitude.csv  
-├── erp_lp.csv    
+├── erp_lp.csv 
+├── exclude.xlsx    
 ├── spr
 │   └── ...     <- files from SPR-EEG experiment
 ├── cloze
 │   └── ...     <- files from Cloze Task
-└── epochs
+├── epochs
     └── ...     <- epochs after preprocessing
+└── erps
+    └── ...     <- erps for every participant
 
 ```
 
@@ -22,14 +25,15 @@ The prefix *s_* indicates the variable has been scaled, and the subfix *n* (wher
 The part of speech (pos) tags of the stimuli is extracted using SpaCy and the *nl_core_news_sm* model. This is done in ``src/stim_pos.py``.
 
 ## Mean amplitude and ERPs
-The csv-file ``mean_amplitude.csv`` contains the mean amplitude for specific channels in a specific time window (see table). The mean amplitudes are created in ``src/summarize_results.r``.
+The csv-file ``mean_amplitude.csv`` contains the mean amplitude for specific channels in a specific time window (see table). The mean amplitudes are created in ``src/summarize_eeg.r``.
 
 | colname | channels | time window | 
 | --- | --- | --- |
-| n400 | Cz, Pz, C4, CP6, P4, P3, CP5, C3, P8, PO3, PO4, P7 | 300-500 ms |
 | n170 | O1, Oz, O2 | 160-210 ms |
+| n400 | Cz, Pz, C4, CP6, P4, P3, CP5, C3, P8, PO3, PO4, P7 | 300-500 ms |
+| p600 | Cz, CP2, Pz, CP1, C4, CP6, P4, P3, CP5, C3, T8, TP8, P8, PO4, PO3, P7, TP7, T7 | 500-700 ms |
 
-The csv-file ``erp_lp.csv`` is made in ``src/analysis.rmd`` and relies on the files from the ``erps/`` folder, which is created in ``src/summarize_results.r``. This file contains ERPs averaged for three different conditions: *high_lp* (log-probability of word in highest quartile), *low_lp* (log-probability of word in lowest quartile), and *med_lp* (words with log-probability between lowest and highest quartile). These ERPs have been averaged for trials with SPR, RSVP or both (indicated by the ``reading_type`` column) for either all words (``.value``) or only action words (``.value_action_words``).
+The csv-file ``erp_lp.csv`` is made in ``src/summarize_erps.r`` and relies on the files from the ``erps/`` folder, which is created in ``src/summarize_eeg.r``. This file contains ERPs averaged for three different conditions: *high_lp* (log-probability of word in highest quartile), *low_lp* (log-probability of word in lowest quartile), and *med_lp* (words with log-probability between lowest and highest quartile). These ERPs have been averaged for trials with SPR, RSVP or both (indicated by the ``reading_type`` column) for either all words (``.value``) or only content words (``.value_content_words``). The log-probability quantiles are calculated separately for all words and only content words, making sure that *high_lp* and *low_lp* were calculated from an equal amount of datapoints.
 
 
 ## SPR EEG
@@ -147,5 +151,7 @@ The **participant information** file include the following information:
     - best_reading_language_named: (str) Name of the language the participant reads the best in
     - other_languages: (Dict[Dict[str or int]]) dictionary with other languages the participant speaks (keys) and when they learned and whether they speak in fluently or not (values)
 
-## Epochs
-In the ``epochs`` folder, epochs created in the ``src/preprocessing.r`` are saved as RDS-files. Every files is epochs from a single participant, and the name is the participant number.
+## Epochs and ERPs
+In the ``epochs/`` folder, epochs created in the ``src/preprocessing.r`` are saved as RDS-files. Every files is epochs from a single participant, and the name is the participant number.
+
+In the ``erps/`` folder, erps created on ``src/summarize_eeg.r`` are saved as csv-files. Every files is erps from a single participant, and the name indicates the participant number. The file contains averaged EEG signal from all channels in three conditions (high, med, and low log-probability) for the two presentation rates (SPR and RSVP) separately. A value for all words and a value for only content words are calculated. See *Mean amplitude and ERPs* above for a more in depth explanation.
