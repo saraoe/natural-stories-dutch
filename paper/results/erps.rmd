@@ -231,6 +231,18 @@ erp_mean_plot(
 )
 ```
 
+## Early components from Sereno et al. (2020)
+```{r}
+chs <- list(
+    "midline-anterior" = c("AFz", "Fz"),
+    "anterior-left" = c("Fp1", "AF3", "F7", "F5", "F3", "F1"),
+    "anterior-right" = c("Fp2", "AF4", "F8", "F6", "F4", "F2"),
+    "midline-central" = c("FCz", "Cz", "CPz"),
+    "midline-posterior" = c("Pz", "POz"),
+    "left-posterior" = c("P7", "P5", "P3", "P1", "PO7", "PO3", "O1"),
+    "right-posterior" = c("P2", "P4", "P6", "P8", "PO4", "PO8", "O2")
+)
+```
 ```{r}
 reading_cond <- "SPR"
 only_content_words <- FALSE
