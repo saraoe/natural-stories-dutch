@@ -10,7 +10,6 @@ library(argparse)
 options(mc.cores = parallel::detectCores())
 options(brms.backend = "cmdstan")
 
-source("src/summarize_erps.r")
 source("src/file_checks.r")
 source("src/util.r")
 
@@ -196,7 +195,7 @@ if (run_rt) {
 
         m <- brm(formula,
             family = lognormal(),
-            prior = m_rt_priors,
+            prior = prior,
             data = rt_df |> filter(reading_type == "SPR"),
             chains = 4,
             sample_prior = TRUE,
