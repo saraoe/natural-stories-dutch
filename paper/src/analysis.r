@@ -137,7 +137,14 @@ mean_amplitude_df <- mean_amplitude_df |>
     ungroup() |>
     # filter based on reject rt
     mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
-    filter(rt > rt_threshold[1] & rt < rt_threshold[2])
+    filter(rt > rt_threshold[1] & rt < rt_threshold[2]) |>
+    left_join(
+        stim |>
+        select(document_id, paragraph_n, word_n, number_word, lp_BramVanroy_fietje.2)
+        ) |>
+    mutate(
+        s_lp_fietje = scale(lp_BramVanroy_fietje.2)
+    )
 
 
 ### Models ###
@@ -218,32 +225,32 @@ m_n400_priors <- c(
 m_n400_priors_no_intercept <- m_n400_priors[2:4,] 
 
 m1_n400_formula <- bf(
-    n400 ~ s_lp + s_freq +
-        (s_lp + s_freq || participant_number) +
-        (s_lp + s_freq || document_id) +
-        (s_lp || word)
+    n400 ~ s_lp_fietje + s_freq +
+        (s_lp_fietje + s_freq || participant_number) +
+        (s_lp_fietje + s_freq || document_id) +
+        (s_lp_fietje || word)
 )
 
-m2_n400_formula <- bf(
-    n400 ~ -1 + content_word +
-        content_word:s_lp + content_word:s_freq +
-        (content_word + content_word:s_lp +
-            content_word:s_freq || participant_number) +
-        (content_word + content_word:s_lp +
-            content_word:s_freq || document_id) +
-        (content_word + content_word:s_lp || word)
-)
+# m2_n400_formula <- bf(
+#     n400 ~ -1 + content_word +
+#         content_word:s_lp + content_word:s_freq +
+#         (content_word + content_word:s_lp +
+#             content_word:s_freq || participant_number) +
+#         (content_word + content_word:s_lp +
+#             content_word:s_freq || document_id) +
+#         (content_word + content_word:s_lp || word)
+# )
 
-m3_n400_formula <- bf(
-    n400 ~ s_lp + s_wl + s_freq +
-        (s_lp + s_wl + s_freq || participant_number) +
-        (s_lp + s_wl + s_freq || document_id) +
-        (s_lp || word)
-)
+# m3_n400_formula <- bf(
+#     n400 ~ s_lp + s_wl + s_freq +
+#         (s_lp + s_wl + s_freq || participant_number) +
+#         (s_lp + s_wl + s_freq || document_id) +
+#         (s_lp || word)
+# )
 
 if (run_n400) {
     print(">>> N400 SPR Models <<<")
-    for (i in seq_len(3)) {
+    for (i in seq_len(1)) {
         print(
             paste("Model formula", i)
         )
@@ -269,7 +276,7 @@ if (run_n400) {
             control = list(adapt_delta = 0.9999),
             seed = 246,
             file = paste(
-                "src/brms_models/n400_SPR_m", i,
+                "src/brms_models/llm_fietje/n400_SPR_m", i,
                 sep = ""
             )
         )
@@ -280,28 +287,28 @@ if (run_n400) {
 
 ## N400 RSVP (formulas without document id random effects)
 m1_n400_rsvp_formula <- bf(
-    n400 ~ s_lp + s_freq +
-        (s_lp + s_freq || participant_number) +
-        (s_lp || word)
+    n400 ~ s_lp_fietje + s_freq +
+        (s_lp_fietje + s_freq || participant_number) +
+        (s_lp_fietje || word)
 )
 
-m2_n400_rsvp_formula <- bf(
-    n400 ~ -1 + content_word +
-        content_word:s_lp + content_word:s_freq +
-        (content_word + content_word:s_lp +
-            content_word:s_freq || participant_number) +
-        (content_word + content_word:s_lp || word)
-)
+# m2_n400_rsvp_formula <- bf(
+#     n400 ~ -1 + content_word +
+#         content_word:s_lp + content_word:s_freq +
+#         (content_word + content_word:s_lp +
+#             content_word:s_freq || participant_number) +
+#         (content_word + content_word:s_lp || word)
+# )
 
-m3_n400_rsvp_formula <- bf(
-    n400 ~ s_lp + s_wl + s_freq +
-        (s_lp + s_wl + s_freq || participant_number) +
-        (s_lp || word)
-)
+# m3_n400_rsvp_formula <- bf(
+#     n400 ~ s_lp + s_wl + s_freq +
+#         (s_lp + s_wl + s_freq || participant_number) +
+#         (s_lp || word)
+# )
 
 if (run_n400) {
     print(">>> N400 RSVP Models <<<")
-    for (i in seq_len(3)) {
+    for (i in seq_len(1)) {
         print(
             paste("Model formula", i)
         )
@@ -327,7 +334,7 @@ if (run_n400) {
             control = list(adapt_delta = 0.9999),
             seed = 246,
             file = paste(
-                "src/brms_models/n400_RSVP_m", i,
+                "src/brms_models/llm_fietje/n400_RSVP_m", i,
                 sep = ""
             )
         )
@@ -341,33 +348,33 @@ m_p600_priors <- m_n400_priors
 m_p600_priors_no_intercept <- m_n400_priors_no_intercept
 
 m1_p600_formula <- bf(
-    p600 ~ s_lp + s_freq +
-        (s_lp + s_freq || participant_number) +
-        (s_lp + s_freq || document_id) +
-        (s_lp || word)
+    p600 ~ s_lp_fietje + s_freq +
+        (s_lp_fietje + s_freq || participant_number) +
+        (s_lp_fietje + s_freq || document_id) +
+        (s_lp_fietje || word)
 )
 
-m2_p600_formula <- bf(
-    p600 ~ -1 + content_word +
-        content_word:s_lp + content_word:s_freq +
-        (content_word + content_word:s_lp +
-            content_word:s_freq || participant_number) +
-        (content_word + content_word:s_lp +
-            content_word:s_freq || document_id) +
-        (content_word + content_word:s_lp || word)
-)
+# m2_p600_formula <- bf(
+#     p600 ~ -1 + content_word +
+#         content_word:s_lp + content_word:s_freq +
+#         (content_word + content_word:s_lp +
+#             content_word:s_freq || participant_number) +
+#         (content_word + content_word:s_lp +
+#             content_word:s_freq || document_id) +
+#         (content_word + content_word:s_lp || word)
+# )
 
-m3_p600_formula <- bf(
-    p600 ~ s_lp + s_wl + s_freq +
-        (s_lp + s_wl + s_freq || participant_number) +
-        (s_lp + s_wl + s_freq || document_id) +
-        (s_lp || word)
-)
+# m3_p600_formula <- bf(
+#     p600 ~ s_lp + s_wl + s_freq +
+#         (s_lp + s_wl + s_freq || participant_number) +
+#         (s_lp + s_wl + s_freq || document_id) +
+#         (s_lp || word)
+# )
 
 
 if (run_p600) {
     print(">>> P600 SPR Models <<<")
-    for (i in seq_len(3)) {
+    for (i in seq_len(1)) {
         print(
             paste("Model formula", i)
         )
@@ -393,7 +400,7 @@ if (run_p600) {
             control = list(adapt_delta = 0.9999),
             seed = 246,
             file = paste(
-                "src/brms_models/p600_SPR_m", i,
+                "src/brms_models/llm_fietje/p600_SPR_m", i,
                 sep = ""
             )
         )
@@ -404,28 +411,28 @@ if (run_p600) {
 
 ## P600 RSVP (formulas without document id random effects)
 m1_p600_rsvp_formula <- bf(
-    p600 ~ s_lp + s_freq +
-        (s_lp + s_freq || participant_number) +
-        (s_lp || word)
+    p600 ~ s_lp_fietje + s_freq +
+        (s_lp_fietje + s_freq || participant_number) +
+        (s_lp_fietje || word)
 )
 
-m2_p600_rsvp_formula <- bf(
-    p600 ~ -1 + content_word +
-        content_word:s_lp + content_word:s_freq +
-        (content_word + content_word:s_lp +
-            content_word:s_freq || participant_number) +
-        (content_word + content_word:s_lp || word)
-)
+# m2_p600_rsvp_formula <- bf(
+#     p600 ~ -1 + content_word +
+#         content_word:s_lp + content_word:s_freq +
+#         (content_word + content_word:s_lp +
+#             content_word:s_freq || participant_number) +
+#         (content_word + content_word:s_lp || word)
+# )
 
-m3_p600_rsvp_formula <- bf(
-    p600 ~ s_lp + s_wl + s_freq +
-        (s_lp + s_wl + s_freq || participant_number) +
-        (s_lp || word)
-)
+# m3_p600_rsvp_formula <- bf(
+#     p600 ~ s_lp + s_wl + s_freq +
+#         (s_lp + s_wl + s_freq || participant_number) +
+#         (s_lp || word)
+# )
 
 if (run_p600) {
     print(">>> p600 RSVP Models <<<")
-    for (i in seq_len(3)) {
+    for (i in seq_len(1)) {
         print(
             paste("Model formula", i)
         )
@@ -451,7 +458,7 @@ if (run_p600) {
             control = list(adapt_delta = 0.9999),
             seed = 246,
             file = paste(
-                "src/brms_models/p600_RSVP_m", i,
+                "src/brms_models/llm_fietje/p600_RSVP_m", i,
                 sep = ""
             )
         )
