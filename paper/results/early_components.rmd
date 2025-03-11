@@ -13,6 +13,7 @@ library(ggplot2)
 
 setwd("paper")
 
+source("src/file_checks.r")
 source("src/util.r")
 ```
 
@@ -192,11 +193,8 @@ early_amplitude_df <- read.csv("data/early_components.csv")
 ```
 
 ```{r}
-# check data
-early_amplitude_df |>
-    group_by(participant_number) |>
-    summarise(n()) |>
-    print(n = 21)
+# check number of words per participant is correct
+test_n_words_per_participants(early_amplitude_df)
 ```
 
 ```{r}
@@ -228,7 +226,11 @@ early_amplitude_df <- early_amplitude_df |>
 data <- early_amplitude_df |>
     filter(!(reject)) |>
     filter(!(document_id %in% c(11, 12))) |>
-    filter(reading_type == "SPR")
+    filter(reading_type == "SPR") |>
+    # filter based on reject rt
+    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    filter(rt > 100 & rt < 3000) |>
+    filter(!participant_number == 64)
 
 early_m <- lmer(
     (early_component ~ s_lp +
@@ -442,6 +444,10 @@ early_amplitude_df |>
     filter(!(reject)) |>
     filter(!(document_id %in% c(11, 12))) |>
     filter(reading_type == "SPR") |>
+    # filter based on reject rt
+    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    filter(rt > 100 & rt < 3000) |>
+    filter(!participant_number == 64) |>
     ggplot(aes(x = s_lp, y = early_component)) +
     geom_point(aes(color = participant_number), alpha = .1) +
     geom_smooth(method = "lm") +
@@ -453,8 +459,24 @@ early_amplitude_df |>
     filter(!(reject)) |>
     filter(!(document_id %in% c(11, 12))) |>
     filter(reading_type == "SPR") |>
+    # filter based on reject rt
+    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    filter(rt > 100 & rt < 3000) |>
+    filter(!participant_number == 64) |>
     ggplot(aes(x = s_lp, y = n1)) +
     geom_point(aes(color = participant_number), alpha = .1) +
     geom_smooth(method = "lm") +
     theme_minimal()
+```
+
+## with brms
+```{r}
+library(brms)
+
+options(mc.cores = parallel::detectCores())
+options(brms.backend = "cmdstan")
+```
+
+```{r}
+
 ```
