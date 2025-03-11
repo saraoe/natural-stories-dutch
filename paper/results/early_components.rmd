@@ -80,11 +80,25 @@ chs <- list(
 ```
 
 ```{r}
+filename <- "data/early_components.csv"
+
+# already summarized data
+if (file.exists(filename)) {
+    cur_mean_df <- read.csv(filename)
+    cur_mean_participants <- unique(cur_mean_df$participant_number)
+} else {
+    cur_mean_participants <- c()
+}
+
 ## loop through files
-for (epoch_file in epoch_files[1:40]) {
+for (epoch_file in epoch_files) {
     start_time <- Sys.time()
     char_n <- get_participant_n(epoch_file)
     n <- as.numeric(char_n)
+    if (n %in% cur_mean_participants) {
+        print(paste("Participant", n, "already in", filename))
+        next
+    }
     print(
         paste("Running participant: ", n, sep = "")
     )
@@ -152,29 +166,37 @@ for (epoch_file in epoch_files[1:40]) {
         ) |>
         left_join(rt_df, by = "segment")
 
-    if (exists("early_amplitude_df")) {
-        early_amplitude_df <- rbind(early_amplitude_df, tmp_df)
-    } else {
-        early_amplitude_df <- tmp_df
-    }
+    # if (exists("early_amplitude_df")) {
+    #     early_amplitude_df <- rbind(early_amplitude_df, tmp_df)
+    # } else {
+    #     early_amplitude_df <- tmp_df
+    # }
 
     end_time <- Sys.time()
     print(paste("Time for participant", n, ":", end_time - start_time))
+
+    write.table(
+        tmp_df,
+        filename,
+        sep = ",",
+        col.names = !file.exists(filename),
+        row.names = FALSE,
+        append = TRUE
+    )
 }
-
-write.csv(early_amplitude_df, "data/early_components.csv")
-```
-
-```{r}
-early_amplitude_df |>
-    group_by(participant_number) |>
-    summarise(n()) |>
-    print(n = 21)
 ```
 
 ## Test models with lmer
 ```{r}
 early_amplitude_df <- read.csv("data/early_components.csv")
+```
+
+```{r}
+# check data
+early_amplitude_df |>
+    group_by(participant_number) |>
+    summarise(n()) |>
+    print(n = 21)
 ```
 
 ```{r}
