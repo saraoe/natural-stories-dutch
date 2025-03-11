@@ -233,7 +233,7 @@ erp_mean_plot(
 
 ## Early components from Sereno et al. (2020)
 ```{r}
-chs <- list(
+chs_roi <- list(
     "midline-anterior" = c("AFz", "Fz"),
     "left-anterior" = c("Fp1", "AF3", "F7", "F5", "F3", "F1"),
     "midline-posterior" = c("Pz", "POz"),
@@ -244,20 +244,31 @@ chs <- list(
 reading_cond <- "SPR"
 component <- "n1" # n1 or early
 only_content_words <- FALSE
+facet <- TRUE
 
 if (component == "early") {
-    chs <- c(chs[["midline-anterior"]], chs[["left-anterior"]])
+    chs <- c(chs_roi[["midline-anterior"]], chs_roi[["left-anterior"]])
     timewindow <- c(0.05, 0.08)
 } else if (component == "n1") {
-    chs <- c(chs[["midline-posterior"]], chs[["right-posterior"]])
+    chs <- c(chs_roi[["midline-posterior"]], chs_roi[["right-posterior"]])
     timewindow <- c(0.16, 0.2)
 }
 
-erp_mean_plot(
-    df = erp_df,
-    reading_cond = reading_cond,
-    channels = chs,
-    content_words = only_content_words,
-    annotate_timewindow = timewindow
-)
+if (!facet) {
+    erp_mean_plot(
+        df = erp_df,
+        reading_cond = reading_cond,
+        channels = chs,
+        content_words = only_content_words,
+        annotate_timewindow = timewindow
+    ) + xlim(-0.2, 0.4)
+} else if (facet) {
+    erp_facet_plot(
+        df = erp_df,
+        reading_cond = reading_cond,
+        channels = unique(unlist(chs_roi)), # all the chs
+        content_words = only_content_words,
+        annotate_timewindow = timewindow
+    ) + xlim(-0.2, 0.4)
+}
 ```
