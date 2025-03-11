@@ -1,0 +1,259 @@
+# Early components (<200ms) and word probability
+Inspired by the paper by Serena et al. (2020), we're looking at two early components that were found related to contextual predictability.
+- 50-80 ms after onset of the word; positive effect of predictability in left- and midline-anterior ROI.
+- N1, 160-200 ms after onset of the word; negative effect of predictability in midline- and right-posterior ROI.
+
+```{r}
+library(tidytable)
+library(eeguana)
+library(readxl)
+library(stringr)
+library(lmerTest)
+library(ggplot2)
+
+setwd("paper")
+
+source("src/util.r")
+```
+
+## Summarize components
+```{r}
+### functions (NB: copied from src/summarize_eeg.r)
+get_participant_n <- function(file) {
+    return(gsub(".*?([0-9]+).*", "\\1", file))
+}
+
+cal_mean_amplitude <- function(epochs, chs, time_from, time_to, time_unit) {
+    amplitude_mean <- epochs |>
+        eeg_filter(between(as_time(.sample, .unit = time_unit), time_from, time_to)) |>
+        eeg_group_by(segment, .sample) |>
+        eeg_summarize(
+            "mean_amplitude_sample" = chs_mean(across(
+                chs
+            ), na.rm = TRUE)
+        ) |>
+        eeg_group_by(segment) |>
+        eeg_summarize(
+            "mean_amplitude" = mean(mean_amplitude_sample)
+        )
+
+    return(amplitude_mean)
+}
+```
+
+```{r}
+# Files
+epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = ".rds$")
+
+stim <- read.csv("../data/words_corpus.csv") |>
+    select(-X) |>
+    mutate(content_word = ifelse(pos %in% c("NOUN", "VERB", "ADJ", "ADV"), TRUE, FALSE)) |>
+    mutate(
+        lp_quantile = case_when(
+            lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
+            lp <= quantile(lp, na.rm = TRUE)[2] ~ "low_lp",
+            (lp > quantile(lp, na.rm = TRUE)[2] &
+                lp < quantile(lp, na.rm = TRUE)[4]) ~ "med_lp"
+        ),
+        lp_quantile_content = case_when(
+            content_word == TRUE ~ case_when(
+                (lp >= quantile(lp[content_word == TRUE], na.rm = TRUE)[4]
+                ~ "high_lp"),
+                (lp <= quantile(lp[content_word == TRUE], na.rm = TRUE)[2]
+                ~ "low_lp"),
+                (lp > quantile(lp[content_word == TRUE], na.rm = TRUE)[2] &
+                    lp < quantile(lp[content_word == TRUE], na.rm = TRUE)[4])
+                ~ "med_lp"
+            ),
+            TRUE ~ NA_character_
+        )
+    )
+
+exclude_df <- read_excel("data/exclude.xlsx")
+
+chs <- list(
+    "midline-anterior" = c("AFz", "Fz"),
+    "left-anterior" = c("Fp1", "AF3", "F7", "F5", "F3", "F1"),
+    "midline-posterior" = c("Pz", "POz"),
+    "right-posterior" = c("P2", "P4", "P6", "P8", "PO4", "PO8", "O2")
+)
+```
+
+```{r}
+## loop through files
+for (epoch_file in epoch_files[1:40]) {
+    start_time <- Sys.time()
+    char_n <- get_participant_n(epoch_file)
+    n <- as.numeric(char_n)
+    print(
+        paste("Running participant: ", n, sep = "")
+    )
+
+    # load data
+    exclude_chs <- exclude_df |>
+        filter(participant_number == n & !is.na(ch)) |>
+        pull(ch)
+    epochs <- readRDS(epoch_file) |>
+        as_eeg_lst() |>
+        eeg_left_join(stim)
+    rt_df <- list.files(
+        "data/spr",
+        full.names = TRUE,
+        pattern = paste("rt_.*_", n, "_.*\\.csv$", sep = "")
+    ) |>
+        lapply(read_multiple_sessions_csv) |>
+        bind_rows() |>
+        mutate( # remove fancy quotations
+            word = str_replace_all(word, "\\p{quotation mark}", "'"),
+            trial = ifelse(document_id > 10, trial - 0.5, trial)
+        ) |>
+        select(-X, -participant_id, -participant_subfix) |>
+        left_join(
+            stim,
+            by = c("story_name", "document_id", "word_n", "paragraph_n", "word")
+        ) |>
+        arrange(trial, paragraph_n, word_n)
+    rt_df$segment <- seq_len(nrow(rt_df))
+    reject_reasons <- epochs |>
+        segments_tbl() |>
+        select(reject_reason, segment)
+    rt_df <- rt_df |> left_join(reject_reasons)
+
+    # summarize results
+    early_chs <- c(chs[["midline-anterior"]], chs[["left-anterior"]])
+    early_chs <- early_chs[!early_chs %in% exclude_chs] # exclude
+    amplitude_early <- cal_mean_amplitude(
+        epochs,
+        chs = early_chs,
+        time_from = .05,
+        time_to = .08,
+        time_unit = "s"
+    )
+
+    n1_chs <- c(chs[["midline-posterior"]], chs[["right-posterior"]])
+    n1_chs <- n1_chs[!n1_chs %in% exclude_chs] # exclude
+    amplitude_n1 <- cal_mean_amplitude(
+        epochs,
+        chs = n1_chs,
+        time_from = .16,
+        time_to = .2,
+        time_unit = "s"
+    )
+
+    tmp_df <- amplitude_early |>
+        as_tidytable() |>
+        rename("early_component" = .value) |>
+        select(-.key) |>
+        left_join(
+            amplitude_n1 |>
+                as_tidytable() |>
+                rename("n1" = .value) |>
+                select(-.key)
+        ) |>
+        left_join(rt_df, by = "segment")
+
+    if (exists("early_amplitude_df")) {
+        early_amplitude_df <- rbind(early_amplitude_df, tmp_df)
+    } else {
+        early_amplitude_df <- tmp_df
+    }
+
+    end_time <- Sys.time()
+    print(paste("Time for participant", n, ":", end_time - start_time))
+}
+
+write.csv(early_amplitude_df, "data/early_components.csv")
+```
+
+```{r}
+early_amplitude_df |>
+    group_by(participant_number) |>
+    summarise(n()) |>
+    print(n = 21)
+```
+
+## Test models with lmer
+```{r}
+early_amplitude_df <- read.csv("data/early_components.csv")
+```
+
+```{r}
+# filter based on amount of rejected epochs
+reject_threshold <- .3
+
+reject_df <- early_amplitude_df |>
+    filter(!document_id %in% c(11, 12)) |>
+    filter(!is.na(lp_quantile)) |>
+    group_by(participant_number, document_id, lp_quantile) |>
+    summarize(
+        "rejected_epochs" = (sum(is.na(n1)) / n())
+    ) |>
+    group_by(participant_number, document_id) |>
+    summarize(
+        "reject" = ifelse(all(rejected_epochs < reject_threshold), FALSE, TRUE)
+    )
+
+reject_df |>
+    filter(reject) |>
+    group_by(participant_number) |>
+    summarize(n())
+
+early_amplitude_df <- early_amplitude_df |>
+    left_join(reject_df, by = c("participant_number", "document_id"))
+```
+
+```{r}
+data <- early_amplitude_df |>
+    filter(!(reject)) |>
+    filter(!(document_id %in% c(11, 12))) |>
+    filter(reading_type == "SPR")
+
+early_m <- lmer(
+    (early_component ~ s_lp +
+        (s_lp | participant_number) +
+        (s_lp | word) +
+        (s_lp | document_id)
+    ),
+    data = data
+)
+
+n1_m <- lmer(
+    (n1 ~ s_lp +
+        (s_lp | participant_number) +
+        (s_lp | word) +
+        (s_lp | document_id)
+    ),
+    data = data
+)
+```
+
+```{r}
+summary(early_m)
+```
+
+```{r}
+summary(n1_m)
+```
+
+## Plots
+```{r}
+early_amplitude_df |>
+    filter(!(reject)) |>
+    filter(!(document_id %in% c(11, 12))) |>
+    filter(reading_type == "SPR") |>
+    ggplot(aes(x = s_lp, y = early_component)) +
+    geom_point(aes(color = participant_number), alpha = .1) +
+    geom_smooth(method = "lm") +
+    theme_minimal()
+```
+
+```{r}
+early_amplitude_df |>
+    filter(!(reject)) |>
+    filter(!(document_id %in% c(11, 12))) |>
+    filter(reading_type == "SPR") |>
+    ggplot(aes(x = s_lp, y = n1)) +
+    geom_point(aes(color = participant_number), alpha = .1) +
+    geom_smooth(method = "lm") +
+    theme_minimal()
+```
