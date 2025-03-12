@@ -278,34 +278,34 @@ Formula: (early_component ~ s_lp + (s_lp | participant_number) + (s_lp |
     word) + (s_lp | document_id))
    Data: data
 
-REML criterion at convergence: 888123.6
+REML criterion at convergence: 829696
 
 Scaled residuals:
     Min      1Q  Median      3Q     Max 
--8.9499 -0.6279 -0.0031  0.6316 10.3084 
+-8.9251 -0.6266 -0.0029  0.6315 10.2835
 
 Random effects:
  Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept)  0.079879 0.28263
-                    s_lp         0.041573 0.20389  -0.24
- participant_number (Intercept)  2.342588 1.53055
-                    s_lp         0.001534 0.03917  1.00
- document_id        (Intercept)  0.007377 0.08589
-                    s_lp         0.002141 0.04627  0.33
- Residual                       97.277293 9.86293
-Number of obs: 119722, groups:
+ word               (Intercept)  0.101111 0.31798
+                    s_lp         0.059875 0.24469  -0.47
+ participant_number (Intercept)  2.368495 1.53899       
+                    s_lp         0.001051 0.03241  1.00
+ document_id        (Intercept)  0.007160 0.08461
+                    s_lp         0.002509 0.05009  0.42
+ Residual                       97.785442 9.88865       
+Number of obs: 111761, groups:
 word, 1975; participant_number, 51; document_id, 8
 
 Fixed effects:
-            Estimate Std. Error       df t value Pr(>|t|)
-(Intercept)  0.39658    0.22014 52.15385   1.801   0.0774 .
-s_lp         0.01248    0.03890  9.30728   0.321   0.7554
+             Estimate Std. Error        df t value Pr(>|t|)  
+(Intercept)  0.414103   0.221529 52.247792   1.869   0.0672 .
+s_lp         0.003917   0.040972  9.109582   0.096   0.9259
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
      (Intr)
-s_lp 0.175
+s_lp 0.148
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
@@ -319,38 +319,38 @@ Formula:
     (s_lp | word) + (s_lp + s_freq | document_id))
    Data: data
 
-REML criterion at convergence: 888123.7
+REML criterion at convergence: 829695.8
 
 Scaled residuals:
     Min      1Q  Median      3Q     Max 
--8.9435 -0.6278 -0.0029  0.6315 10.2974
+-8.9180 -0.6268 -0.0030  0.6318 10.2716
 
 Random effects:
- Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept) 7.603e-02 0.275734
-                    s_lp        4.386e-02 0.209423 -0.21
- participant_number (Intercept) 2.340e+00 1.529630
-                    s_lp        3.947e-05 0.006283 0.97       
-                    s_freq      3.680e-03 0.060663 0.96  0.92
- document_id        (Intercept) 7.153e-03 0.084574
-                    s_lp        7.644e-03 0.087432  0.21
-                    s_freq      2.449e-03 0.049488 -0.28 -1.00
- Residual                       9.727e+01 9.862769
-Number of obs: 119722, groups:
+ Groups             Name        Variance  Std.Dev. Corr       
+ word               (Intercept) 9.669e-02 0.31095
+                    s_lp        6.042e-02 0.24580  -0.46
+ participant_number (Intercept) 2.369e+00 1.53924
+                    s_lp        1.139e-04 0.01067  -0.57
+                    s_freq      5.834e-03 0.07638   0.88 -0.89
+ document_id        (Intercept) 6.972e-03 0.08350
+                    s_lp        6.531e-03 0.08082   0.27
+                    s_freq      1.554e-03 0.03942  -0.22 -1.00
+ Residual                       9.778e+01 9.88854
+Number of obs: 111761, groups:
 word, 1975; participant_number, 51; document_id, 8
 
 Fixed effects:
-             Estimate Std. Error        df t value Pr(>|t|)
-(Intercept)  0.403325   0.220022 52.265724   1.833   0.0725 .
-s_lp        -0.004197   0.050224  7.034908  -0.084   0.9357
-s_freq       0.032943   0.043732 15.192737   0.753   0.4628
+            Estimate Std. Error       df t value Pr(>|t|)
+(Intercept)  0.42084    0.22158 52.25223   1.899   0.0631 .
+s_lp        -0.01074    0.05037  6.82543  -0.213   0.8374
+s_freq       0.03036    0.04420 15.42366   0.687   0.5023
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
-       (Intr) s_lp
-s_lp    0.038       
-s_freq  0.193 -0.569
+       (Intr) s_lp  
+s_lp    0.005
+s_freq  0.226 -0.534
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
@@ -363,80 +363,78 @@ Formula: (n1 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |
     document_id))
    Data: data
 
-REML criterion at convergence: 894206.5
+REML criterion at convergence: 835325.8
 
 Scaled residuals:
      Min       1Q   Median       3Q      Max 
--13.0793  -0.6140  -0.0018   0.6115  10.1013
+-13.0567  -0.6111  -0.0011   0.6097  10.0569
 
 Random effects:
  Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept) 6.618e-01  0.81350
-                    s_lp        9.234e-03  0.09610 0.37
- participant_number (Intercept) 3.211e+00  1.79180
-                    s_lp        9.283e-02  0.30468 -0.44
- document_id        (Intercept) 5.558e-03  0.07455
-                    s_lp        1.418e-02  0.11909 -0.84
- Residual                       1.020e+02 10.09949
-Number of obs: 119722, groups:
+ word               (Intercept) 7.063e-01  0.84044
+                    s_lp        1.458e-02  0.12074 0.42
+ participant_number (Intercept) 3.178e+00  1.78275
+                    s_lp        9.848e-02  0.31382 -0.40
+ document_id        (Intercept) 1.469e-03  0.03833
+                    s_lp        1.770e-02  0.13304 -0.60
+ Residual                       1.025e+02 10.12393
+Number of obs: 111761, groups:
 word, 1975; participant_number, 51; document_id, 8
 
 Fixed effects:
-             Estimate Std. Error        df t value Pr(>|t|)
-(Intercept) -0.449577   0.257044 50.416588  -1.749   0.0864 .
-s_lp         0.003048   0.073270 18.474187   0.042   0.9673
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+              Estimate Std. Error         df t value Pr(>|t|)
+(Intercept) -0.3813964  0.2551479 50.1632957  -1.495    0.141
+s_lp        -0.0005294  0.0779580 18.3348288  -0.007    0.995
 
 Correlation of Fixed Effects:
      (Intr)
-s_lp -0.275
+s_lp -0.214
 optimizer (nloptwrap) convergence code: 0 (OK)
-Model failed to converge with max|grad| = 0.00853099 (tol = 0.002, component 1)
+Model failed to converge with max|grad| = 0.0308431 (tol = 0.002, component 1)
 
 ```{r}
 summary(n1_m1)
 ```
 Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
-Formula: (n1 ~ s_lp + s_freq + (s_lp + s_freq | participant_number) +  
+Formula: (n1 ~ s_lp + s_freq + (s_lp + s_freq | participant_number) +
     (s_lp | word) + (s_lp + s_freq | document_id))
    Data: data
 
-REML criterion at convergence: 894141.7
+REML criterion at convergence: 835267
 
 Scaled residuals:
      Min       1Q   Median       3Q      Max 
--13.1160  -0.6142  -0.0018   0.6103  10.1309
+-13.0911  -0.6115  -0.0009   0.6088  10.0846
 
 Random effects:
  Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept) 5.151e-01  0.71767
-                    s_lp        8.223e-03  0.09068 -0.04
- participant_number (Intercept) 3.229e+00  1.79705
-                    s_lp        7.164e-02  0.26765 -0.50      
-                    s_freq      8.191e-02  0.28620  0.02 -0.05
- document_id        (Intercept) 5.185e-03  0.07201
-                    s_lp        1.569e-02  0.12524 -0.66
-                    s_freq      3.028e-03  0.05503  0.85 -0.63
- Residual                       1.020e+02 10.09822
-Number of obs: 119722, groups:  
+ word               (Intercept) 5.538e-01  0.74420
+                    s_lp        1.105e-02  0.10512 0.06
+ participant_number (Intercept) 3.170e+00  1.78052
+                    s_lp        7.315e-02  0.27046 -0.44      
+                    s_freq      8.136e-02  0.28524 -0.03 -0.02
+ document_id        (Intercept) 1.078e-03  0.03283
+                    s_lp        2.345e-02  0.15315  0.08
+                    s_freq      3.506e-03  0.05921 -0.29 -0.98
+ Residual                       1.025e+02 10.12291
+Number of obs: 111761, groups:
 word, 1975; participant_number, 51; document_id, 8
 
 Fixed effects:
-            Estimate Std. Error       df t value Pr(>|t|)
-(Intercept) -0.57165    0.25795 49.83138  -2.216 0.031280 *
-s_lp         0.09076    0.07303 13.38779   1.243 0.235304
-s_freq      -0.31546    0.06872 17.62930  -4.591 0.000238 ***
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept) -0.50547    0.25502 50.16948  -1.982    0.053 .
+s_lp         0.08418    0.08070 12.51070   1.043    0.317
+s_freq      -0.31643    0.07038 37.67362  -4.496 6.41e-05 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
        (Intr) s_lp
-s_lp   -0.286
-s_freq  0.084 -0.296
+s_lp   -0.193
+s_freq  0.031 -0.367
 optimizer (nloptwrap) convergence code: 0 (OK)
-Model failed to converge with max|grad| = 0.0801442 (tol = 0.002, component 1)
+boundary (singular) fit: see help('isSingular')
 
 ## Plots
 ```{r}
