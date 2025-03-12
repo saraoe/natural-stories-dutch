@@ -5,7 +5,7 @@ library(eeguana)
 library(tidytable)
 
 
-svd_erp <- function(epochs){
+svd_erp <- function(epochs) {
     erps <- epochs |>
         eeg_group_by(.sample) |>
         eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
@@ -14,7 +14,7 @@ svd_erp <- function(epochs){
         as.matrix()
 
     svdouts <- svd(erps)
-    weights <- svdouts$v[,1]
+    weights <- svdouts$v[, 1]
 
 
     epochs_signal <- epochs |>
@@ -22,12 +22,12 @@ svd_erp <- function(epochs){
         select(-.id, -.sample) |>
         as.matrix()
 
-    sterp = data.frame(
+    sterp <- data.frame(
         ".value" = epochs_signal %*% weights,
         "segment" = signal_tbl(epochs)$.id,
         ".sample" = signal_tbl(epochs)$.sample
     ) |>
-    mutate(".time" = as_time(.sample, .unit = "s"))
+        mutate(".time" = as_time(.sample, .unit = "s"))
 
     return(sterp)
 }
@@ -39,8 +39,8 @@ svd_erp <- function(epochs){
 # raw_eeg <- eeguana::read_edf(eeg_file)
 
 # svd_epochs <- eeguana::eeg_segment(
-#     raw_eeg, 
-#     .description %in% c(101, 102), 
+#     raw_eeg,
+#     .description %in% c(101, 102),
 #     .lim = c(-0.2, 1.2)
 #     ) |>
 #     eeguana::eeg_baseline() |>
