@@ -267,6 +267,23 @@ n1_m1 <- lmer(
     ),
     data = data
 )
+
+n1_m2 <- lmer(
+    (n1 ~ s_lp * s_freq +
+        (s_lp * s_freq | participant_number) +
+        (s_lp | word) +
+        (s_lp * s_freq | document_id)
+    ),
+    data = data
+)
+
+n1_m3 <- lmer(
+    (n1 ~ s_freq +
+        (s_freq | participant_number) +
+        (s_freq | document_id)
+    ),
+    data = data
+)
 ```
 
 ```{r}
@@ -436,6 +453,90 @@ s_freq  0.031 -0.367
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
+```{r}
+summary(n1_m2)
+```
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: (n1 ~ s_lp * s_freq + (s_lp * s_freq | participant_number) +
+    (s_lp | word) + (s_lp * s_freq | document_id))
+   Data: data
+
+REML criterion at convergence: 835266
+
+Scaled residuals:
+     Min       1Q   Median       3Q      Max 
+-13.0918  -0.6114  -0.0014   0.6088  10.0468
+
+Random effects:
+ Groups             Name        Variance  Std.Dev. Corr
+ word               (Intercept)   0.54667  0.73937
+                    s_lp          0.01059  0.10291 0.08
+ participant_number (Intercept)   3.17903  1.78298
+                    s_lp          0.09641  0.31050 -0.44
+                    s_freq        0.07581  0.27534 -0.03  0.05
+                    s_lp:s_freq   0.00450  0.06708 -0.25  0.77  0.62
+ document_id        (Intercept)   0.01541  0.12412
+                    s_lp          0.05265  0.22947 -0.65
+                    s_freq        0.01617  0.12716  0.81 -0.93      
+                    s_lp:s_freq   0.01382  0.11756 -0.95  0.79 -0.94
+ Residual                       102.46620 10.12256
+Number of obs: 111761, groups:
+word, 1975; participant_number, 51; document_id, 8
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(>|t|)   
+(Intercept) -0.49010    0.25926 51.06155  -1.890   0.0644 .
+s_lp         0.06052    0.11198  9.93523   0.540   0.6008
+s_freq      -0.30654    0.08059 13.74662  -3.804   0.0020 **
+s_lp:s_freq -0.02742    0.06340  7.60423  -0.433   0.6774   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) s_lp   s_freq
+s_lp        -0.258
+s_freq       0.109 -0.482
+s_lp:s_freq -0.175  0.711 -0.309
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+```{r}
+summary(n1_m3)
+```
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: (n1 ~ s_freq + (s_freq | participant_number) + (s_freq | document_id))
+   Data: data
+
+REML criterion at convergence: 836593.3
+
+Scaled residuals:
+     Min       1Q   Median       3Q      Max 
+-13.1271  -0.6144  -0.0010   0.6111  10.0953
+
+Random effects:
+ Groups             Name        Variance  Std.Dev. Corr
+ participant_number (Intercept) 3.150e+00  1.77469
+                    s_freq      9.801e-02  0.31307 -0.23
+ document_id        (Intercept) 8.851e-03  0.09408
+                    s_freq      4.914e-03  0.07010 -1.00
+ Residual                       1.030e+02 10.15017
+Number of obs: 111915, groups:  participant_number, 51; document_id, 8
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept) -0.59487    0.25368 49.55151  -2.345   0.0231 *
+s_freq      -0.40025    0.06101 24.39389  -6.560 8.07e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+       (Intr)
+s_freq -0.220
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
 ## Plots
 ```{r}
 early_amplitude_df |>
@@ -464,6 +565,45 @@ early_amplitude_df |>
     ggplot(aes(x = s_lp, y = n1)) +
     geom_point(aes(color = participant_number), alpha = .1) +
     geom_smooth(method = "lm") +
+    theme_minimal()
+```
+
+```{r}
+early_amplitude_df |>
+    filter(!(reject)) |>
+    filter(!(document_id %in% c(11, 12))) |>
+    filter(reading_type == "SPR") |>
+    # filter based on reject rt
+    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    filter(rt > 100 & rt < 3000) |>
+    filter(!participant_number == 64) |>
+    ggplot(aes(x = s_freq, y = n1)) +
+    geom_point(aes(color = participant_number), alpha = .1) +
+    geom_smooth(method = "lm") +
+    theme_minimal()
+```
+
+```{r}
+early_amplitude_df |>
+    filter(!(reject)) |>
+    filter(!(document_id %in% c(11, 12))) |>
+    filter(reading_type == "SPR") |>
+    # filter based on reject rt
+    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    filter(rt > 100 & rt < 3000) |>
+    filter(!participant_number == 64) |>
+    mutate(
+        freq_quantile = case_when(
+            zipf_freq >= quantile(zipf_freq, na.rm = TRUE)[4] ~ "high_freq",
+            zipf_freq <= quantile(zipf_freq, na.rm = TRUE)[2] ~ "low_freq",
+            (zipf_freq > quantile(zipf_freq, na.rm = TRUE)[2] &
+                zipf_freq < quantile(zipf_freq, na.rm = TRUE)[4]) ~ "med_freq"
+        )
+    ) |>
+    ggplot(aes(x = s_lp, y = n1)) +
+    geom_point(aes(color = participant_number), alpha = .1) +
+    geom_smooth(method = "lm") +
+    facet_wrap(. ~ freq_quantile) +
     theme_minimal()
 ```
 
