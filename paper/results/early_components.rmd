@@ -606,15 +606,3 @@ early_amplitude_df |>
     facet_wrap(. ~ freq_quantile) +
     theme_minimal()
 ```
-
-## with brms
-```{r}
-library(brms)
-
-options(mc.cores = parallel::detectCores())
-options(brms.backend = "cmdstan")
-```
-
-```{r}
-
-```
