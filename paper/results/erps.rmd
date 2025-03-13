@@ -267,13 +267,33 @@ if (!facet) {
         content_words = only_content_words,
         annotate_timewindow = timewindow
     ) + xlim(-0.2, 0.4)
+
+    fig_name <- file.path(
+        figs_path,
+        paste(reading_cond, "_", component, "_contentwords",
+            only_content_words, ".png",
+            sep = ""
+        )
+    )
 } else if (facet) {
     erp_facet_plot(
         df = erp_df,
         reading_cond = reading_cond,
         channels = unique(unlist(chs_roi)), # all the chs
         content_words = only_content_words,
-        annotate_timewindow = timewindow
     ) + xlim(-0.2, 0.4)
+
+    fig_name <- file.path(
+        figs_path,
+        paste(reading_cond, "_early_contentwords",
+            only_content_words, "_facet_chs.png",
+            sep = ""
+        )
+    )
 }
+
+ggsave(
+    fig_name,
+    width = 15, height = 10
+)
 ```
