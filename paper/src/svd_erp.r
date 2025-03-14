@@ -5,7 +5,10 @@ library(eeguana)
 library(tidytable)
 
 
-svd_erp <- function(epochs) {
+svd_erp <- function(epochs, comp = 1) {
+    # epochs in eeguana format
+    # comp is the svd component to take the weights from
+    #   - comp = 1 explains most variance
     erps <- epochs |>
         eeg_group_by(.sample) |>
         eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
@@ -14,7 +17,7 @@ svd_erp <- function(epochs) {
         as.matrix()
 
     svdouts <- svd(erps)
-    weights <- svdouts$v[, 1]
+    weights <- svdouts$v[, comp]
 
 
     epochs_signal <- epochs |>
