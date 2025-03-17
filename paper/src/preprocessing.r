@@ -8,14 +8,9 @@ library(tidytable)
 library(readxl)
 library(stringr)
 
-# setwd("paper")
-source("src/svd_erp.r")
+setwd("paper")
 source("src/file_checks.r")
 source("src/util.r")
-
-# single trial erps
-do_sterp <- FALSE
-sterp_filename <- "data/sterp.csv"
 
 # files
 eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")
@@ -333,24 +328,6 @@ for (eeg_file in eeg_files) {
     # save epochs
     number <- ifelse(n < 10, paste("0", n, sep = ""), as.character(n))
     saveRDS(epochs, paste("data/epochs/", number, ".rds", sep = ""))
-
-    if (do_sterp) {
-        svd_epochs <- epochs |>
-            eeg_filter(!document_id %in% c(11, 12)) |> # remove practice texts
-            eeg_select(-VEOG, -HEOG) |>
-            svd_erp() |>
-            left_join(rt_df, by = "segment") |>
-            filter(!document_id %in% exclude_docs)
-
-        write.table(
-            svd_epochs,
-            erp_filename,
-            sep = ",",
-            col.names = !file.exists(erp_filename),
-            row.names = FALSE,
-            append = TRUE
-        )
-    }
 
     end_time <- Sys.time()
     print(paste("Time for participant", n, ":", end_time - start_time))

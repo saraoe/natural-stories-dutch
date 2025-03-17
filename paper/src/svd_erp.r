@@ -3,6 +3,14 @@
 
 library(eeguana)
 library(tidytable)
+library(readxl)
+library(stringr)
+
+setwd("paper")
+source("src/file_checks.r")
+source("src/util.r")
+
+dir.create(file.path(getwd(), "data/sterps"), showWarnings = TRUE)
 
 
 svd_erp <- function(epochs, comp = 1) {
@@ -36,16 +44,66 @@ svd_erp <- function(epochs, comp = 1) {
 }
 
 
-# testing function
-# setwd("paper")
-# eeg_file <- list.files("data/spr/", full.names=TRUE, pattern=".bdf$")[1]
-# raw_eeg <- eeguana::read_edf(eeg_file)
+# files
+epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = "rds$")
+stim <- read.csv("../data/words_corpus.csv") |>
+    select(-X) |>
+    mutate(
+        lp_quantile = case_when(
+            lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
+            lp <= quantile(lp, na.rm = TRUE)[2] ~ "low_lp",
+            (lp > quantile(lp, na.rm = TRUE)[2] &
+                lp < quantile(lp, na.rm = TRUE)[4]) ~ "med_lp"
+        ),
+    )
+exclude_df <- read_excel("data/exclude.xlsx")
 
-# svd_epochs <- eeguana::eeg_segment(
-#     raw_eeg,
-#     .description %in% c(101, 102),
-#     .lim = c(-0.2, 1.2)
-#     ) |>
-#     eeguana::eeg_baseline() |>
-#     eeg_select(-M1, -M2, -Up, -Down, -Left, -Right) |>
-#     svd_erp()
+## loop over epochs
+for (epoch_file in epoch_files) {
+    start_time <- Sys.time()
+    n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", epoch_file))
+    exclude_docs <- exclude_df |>
+        filter(participant_number == n & !is.na(document_id)) |>
+        pull(document_id)
+    print(
+        paste("Running participant: ", n, sep = "")
+    )
+
+    # load files
+    epochs <- readRDS(epoch_file)
+    rt_df <- list.files(
+        "data/spr",
+        full.names = TRUE,
+        pattern = paste("rt_.*_", n, "_.*\\.csv$", sep = "")
+    ) |>
+        lapply(read_multiple_sessions_csv) |>
+        bind_rows() |>
+        mutate( # remove fancy quotations
+            word = str_replace_all(word, "\\p{quotation mark}", "'"),
+            trial = ifelse(document_id > 10, trial - 0.5, trial)
+        ) |>
+        select(-X, -participant_id, -participant_subfix) |>
+        left_join(
+            stim,
+            by = c("story_name", "document_id", "word_n", "paragraph_n", "word")
+        ) |>
+        arrange(trial, paragraph_n, word_n)
+    rt_df$segment <- seq_len(nrow(rt_df))
+
+    # test
+    if (!test_n_words(rt_df)) {
+        print("Number of words in every story does not match!")
+        next
+    }
+
+    # create sterps
+    svd_epochs <- epochs |>
+        eeg_filter(!document_id %in% c(11, 12)) |> # remove practice texts
+        eeg_select(-VEOG, -HEOG) |>
+        svd_erp() |>
+        left_join(rt_df, by = "segment") |>
+        filter(!document_id %in% exclude_docs)
+
+    number <- ifelse(n < 10, paste("0", n, sep = ""), as.character(n))
+    # write.csv(svd_epochs, paste("data/sterps/sterp", number, ".csv", sep = ""))
+}

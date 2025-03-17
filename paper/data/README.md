@@ -11,8 +11,10 @@
 │   └── ...     <- files from Cloze Task
 ├── epochs
     └── ...     <- epochs after preprocessing
-└── erps
+├── erps
     └── ...     <- erps for every participant
+└── sterps
+    └── ...     <- sterps for every participant
 
 ```
 
@@ -147,3 +149,5 @@ The **participant information** file include the following information:
 In the ``epochs/`` folder, epochs created in the ``src/preprocessing.r`` are saved as RDS-files. Every files is epochs from a single participant, and the name is the participant number.
 
 In the ``erps/`` folder, erps created on ``src/summarize_eeg.r`` are saved as csv-files. Every files is erps from a single participant, and the name indicates the participant number. The file contains averaged EEG signal from all channels in three conditions (high, med, and low log-probability) for the two presentation rates (SPR and RSVP) separately. A value for all words and a value for only content words are calculated. See *Mean amplitude and ERPs* above for a more in depth explanation.
+
+In the ``sterps/`` folder, single-trial ERPs created in the ``src/svd_erp.r`` are saved as csv-files. Every files is erps from a single participant, and the name indicates the participant number. Singular value decomposition (SVD) is used to create single-trial event-related potentials (ERPs) instead of averaging over all channels. The methods is used in [Nunez et al., 2017](https://doi.org/10.1016/j.jmp.2016.03.003). 

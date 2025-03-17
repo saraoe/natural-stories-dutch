@@ -16,6 +16,7 @@ paper/data/cloze/*
 paper/data/spr/*
 paper/data/epochs/*
 paper/data/erps/*
+paper/data/sterps/*
 paper/data/*.csv
 paper/figs/preprocessing/*
 paper/figs/*
