@@ -18,26 +18,24 @@ sterp_files <- list.files(
 )
 
 # create reject_df
+# percent of rejected artifacts in one story for the entire story to be rejected
 artifact_threshold <- .3
+# reject reading times that are below or above (in ms)
+rt_threshold <- c(100, 3000)
 
 reject_df <- read.csv("data/mean_amplitude.csv") |>
     filter(document_id < 10) |> # exclude practice texts
     filter(!is.na(lp_quantile)) |>
     group_by(participant_number, document_id) |>
     summarize(
-        "reject" = ifelse(
-            # if proportion of rejected epochs are under the threshold
-            (sum(is.na(n400)) / n()) < artifact_threshold,
-            FALSE, TRUE
-        )
-    ) |>
-    mutate(
-        "reject" = ifelse(
+        "reject" = case_when(
+            # if proportion of rejected epochs are over the threshold
+            (sum(is.na(n400)) / n()) > artifact_threshold ~ TRUE,
             # reject document 1 from participant 17 (error while reading)
-            # and remove participant 64 (problems during data collection)
-            ((participant_number == 17 & document_id == 1) |
-                participant_number == 64),
-            TRUE, reject
+            (participant_number == 17 & document_id == 1) ~ TRUE,
+            # reject participant 64 (problems during data collection)
+            participant_number == 64 ~ TRUE,
+            .default = FALSE
         )
     )
 
@@ -111,7 +109,10 @@ for (sterp_file in sterp_files) {
         left_join(reject_df,
             by = c("participant_number", "document_id")
         ) |>
-        filter(!reject)
+        filter(!reject) |>
+        # filter based on reject rt
+        mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+        filter(rt > rt_threshold[1] & rt < rt_threshold[2])
 
     sterp_lp_spr <- mean_sterps(sterps, reading_cond = "SPR")
     sterp_lp_rsvp <- mean_sterps(sterps, reading_cond = "RSVP")
@@ -181,6 +182,9 @@ for (sterp_file in sterp_files) {
             by = c("participant_number", "document_id")
         ) |>
         filter(!reject) |>
+        # filter based on reject rt
+        mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+        filter(rt > rt_threshold[1] & rt < rt_threshold[2]) |>
         group_by(-.value, -.sample, -.time) |>
         summarize(
             "early" = mean(
@@ -244,36 +248,36 @@ summary(lp_early_m)
 ```
 Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
-Formula: (early ~ s_lp + (s_lp | participant_number) + (s_lp | word) +
+Formula: (early ~ s_lp + (s_lp | participant_number) + (s_lp | word) +  
     (s_lp | document_id))
    Data: filter(sterp_early_df, reading_type == reading_cond)
 
-REML criterion at convergence: 783357.2
+REML criterion at convergence: 738921.9
 
-Scaled residuals:
+Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--7.5252 -0.6071 -0.0046  0.6048  8.8075
+-7.5170 -0.6052 -0.0050  0.6027  8.7948 
 
 Random effects:
  Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept) 8.012e-01  0.8951
-                    s_lp        1.273e-01  0.3568  -1.00
- participant_number (Intercept) 9.135e+01  9.5575
-                    s_lp        2.546e-01  0.5046  1.00
- document_id        (Intercept) 1.691e+00  1.3006
-                    s_lp        9.177e-03  0.0958  1.00
- Residual                       3.141e+03 56.0486
-Number of obs: 71918, groups:
+ word               (Intercept) 1.252e+00  1.1188       
+                    s_lp        1.682e-01  0.4101  -1.00
+ participant_number (Intercept) 9.279e+01  9.6325
+                    s_lp        2.438e-01  0.4938  1.00
+ document_id        (Intercept) 1.706e+00  1.3061
+                    s_lp        1.006e-02  0.1003  1.00 
+ Residual                       3.152e+03 56.1393       
+Number of obs: 67817, groups:
 word, 1975; participant_number, 29; document_id, 8
 
 Fixed effects:
             Estimate Std. Error      df t value Pr(>|t|)
-(Intercept)   1.1328     1.8559 31.0224   0.610    0.546
-s_lp          0.2244     0.2502 65.3476   0.897    0.373
+(Intercept)   1.2225     1.8711 31.3308   0.653    0.518
+s_lp          0.2848     0.2582 69.8447   1.103    0.274
 
 Correlation of Fixed Effects:
      (Intr)
-s_lp 0.395
+s_lp 0.378
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
@@ -282,38 +286,38 @@ summary(lp_p1_m)
 ```
 Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
-Formula: (p1 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |
+Formula: (p1 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |  
     document_id))
    Data: filter(sterp_early_df, reading_type == reading_cond)
 
-REML criterion at convergence: 788100.3
+REML criterion at convergence: 743314.1
 
 Scaled residuals:
     Min      1Q  Median      3Q     Max 
--9.3803 -0.6041 -0.0026  0.6016 10.9555 
+-9.3814 -0.6021 -0.0028  0.5998 10.9449 
 
 Random effects:
- Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept) 2.607e+00  1.61470
-                    s_lp        4.814e-01  0.69386 -1.00
- participant_number (Intercept) 1.973e+02 14.04636
-                    s_lp        5.619e+00  2.37052 -0.28
- document_id        (Intercept) 1.279e+00  1.13113
-                    s_lp        4.540e-03  0.06738 1.00
- Residual                       3.351e+03 57.88961      
-Number of obs: 71918, groups:
+ Groups             Name        Variance  Std.Dev. Corr 
+ word               (Intercept) 2.402e+00  1.5497       
+                    s_lp        3.364e-01  0.5800  -1.00
+ participant_number (Intercept) 1.968e+02 14.0273
+                    s_lp        5.827e+00  2.4139  -0.24
+ document_id        (Intercept) 1.419e+00  1.1914
+                    s_lp        1.608e-02  0.1268  1.00
+ Residual                       3.359e+03 57.9542
+Number of obs: 67817, groups:  
 word, 1975; participant_number, 29; document_id, 8
 
 Fixed effects:
-            Estimate Std. Error     df t value Pr(>|t|)
-(Intercept)   -1.869      2.657 29.301  -0.704   0.4871
-s_lp           1.024      0.526 26.208   1.948   0.0623 .
+            Estimate Std. Error      df t value Pr(>|t|)  
+(Intercept)  -1.7212     2.6571 29.3521  -0.648   0.5222
+s_lp          1.0847     0.5379 25.9541   2.017   0.0542 .
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
      (Intr)
-s_lp -0.227
+s_lp -0.185
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
@@ -327,37 +331,36 @@ Formula: (n1 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |
     document_id))
    Data: filter(sterp_early_df, reading_type == reading_cond)
 
-REML criterion at convergence: 800647
+REML criterion at convergence: 755207.8
 
 Scaled residuals:
      Min       1Q   Median       3Q      Max 
--10.3236  -0.5970  -0.0008   0.5944  13.7321
+-10.0800  -0.5940   0.0001   0.5907  13.7173
 
 Random effects:
  Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept) 1.506e+01  3.8805
-                    s_lp        1.589e+00  1.2604  -0.75
- participant_number (Intercept) 2.445e+02 15.6374
-                    s_lp        6.013e+00  2.4521  0.22
- document_id        (Intercept) 4.076e-01  0.6384
-                    s_lp        7.787e-02  0.2791  1.00
- Residual                       3.980e+03 63.0912
-Number of obs: 71918, groups:
+ word               (Intercept)   14.7802  3.8445
+                    s_lp           1.6241  1.2744  -1.00
+ participant_number (Intercept)  248.0735 15.7504
+                    s_lp           6.2431  2.4986  0.24
+ document_id        (Intercept)    0.5037  0.7097       
+                    s_lp           0.1242  0.3524  1.00 
+ Residual                       3992.6115 63.1871
+Number of obs: 67817, groups:
 word, 1975; participant_number, 29; document_id, 8
 
 Fixed effects:
-            Estimate Std. Error      df t value Pr(>|t|)  
-(Intercept)  -6.4060     2.9345 28.3803  -2.183   0.0375 *
-s_lp         -0.2481     0.5752 32.2000  -0.431   0.6690
+            Estimate Std. Error      df t value Pr(>|t|)
+(Intercept)  -6.4606     2.9578 28.3191  -2.184   0.0374 *
+s_lp         -0.4117     0.5903 31.2428  -0.697   0.4907  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
      (Intr)
-s_lp 0.191
+s_lp 0.208 
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
-
 
 ```{r}
 reading_cond <- "SPR"
@@ -406,32 +409,32 @@ Formula: (early ~ s_lp + (s_lp | participant_number) + (s_lp | word) +
    Data: filter(filter(sterp_early_df, reading_type == reading_cond),
     pos %in% content_words)
 
-REML criterion at convergence: 382403.9
+REML criterion at convergence: 359073.2
 
 Scaled residuals:
     Min      1Q  Median      3Q     Max 
--6.4927 -0.6089 -0.0098  0.5986  8.8175
+-6.4033 -0.6057 -0.0101  0.5987  8.8069
 
 Random effects:
- Groups             Name        Variance  Std.Dev.  Corr
- word               (Intercept) 0.000e+00  0.000000
-                    s_lp        6.078e-06  0.002465  NaN
- participant_number (Intercept) 8.767e+01  9.363420
-                    s_lp        1.597e-01  0.399584 1.00
- document_id        (Intercept) 1.931e+00  1.389618      
-                    s_lp        1.863e-04  0.013651 -1.00
- Residual                       3.123e+03 55.881934
-Number of obs: 35124, groups:
+ Groups             Name        Variance  Std.Dev. Corr
+ word               (Intercept) 7.609e-03  0.08723      
+                    s_lp        1.264e-04  0.01124 0.82
+ participant_number (Intercept) 8.883e+01  9.42519
+                    s_lp        1.452e-01  0.38108 1.00
+ document_id        (Intercept) 1.588e+00  1.26030      
+                    s_lp        1.117e-03  0.03343 -1.00
+ Residual                       3.132e+03 55.96245
+Number of obs: 32972, groups:
 word, 1640; participant_number, 29; document_id, 8
 
 Fixed effects:
-             Estimate Std. Error        df t value Pr(>|t|)
-(Intercept)   1.06575    1.85407  31.59560   0.575    0.569
-s_lp          0.07733    0.30669 266.79346   0.252    0.801
+            Estimate Std. Error       df t value Pr(>|t|)
+(Intercept)   1.2155     1.8551  31.1472   0.655    0.517
+s_lp          0.1158     0.3163 275.3088   0.366    0.715
 
 Correlation of Fixed Effects:
      (Intr)
-s_lp 0.288
+s_lp 0.269
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
@@ -440,37 +443,39 @@ summary(lp_p1_content_m)
 ```
 Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
-Formula: (p1 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |
+Formula: (p1 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |  
     document_id))
-   Data: filter(filter(sterp_early_df, reading_type == reading_cond),
+   Data: filter(filter(sterp_early_df, reading_type == reading_cond),  
     pos %in% content_words)
 
-REML criterion at convergence: 384927.2
+REML criterion at convergence: 361470
 
 Scaled residuals:
-    Min      1Q  Median      3Q     Max
--7.2682 -0.6067 -0.0005  0.5968 10.8828 
+    Min      1Q  Median      3Q     Max 
+-7.2993 -0.6030 -0.0015  0.5938 10.8650
 
 Random effects:
- Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept)    2.9467  1.7166
-                    s_lp           0.6204  0.7877  -1.00
- participant_number (Intercept)  239.2250 15.4669
-                    s_lp           0.7617  0.8728  -0.30
- document_id        (Intercept)    2.3275  1.5256       
-                    s_lp           0.0804  0.2836  1.00
- Residual                       3347.7149 57.8594
-Number of obs: 35124, groups:
+ Groups             Name        Variance  Std.Dev. Corr 
+ word               (Intercept)    2.5662  1.6019
+                    s_lp           1.5436  1.2424  -0.03
+ participant_number (Intercept)  235.8465 15.3573       
+                    s_lp           0.7982  0.8934  -0.28
+ document_id        (Intercept)    1.8249  1.3509
+                    s_lp           0.0610  0.2470  1.00
+ Residual                       3360.4895 57.9697       
+Number of obs: 32972, groups:
 word, 1640; participant_number, 29; document_id, 8
 
 Fixed effects:
             Estimate Std. Error      df t value Pr(>|t|)
-(Intercept)  -2.5885     2.9555 29.7347  -0.876    0.388
-s_lp          0.6581     0.3801 18.2548   1.732    0.100
+(Intercept)  -2.3723     2.9262 29.3684  -0.811   0.4241  
+s_lp          0.7169     0.3901 20.5638   1.838   0.0806 .
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
      (Intr)
-s_lp -0.041
+s_lp -0.038
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
@@ -481,37 +486,37 @@ Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
 Formula: (n1 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |  
     document_id))
-   Data: filter(filter(sterp_early_df, reading_type == reading_cond),
+   Data: filter(filter(sterp_early_df, reading_type == reading_cond),  
     pos %in% content_words)
 
-REML criterion at convergence: 391058.2
+REML criterion at convergence: 367175.8
 
 Scaled residuals:
-     Min       1Q   Median       3Q      Max 
--10.3474  -0.5977  -0.0039   0.5912  13.7465
+    Min      1Q  Median      3Q     Max 
+-7.8291 -0.5964 -0.0024  0.5875 13.7354
 
 Random effects:
- Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept) 1.391e+01  3.72941
-                    s_lp        1.058e+00  1.02856 -1.00
- participant_number (Intercept) 2.306e+02 15.18589
-                    s_lp        5.267e-02  0.22950 1.00
- document_id        (Intercept) 1.809e-01  0.42530
-                    s_lp        9.338e-03  0.09663 1.00 
- Residual                       3.977e+03 63.06474
-Number of obs: 35124, groups:
+ Groups             Name        Variance  Std.Dev. Corr 
+ word               (Intercept) 1.270e+01  3.56319
+                    s_lp        1.710e+00  1.30759 -1.00
+ participant_number (Intercept) 2.393e+02 15.46955
+                    s_lp        1.626e-01  0.40322 0.98
+ document_id        (Intercept) 8.306e-02  0.28820
+                    s_lp        4.528e-03  0.06729 1.00
+ Residual                       3.986e+03 63.13203
+Number of obs: 32972, groups:  
 word, 1640; participant_number, 29; document_id, 8
 
 Fixed effects:
             Estimate Std. Error       df t value Pr(>|t|)
-(Intercept)  -5.9888     2.8631  27.7164  -2.092   0.0458 *
-s_lp          0.0830     0.3649 143.3062   0.227   0.8204
+(Intercept) -5.94391    2.91385 27.57511  -2.040    0.051 .
+s_lp        -0.02982    0.38268 26.53304  -0.078    0.938  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
      (Intr)
-s_lp 0.168
+s_lp 0.238
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
@@ -543,42 +548,42 @@ summary(freq_p1_m1)
 ```
 Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
-Formula: (p1 ~ s_lp + s_freq + (s_lp + s_freq | participant_number) +
+Formula: (p1 ~ s_lp + s_freq + (s_lp + s_freq | participant_number) +  
     (s_lp | word) + (s_lp + s_freq | document_id))
    Data: filter(sterp_early_df, reading_type == reading_cond)
 
-REML criterion at convergence: 788055.2
+REML criterion at convergence: 743270.4
 
 Scaled residuals:
     Min      1Q  Median      3Q     Max 
--9.3854 -0.6054 -0.0020  0.6015 10.9848
+-9.3880 -0.6023 -0.0032  0.5989 10.9746
 
 Random effects:
- Groups             Name        Variance  Std.Dev. Corr       
- word               (Intercept) 2.552e+00  1.59735
-                    s_lp        5.170e-01  0.71905 -1.00
- participant_number (Intercept) 1.963e+02 14.01074
-                    s_lp        1.696e+00  1.30223 -0.08
-                    s_freq      3.379e+00  1.83812 -0.48  0.91
- document_id        (Intercept) 1.282e+00  1.13218
-                    s_lp        2.771e-03  0.05264 -0.50
-                    s_freq      7.473e-02  0.27337  0.75 -0.94
- Residual                       3.349e+03 57.86877
-Number of obs: 71918, groups:
+ Groups             Name        Variance  Std.Dev. Corr
+ word               (Intercept) 2.370e+00  1.5396
+                    s_lp        3.935e-01  0.6273  -1.00
+ participant_number (Intercept) 1.968e+02 14.0289
+                    s_lp        1.810e+00  1.3455  -0.05
+                    s_freq      3.478e+00  1.8650  -0.41  0.93
+ document_id        (Intercept) 1.407e+00  1.1862
+                    s_lp        1.253e-02  0.1119  -0.12
+                    s_freq      3.096e-01  0.5564   0.59 -0.87
+ Residual                       3.356e+03 57.9312
+Number of obs: 67817, groups:
 word, 1975; participant_number, 29; document_id, 8
 
 Fixed effects:
             Estimate Std. Error      df t value Pr(>|t|)  
-(Intercept)  -1.8587     2.6500 29.4924  -0.701   0.4886
-s_lp          0.8536     0.3814 35.5892   2.238   0.0316 *
-s_freq        0.2407     0.4572 12.4527   0.526   0.6078
+(Intercept)  -1.7084     2.6570 29.2884  -0.643    0.525
+s_lp          0.9416     0.3940 31.5901   2.390    0.023 *
+s_freq        0.1520     0.4995 12.6231   0.304    0.766
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Correlation of Fixed Effects:
-       (Intr) s_lp  
-s_lp   -0.054
-s_freq -0.322  0.234
+       (Intr) s_lp
+s_lp   -0.035
+s_freq -0.235  0.197
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
@@ -587,43 +592,202 @@ summary(freq_p1_m2)
 ```
 Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
-Formula: (p1 ~ s_lp * s_freq + (s_lp * s_freq | participant_number) +  
+Formula: (p1 ~ s_lp * s_freq + (s_lp * s_freq | participant_number) +
     (s_lp | word) + (s_lp * s_freq | document_id))
    Data: filter(sterp_early_df, reading_type == reading_cond)
 
-REML criterion at convergence: 788045.3
+REML criterion at convergence: 743259.5
 
 Scaled residuals:
     Min      1Q  Median      3Q     Max 
--9.3855 -0.6052 -0.0022  0.6015 10.9687
+-9.3877 -0.6031 -0.0034  0.5996 10.9571 
 
 Random effects:
  Groups             Name        Variance  Std.Dev. Corr
- word               (Intercept) 2.653e+00  1.6289
-                    s_lp        5.400e-01  0.7348  -1.00
- participant_number (Intercept) 1.982e+02 14.0781
-                    s_lp        4.275e+00  2.0677  -0.09
-                    s_freq      2.482e+00  1.5753  -0.56  0.87
-                    s_lp:s_freq 7.751e-01  0.8804  -0.10  1.00  0.88
- document_id        (Intercept) 1.429e+00  1.1954
-                    s_lp        9.643e-02  0.3105  -0.56
-                    s_freq      2.712e-01  0.5208   0.59 -1.00      
-                    s_lp:s_freq 1.191e-01  0.3450  -0.57  1.00 -1.00
- Residual                       3.348e+03 57.8624
-Number of obs: 71918, groups:
+ word               (Intercept)    2.4854  1.5765
+                    s_lp           0.4194  0.6476  -0.99
+ participant_number (Intercept)  197.0911 14.0389
+                    s_lp           4.7183  2.1722  -0.06
+                    s_freq         2.4762  1.5736  -0.50  0.90
+                    s_lp:s_freq    0.8981  0.9477  -0.06  1.00  0.89
+ document_id        (Intercept)    1.6266  1.2754
+                    s_lp           0.1773  0.4210  -0.52
+                    s_freq         0.5035  0.7096   0.61 -0.99      
+                    s_lp:s_freq    0.1329  0.3646  -0.68  0.98 -1.00
+ Residual                       3355.2492 57.9245
+Number of obs: 67817, groups:
 word, 1975; participant_number, 29; document_id, 8
 
 Fixed effects:
-              Estimate Std. Error         df t value Pr(>|t|)
-(Intercept) -1.8451195  2.6695807 29.3800124  -0.691    0.495
-s_lp         0.8449960  0.5582474 26.6414115   1.514    0.142
-s_freq       0.2387112  0.4581748 11.0471204   0.521    0.613
-s_lp:s_freq -0.0001997  0.3517720 17.4994359  -0.001    1.000
+            Estimate Std. Error      df t value Pr(>|t|)
+(Intercept)  -1.6986     2.6681 29.4770  -0.637    0.529
+s_lp          0.9435     0.5890 21.7774   1.602    0.124
+s_freq        0.1745     0.4953  9.6931   0.352    0.732
+s_lp:s_freq   0.0108     0.3669 15.9170   0.029    0.977
 
 Correlation of Fixed Effects:
             (Intr) s_lp   s_freq
-s_lp        -0.106
-s_freq      -0.302  0.096
-s_lp:s_freq -0.121  0.763 -0.012
+s_lp        -0.092
+s_freq      -0.224  0.037
+s_lp:s_freq -0.113  0.781 -0.051
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+Freq and n1
+```{r}
+reading_cond <- "SPR"
+
+freq_n1_m <- lmer(
+    (n1 ~ s_freq +
+        (s_freq | participant_number) +
+        (s_freq | document_id)
+    ),
+    data = sterp_early_df |> filter(reading_type == reading_cond)
+)
+
+freq_n1_m1 <- lmer(
+    (n1 ~ s_lp + s_freq +
+        (s_lp + s_freq | participant_number) +
+        (s_lp | word) +
+        (s_lp + s_freq | document_id)
+    ),
+    data = sterp_early_df |> filter(reading_type == reading_cond)
+)
+
+freq_n1_m2 <- lmer(
+    (n1 ~ s_lp * s_freq +
+        (s_lp * s_freq | participant_number) +
+        (s_lp | word) +
+        (s_lp * s_freq | document_id)
+    ),
+    data = sterp_early_df |> filter(reading_type == reading_cond)
+)
+```
+
+```{r}
+summary(freq_n1_m)
+```
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: (n1 ~ s_freq + (s_freq | participant_number) + (s_freq | document_id))
+   Data: filter(sterp_early_df, reading_type == reading_cond)
+
+REML criterion at convergence: 755977.3
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-10.0270  -0.5944  -0.0006   0.5891  13.7846
+
+Random effects:
+ Groups             Name        Variance  Std.Dev. Corr
+ participant_number (Intercept) 2.449e+02 15.65067
+                    s_freq      1.865e+01  4.31835 0.43
+ document_id        (Intercept) 6.578e-01  0.81103
+                    s_freq      8.698e-03  0.09326 1.00
+ Residual                       3.993e+03 63.19246
+Number of obs: 67903, groups:  participant_number, 29; document_id, 8
+
+Fixed effects:
+            Estimate Std. Error      df t value Pr(>|t|)
+(Intercept)  -7.1713     2.9378 28.2875  -2.441   0.0212 *
+s_freq       -2.2082     0.8535 27.8025  -2.587   0.0152 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+       (Intr)
+s_freq 0.404
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+```{r}
+summary(freq_n1_m1)
+```
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: (n1 ~ s_lp + s_freq + (s_lp + s_freq | participant_number) +
+    (s_lp | word) + (s_lp + s_freq | document_id))
+   Data: filter(sterp_early_df, reading_type == reading_cond)
+
+REML criterion at convergence: 754987.1
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max
+-10.0429  -0.5939  -0.0010   0.5891  13.7706 
+
+Random effects:
+ Groups             Name        Variance  Std.Dev. Corr
+ word               (Intercept) 7.308e+00  2.70327
+                    s_lp        2.683e+00  1.63791 -1.00
+ participant_number (Intercept) 2.471e+02 15.72002
+                    s_lp        1.129e+00  1.06276 -0.32
+                    s_freq      1.833e+01  4.28139  0.46 -0.14
+ document_id        (Intercept) 6.045e-01  0.77751
+                    s_lp        1.428e-01  0.37782  1.00
+                    s_freq      8.824e-06  0.00297 -1.00 -1.00
+ Residual                       3.982e+03 63.10658
+Number of obs: 67817, groups:
+word, 1975; participant_number, 29; document_id, 8
+
+Fixed effects:
+            Estimate Std. Error      df t value Pr(>|t|)
+(Intercept)  -7.0943     2.9519 28.2321  -2.403   0.0231 *
+s_lp          0.4901     0.4189 15.6307   1.170   0.2595
+s_freq       -2.3532     0.8707 28.2398  -2.703   0.0115 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+       (Intr) s_lp
+s_lp   -0.125
+s_freq  0.423 -0.209
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+```{r}
+summary(freq_n1_m2)
+```
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: (n1 ~ s_lp * s_freq + (s_lp * s_freq | participant_number) +
+    (s_lp | word) + (s_lp * s_freq | document_id))
+   Data: filter(sterp_early_df, reading_type == reading_cond)
+
+REML criterion at convergence: 754983.7
+
+Scaled residuals:
+     Min       1Q   Median       3Q      Max 
+-10.0426  -0.5931  -0.0010   0.5888  13.7702
+
+Random effects:
+ Groups             Name        Variance  Std.Dev. Corr
+ word               (Intercept) 7.107e+00  2.66597
+                    s_lp        2.655e+00  1.62956 -1.00
+ participant_number (Intercept) 2.514e+02 15.85713
+                    s_lp        1.784e+00  1.33550 -0.44
+                    s_freq      1.748e+01  4.18032  0.48  0.06
+                    s_lp:s_freq 3.343e-01  0.57819 -0.52  0.68  0.47
+ document_id        (Intercept) 5.832e-01  0.76365
+                    s_lp        1.775e-01  0.42130  1.00
+                    s_freq      3.047e-04  0.01746 -1.00 -1.00
+                    s_lp:s_freq 1.025e-03  0.03201  1.00  1.00 -1.00
+ Residual                       3.982e+03 63.10649
+Number of obs: 67817, groups:
+word, 1975; participant_number, 29; document_id, 8
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(>|t|)
+(Intercept)  -7.0222     2.9808  28.2254  -2.356   0.0257 *
+s_lp          0.3499     0.5232  18.5935   0.669   0.5119
+s_freq       -2.2870     0.8575  27.8501  -2.667   0.0126 *
+s_lp:s_freq  -0.1811     0.3441 132.2183  -0.526   0.5996
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) s_lp   s_freq
+s_lp        -0.213
+s_freq       0.439 -0.148
+s_lp:s_freq -0.209  0.595  0.036
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
