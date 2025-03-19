@@ -101,9 +101,17 @@ for (epoch_file in epoch_files) {
         eeg_filter(!document_id %in% c(11, 12)) |> # remove practice texts
         eeg_select(-VEOG, -HEOG) |>
         svd_erp() |>
-        left_join(rt_df, by = "segment") |>
+        left_join(
+            rt_df |>
+                select(segment, document_id, participant_number, number_word),
+            by = "segment"
+        ) |>
         filter(!document_id %in% exclude_docs)
 
     number <- ifelse(n < 10, paste("0", n, sep = ""), as.character(n))
-    # write.csv(svd_epochs, paste("data/sterps/sterp", number, ".csv", sep = ""))
+    write.csv(svd_epochs, paste("data/sterps/sterp", number, ".csv", sep = ""))
+
+    # print time
+    end_time <- Sys.time()
+    print(paste("Time for participant", n, ":", end_time - start_time))
 }
