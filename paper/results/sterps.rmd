@@ -134,8 +134,14 @@ sterp_df <- sterp_df |>
         ".value_content_words" = .value_content_words / n_subjects
     )
 
+write.csv(sterp_df, "data/sterps/sterp_lp.csv")
+
 # rm tmp
 rm(tmp_sterp)
+```
+
+```{r}
+sterp_df <- read.csv("data/sterps/sterp_lp.csv")
 ```
 
 Plots
