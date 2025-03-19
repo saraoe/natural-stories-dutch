@@ -8,7 +8,22 @@ read_multiple_sessions_csv <- function(filename) {
     return(df)
 }
 
-read_rt_participant <- function(participant_number, folder = "data/spr") {
+read_rt_participant <- function(
+    participant_number,
+    # paths if wd is "paper"
+    rt_folder = "data/spr",
+    stim_path = "../data/words_corpus.csv") {
+    stim <- read.csv(stim_path) |>
+        select(-X) |>
+        mutate(
+            lp_quantile = case_when(
+                lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
+                lp <= quantile(lp, na.rm = TRUE)[2] ~ "low_lp",
+                (lp > quantile(lp, na.rm = TRUE)[2] &
+                    lp < quantile(lp, na.rm = TRUE)[4]) ~ "med_lp"
+            ),
+        )
+
     rt_df <- list.files(
         "data/spr",
         full.names = TRUE,

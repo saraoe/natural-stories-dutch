@@ -7,6 +7,7 @@ library(ggplot2)
 library(lmerTest)
 
 setwd("paper")
+source("src/util.r")
 ```
 
 ## Create files
@@ -103,6 +104,9 @@ for (sterp_file in sterp_files) {
 }
 
 write.csv(sterp_early_df, "data/sterps/sterp_early.csv")
+
+# rm tmp
+rm(indv_sterps_mean)
 ```
 
 
