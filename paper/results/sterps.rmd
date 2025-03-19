@@ -32,7 +32,7 @@ reject_df <- read.csv("data/mean_amplitude.csv") |>
     summarize(
         "reject" = case_when(
             # if proportion of rejected epochs are over the threshold
-            (sum(is.na(n400)) / n()) > artifact_threshold ~ TRUE,
+            (sum(is.na(n400)) / n()) >= artifact_threshold ~ TRUE,
             # reject document 1 from participant 17 (error while reading)
             (participant_number == 17 & document_id == 1) ~ TRUE,
             # reject participant 64 (problems during data collection)
@@ -870,7 +870,7 @@ Formula: (p1 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |
 REML criterion at convergence: 618420.8
 
 Scaled residuals:
-    Min      1Q  Median      3Q     Max 
+    Min      1Q  Median      3Q     Max
 -7.6054 -0.6231 -0.0034  0.6152 11.0382 
 
 Random effects:
@@ -903,7 +903,7 @@ summary(freq_p1_m1)
 ```
 Linear mixed model fit by REML. t-tests use Satterthwaite's method [
 lmerModLmerTest]
-Formula: (p1 ~ s_lp + s_freq + (s_lp + s_freq | participant_number) +  
+Formula: (p1 ~ s_lp + s_freq + (s_lp + s_freq | participant_number) +
     (s_lp | word) + (s_lp + s_freq | document_id))
    Data: filter(sterp_early_df, reading_type == reading_cond)
 
@@ -921,14 +921,14 @@ Random effects:
                     s_lp           2.1737  1.4743  -0.33
                     s_freq         4.8434  2.2008  -0.41  1.00
  document_id        (Intercept)    0.3285  0.5732
-                    s_lp           0.1802  0.4245   0.68      
+                    s_lp           0.1802  0.4245   0.68
                     s_freq         0.0172  0.1311  -0.35 -0.93
  Residual                       3832.9425 61.9108
 Number of obs: 55750, groups:
 word, 1975; participant_number, 24; document_id, 8
 
 Fixed effects:
-            Estimate Std. Error      df t value Pr(>|t|)
+            Estimate Std. Error      df t value Pr(>|t|)   
 (Intercept)  -7.9264     2.1608 23.5253  -3.668  0.00124 **
 s_lp         -0.0159     0.4835 11.8964  -0.033  0.97431
 s_freq       -0.2632     0.5579 23.4936  -0.472  0.64149
@@ -967,7 +967,7 @@ REML criterion at convergence: 629955.6
 
 Scaled residuals:
     Min      1Q  Median      3Q     Max 
--9.8136 -0.6132 -0.0057  0.6044 13.3855
+-9.8136 -0.6132 -0.0057  0.6044 13.3855 
 
 Random effects:
  Groups             Name        Variance  Std.Dev. Corr
