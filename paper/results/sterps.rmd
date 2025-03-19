@@ -213,8 +213,7 @@ Use only first 40 participants
 ```{r}
 sterp_early_df <- read.csv("data/sterps/sterp_early.csv") |>
     filter(participant_number < 43)
-sterp_df <- read.csv("data/sterps/sterp_lp.csv") |>
-    filter(participant_number < 43)
+sterp_df <- read.csv("data/sterps/sterp_lp.csv")
 ```
 
 Plots
