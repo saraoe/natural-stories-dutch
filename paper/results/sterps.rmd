@@ -48,7 +48,9 @@ content_words <- c("NOUN", "VERB", "ADJ", "ADV")
 time_windows <- list(
     "early" = c(0.05, 0.08, "slategray4"),
     "p1" = c(0.08, 0.12, "darkseagreen"),
-    "n1" = c(0.16, 0.2, "slategray4")
+    "n1" = c(0.16, 0.2, "slategray4"),
+    "n2" = c(.2, .3, "darkseagreen"),
+    "n400" = c(.3, .5, "slategray4")
 )
 ```
 
@@ -93,6 +95,16 @@ for (sterp_file in sterp_files) {
                 .value[(.time > as.numeric(time_windows$n1[1]) &
                     .time < as.numeric(time_windows$n1[2]))],
                 na.rm = TRUE
+            ),
+            "n2" = mean(
+                .value[(.time > as.numeric(time_windows$n2[1]) &
+                    .time < as.numeric(time_windows$n2[2]))],
+                na.rm = TRUE
+            ),
+            "n400" = mean(
+                .value[(.time > as.numeric(time_windows$n400[1]) &
+                    .time < as.numeric(time_windows$n400[2]))],
+                na.rm = TRUE
             )
         )
 
@@ -103,7 +115,7 @@ for (sterp_file in sterp_files) {
     }
 }
 
-write.csv(sterp_early_df, "data/sterps/sterp_early.csv")
+# write.csv(sterp_early_df, "data/sterps/sterp_early.csv")
 
 # rm tmp
 rm(indv_sterps_mean)
@@ -118,11 +130,13 @@ mean_sterps <- function(sterps, reading_cond) {
         filter(reading_type == reading_cond) |>
         group_by(.time, lp_quantile) |>
         summarize(
-            ".value" = mean(.value, na.rm = TRUE),
-            ".value_content_words" = mean(
+            ".value" = sum(.value, na.rm = TRUE),
+            ".value_content_words" = sum(
                 .value[pos %in% content_words],
                 na.rm = TRUE
-            )
+            ),
+            "N" = sum(!is.na(.value)),
+            "N_cw" = sum(!is.na(.value[pos %in% content_words]))
         ) |>
         mutate("reading_type" = reading_cond)
     return(mean_sterps_)
@@ -133,7 +147,9 @@ update_erp_df <- function(cur_df, new_df) {
     new_df <- new_df |>
         rename(
             "value_new" = .value,
-            "value_cw_new" = .value_content_words
+            "value_cw_new" = .value_content_words,
+            "N_new" = N,
+            "N_cw_new" = N_cw
         ) |>
         mutate("n_subjects_new" = 1)
 
@@ -147,9 +163,11 @@ update_erp_df <- function(cur_df, new_df) {
                 value_cw_new,
                 na.rm = TRUE
             ),
-            "n_subjects" = sum(n_subjects, n_subjects_new, na.rm = TRUE)
+            "n_subjects" = sum(n_subjects, n_subjects_new, na.rm = TRUE),
+            "N" = sum(N, N_new, na.rm = TRUE),
+            "N_cw" = sum(N_cw, N_cw_new, na.rm = TRUE)
         ) |>
-        select(-value_new, -value_cw_new, -n_subjects_new)
+        select(-ends_with("new"))
 
     return(updated_df)
 }
@@ -198,11 +216,11 @@ for (sterp_file in sterp_files) {
 # calculate mean over all participants
 sterp_df <- sterp_df |>
     mutate(
-        ".value" = .value / n_subjects,
-        ".value_content_words" = .value_content_words / n_subjects
+        ".value" = .value / N,
+        ".value_content_words" = .value_content_words / N_cw
     )
 
-write.csv(sterp_df, "data/sterps/sterp_lp.csv")
+# write.csv(sterp_df, "data/sterps/sterp_lp.csv")
 
 # rm tmp
 rm(tmp_sterp)
@@ -232,8 +250,7 @@ p <- sterp_df |>
     eeguana::theme_eeguana() +
     theme(legend.position = "bottom") +
     labs(color = "", y = "") +
-    scale_color_manual(values = c("steelblue1", "steelblue3", "steelblue4")) +
-    xlim(-0.2, 0.4)
+    scale_color_manual(values = c("steelblue1", "steelblue3", "steelblue4"))
 
 for (annotate_timewindow in time_windows) {
     p <- p + annotate("rect",
@@ -271,6 +288,15 @@ lp_p1_m <- lmer(
 
 lp_n1_m <- lmer(
     (n1 ~ s_lp +
+        (s_lp | participant_number) +
+        (s_lp | word) +
+        (s_lp | document_id)
+    ),
+    data = sterp_early_df |> filter(reading_type == reading_cond)
+)
+
+lp_n2_m <- lmer(
+    (n2 ~ s_lp +
         (s_lp | participant_number) +
         (s_lp | word) +
         (s_lp | document_id)
@@ -399,6 +425,45 @@ optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
 ```{r}
+summary(lp_n2_m)
+```
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: (n2 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |  
+    document_id))
+   Data: filter(sterp_early_df, reading_type == reading_cond)
+
+REML criterion at convergence: 754631.8
+
+Scaled residuals:
+     Min       1Q   Median       3Q      Max 
+-12.5680  -0.5819  -0.0028   0.5836  16.5569
+
+Random effects:
+ Groups             Name        Variance  Std.Dev. Corr
+ word               (Intercept) 1.386e+01  3.7227
+                    s_lp        1.335e+00  1.1555  -1.00
+ participant_number (Intercept) 1.299e+02 11.3961
+                    s_lp        7.563e+00  2.7502  -0.32
+ document_id        (Intercept) 2.002e-01  0.4475
+                    s_lp        3.559e-02  0.1887  1.00
+ Residual                       3.961e+03 62.9339
+Number of obs: 67817, groups:  
+word, 1975; participant_number, 29; document_id, 8
+
+Fixed effects:
+            Estimate Std. Error      df t value Pr(>|t|)
+(Intercept)  -1.2364     2.1515 28.2086  -0.575    0.570
+s_lp         -0.7444     0.6187 26.9255  -1.203    0.239
+
+Correlation of Fixed Effects:
+     (Intr)
+s_lp -0.247
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+
+```{r}
 reading_cond <- "SPR"
 
 lp_early_content_m <- lmer(
@@ -425,6 +490,17 @@ lp_p1_content_m <- lmer(
 
 lp_n1_content_m <- lmer(
     (n1 ~ s_lp +
+        (s_lp | participant_number) +
+        (s_lp | word) +
+        (s_lp | document_id)
+    ),
+    data = sterp_early_df |>
+        filter(reading_type == reading_cond) |>
+        filter(pos %in% content_words)
+)
+
+lp_n2_content_m <- lmer(
+    (n2 ~ s_lp +
         (s_lp | participant_number) +
         (s_lp | word) +
         (s_lp | document_id)
@@ -553,6 +629,45 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 Correlation of Fixed Effects:
      (Intr)
 s_lp 0.238
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+```{r}
+summary(lp_n2_content_m)
+```
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: (n2 ~ s_lp + (s_lp | participant_number) + (s_lp | word) + (s_lp |
+    document_id))
+   Data: filter(filter(sterp_early_df, reading_type == reading_cond),
+    pos %in% content_words)
+
+REML criterion at convergence: 366970.6
+
+Scaled residuals:
+     Min       1Q   Median       3Q      Max 
+-10.3090  -0.5811  -0.0053   0.5811  16.5454
+
+Random effects:
+ Groups             Name        Variance  Std.Dev. Corr
+ word               (Intercept) 1.999e+01  4.4708
+                    s_lp        7.936e-01  0.8908  -1.00
+ participant_number (Intercept) 1.816e+02 13.4757
+                    s_lp        6.117e-02  0.2473  -0.40
+ document_id        (Intercept) 6.505e-02  0.2551
+                    s_lp        1.595e-02  0.1263  1.00
+ Residual                       3.957e+03 62.9024
+Number of obs: 32972, groups:
+word, 1640; participant_number, 29; document_id, 8
+
+Fixed effects:
+            Estimate Std. Error      df t value Pr(>|t|)
+(Intercept)  -0.8970     2.5504 27.6539  -0.352    0.728
+s_lp         -0.5074     0.3803 19.1755  -1.334    0.198
+
+Correlation of Fixed Effects:
+     (Intr)
+s_lp 0.012
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 
@@ -987,5 +1102,109 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 Correlation of Fixed Effects:
        (Intr)
 s_freq 0.186
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+N400 and lp
+```{r}
+reading_cond <- "SPR"
+
+lp_n400_m <- lmer(
+    (n400 ~ s_lp +
+        (s_lp | participant_number) +
+        (s_lp | word) +
+        (s_lp | document_id)
+    ),
+    data = sterp_early_df |> filter(reading_type == reading_cond)
+)
+
+lp_n400_content_m <- lmer(
+    (n400 ~ s_lp +
+        (s_lp | participant_number) +
+        (s_lp | word) +
+        (s_lp | document_id)
+    ),
+    data = sterp_early_df |>
+        filter(reading_type == reading_cond) |>
+        filter(pos %in% content_words)
+)
+```
+
+```{r}
+summary(lp_n400_m)
+```
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: (n400 ~ s_lp + (s_lp | participant_number) + (s_lp | word) +
+    (s_lp | document_id))
+   Data: filter(sterp_early_df, reading_type == reading_cond)
+
+REML criterion at convergence: 1410561
+
+Scaled residuals:
+     Min       1Q   Median       3Q      Max 
+-14.9879  -0.5729  -0.0040   0.5635  18.8686 
+
+Random effects:
+ Groups             Name        Variance  Std.Dev. Corr
+ word               (Intercept)    5.6291  2.3726
+                    s_lp           1.3495  1.1617  -0.70
+ participant_number (Intercept)   56.6587  7.5272
+                    s_lp          11.5748  3.4022  -0.08
+ document_id        (Intercept)    0.3569  0.5974
+                    s_lp           0.2017  0.4491  0.07
+ Residual                       5293.9337 72.7594
+Number of obs: 123567, groups:
+word, 1975; participant_number, 53; document_id, 8
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(>|t|)
+(Intercept) -2.26563    1.09180 55.98039  -2.075   0.0426 *
+s_lp        -0.03759    0.56901 41.19099  -0.066   0.9477
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+     (Intr)
+s_lp -0.049
+optimizer (nloptwrap) convergence code: 0 (OK)
+Model failed to converge with max|grad| = 0.00741472 (tol = 0.002, component 1)
+
+```{r}
+summary(lp_n400_content_m)
+```
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: (n400 ~ s_lp + (s_lp | participant_number) + (s_lp | word) +
+    (s_lp | document_id))
+   Data: filter(filter(sterp_early_df, reading_type == reading_cond),
+    pos %in% content_words)
+
+REML criterion at convergence: 687931.7
+
+Scaled residuals:
+     Min       1Q   Median       3Q      Max 
+-14.0064  -0.5696  -0.0050   0.5574  18.6713
+
+Random effects:
+ Groups             Name        Variance  Std.Dev. Corr
+ word               (Intercept)    9.6598  3.1080
+                    s_lp           0.4454  0.6674  -1.00
+ participant_number (Intercept)   56.8733  7.5414       
+                    s_lp           8.2064  2.8647  -0.19
+ document_id        (Intercept)    1.5326  1.2380
+                    s_lp           0.8181  0.9045  0.54
+ Residual                       5369.9149 73.2797
+Number of obs: 60178, groups:
+word, 1640; participant_number, 53; document_id, 8
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)
+(Intercept) -1.836770   1.193754 45.192743  -1.539    0.131
+s_lp         0.005619   0.617110 21.393510   0.009    0.993
+
+Correlation of Fixed Effects:
+     (Intr)
+s_lp 0.059
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
