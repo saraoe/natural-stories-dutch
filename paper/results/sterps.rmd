@@ -119,7 +119,7 @@ for (sterp_file in sterp_files) {
     }
 }
 
-# write.csv(sterp_early_df, "data/sterps/sterp_early.csv")
+# write.csv(sterp_early_df, "data/sterps/sterp_n400_early.csv")
 
 # rm tmp
 rm(indv_sterps_mean)
@@ -227,7 +227,7 @@ sterp_df <- sterp_df |>
         ".value_content_words" = .value_content_words / N_cw
     )
 
-# write.csv(sterp_df, "data/sterps/sterp_lp.csv")
+# write.csv(sterp_df, "data/sterps/sterp_n400_lp.csv")
 
 # rm tmp
 rm(tmp_sterp)
