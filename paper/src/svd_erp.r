@@ -13,21 +13,47 @@ source("src/util.r")
 dir.create(file.path(getwd(), "data/sterps"), showWarnings = TRUE)
 
 
-svd_erp <- function(epochs, comp = 1) {
+svd_erp <- function(epochs, comp = 1, lim = NULL) {
     # epochs in eeguana format
     # comp is the svd component to take the weights from
     #   - comp = 1 explains most variance
+    # lim can be used if a smaller time window than
+    #   the size of the epochs is to be used. If NULL the
+    #   entire segment will be used
+
+    # make lim if not defined
+    if (is.null(lim)) {
+        time_sec <- epochs |>
+            signal_tbl() |>
+            mutate(
+                .time = as_time(.sample, .unit = "s")
+            ) |>
+            pull(.time)
+        lim <- c(
+            min(time_sec), max(time_sec)
+        )
+    } else {
+        # test lim
+        if (!is.numeric(lim) || length(lim) != 2) {
+            stop("lim must be a numeric vector of length 2")
+        }
+    }
+
+    ## cal average epoch (within defined lim)
     erps <- epochs |>
+        eeg_mutate(.time = as_time(.sample, .unit = "s")) |>
+        eeg_filter(.time |> between(lim[1], lim[2])) |>
         eeg_group_by(.sample) |>
         eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
         signal_tbl() |>
         select(-.id, -.sample) |>
         as.matrix()
 
+    # svd weights
     svdouts <- svd(erps)
     weights <- svdouts$v[, comp]
 
-
+    # apply weights to entire epoch (regardless of lim)
     epochs_signal <- epochs |>
         signal_tbl() |>
         select(-.id, -.sample) |>
@@ -83,7 +109,7 @@ for (epoch_file in epoch_files) {
     svd_epochs <- epochs |>
         eeg_filter(!document_id %in% c(11, 12)) |> # remove practice texts
         eeg_select(-VEOG, -HEOG) |>
-        svd_erp() |>
+        svd_erp(lim = c(.3, .5)) |>
         left_join(
             rt_df |>
                 select(segment, document_id, participant_number, number_word),
@@ -92,7 +118,7 @@ for (epoch_file in epoch_files) {
         filter(!document_id %in% exclude_docs)
 
     number <- ifelse(n < 10, paste("0", n, sep = ""), as.character(n))
-    write.csv(svd_epochs, paste("data/sterps/sterp", number, ".csv", sep = ""))
+    write.csv(svd_epochs, paste("data/sterps/sterp_n400_", number, ".csv", sep = ""))
 
     # print time
     end_time <- Sys.time()

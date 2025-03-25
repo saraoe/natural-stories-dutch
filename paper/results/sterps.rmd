@@ -16,7 +16,8 @@ source("src/util.r")
 sterp_files <- list.files(
     file.path("data", "sterps"),
     full.names = TRUE,
-    pattern = "^sterp\\d{2}\\.csv$"
+    # pattern = "^sterp\\d{2}\\.csv$"
+    pattern = "^sterp_n400_\\d{2}\\.csv$"
 )
 
 # create reject_df
@@ -60,7 +61,10 @@ for (sterp_file in sterp_files) {
     print(sterp_file)
 
     # read rt_df
-    n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", sterp_file))
+    # n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", sterp_file))
+    regex_pattern <- "(\\d{2})\\.csv$"
+    matches <- regmatches(sterp_file, regexpr(regex_pattern, sterp_file))
+    n <- as.numeric(sub("\\.csv$", "", matches))
     rt_df <- read_rt_participant(n)
 
     indv_sterps_mean <- read.csv(sterp_file) |>
@@ -179,7 +183,10 @@ for (sterp_file in sterp_files) {
     print(sterp_file)
 
     # read rt_df
-    n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", sterp_file))
+    # n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", sterp_file))
+    regex_pattern <- "(\\d{2})\\.csv$"
+    matches <- regmatches(sterp_file, regexpr(regex_pattern, sterp_file))
+    n <- as.numeric(sub("\\.csv$", "", matches))
     rt_df <- read_rt_participant(n)
 
     sterps <- read.csv(sterp_file) |>
