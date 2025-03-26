@@ -192,6 +192,7 @@ if (run_rt) {
             formula <- m3_rt_formula
             prior <- m_rt_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = lognormal(),
@@ -258,6 +259,7 @@ if (run_n400) {
             formula <- m3_n400_formula
             priors <- m_n400_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = gaussian(),
@@ -316,6 +318,7 @@ if (run_n400) {
             formula <- m3_n400_rsvp_formula
             priors <- m_n400_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = gaussian(),
@@ -382,6 +385,7 @@ if (run_p600) {
             formula <- m3_p600_formula
             priors <- m_p600_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = gaussian(),
@@ -440,6 +444,7 @@ if (run_p600) {
             formula <- m3_p600_rsvp_formula
             priors <- m_p600_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = gaussian(),
