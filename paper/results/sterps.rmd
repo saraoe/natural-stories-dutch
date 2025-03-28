@@ -16,8 +16,7 @@ source("src/util.r")
 sterp_files <- list.files(
     file.path("data", "sterps"),
     full.names = TRUE,
-    # pattern = "^sterp\\d{2}\\.csv$"
-    pattern = "^sterp_n400_\\d{2}\\.csv$"
+    pattern = "^sterp\\d{2}\\.csv$"
 )
 
 # create reject_df
@@ -112,14 +111,14 @@ for (sterp_file in sterp_files) {
             )
         )
 
-    if (exists("sterp_early_df")) {
-        sterp_early_df <- rbind(sterp_early_df, indv_sterps_mean)
+    if (exists("sterp_comp_df")) {
+        sterp_comp_df <- rbind(sterp_comp_df, indv_sterps_mean)
     } else {
-        sterp_early_df <- indv_sterps_mean
+        sterp_comp_df <- indv_sterps_mean
     }
 }
 
-# write.csv(sterp_early_df, "data/sterps/sterp_n400_early.csv")
+# write.csv(sterp_comp_df, "data/sterps/sterp_components.csv")
 
 # rm tmp
 rm(indv_sterps_mean)
@@ -227,7 +226,7 @@ sterp_df <- sterp_df |>
         ".value_content_words" = .value_content_words / N_cw
     )
 
-# write.csv(sterp_df, "data/sterps/sterp_n400_lp.csv")
+# write.csv(sterp_df, "data/sterps/sterp_lp.csv")
 
 # rm tmp
 rm(tmp_sterp)
@@ -236,7 +235,7 @@ rm(tmp_sterp)
 ## Explore signal
 Use only first 40 participants
 ```{r}
-sterp_early_df <- read.csv("data/sterps/sterp_early.csv") |>
+sterp_comp_df <- read.csv("data/sterps/sterp_components.csv") |>
     filter(participant_number < 43)
 sterp_df <- read.csv("data/sterps/sterp_lp.csv")
 ```
@@ -281,7 +280,7 @@ lp_early_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 
 lp_p1_m <- lmer(
@@ -290,7 +289,7 @@ lp_p1_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 
 lp_n1_m <- lmer(
@@ -299,7 +298,7 @@ lp_n1_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 
 lp_n2_m <- lmer(
@@ -308,7 +307,7 @@ lp_n2_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 ```
 
@@ -479,7 +478,7 @@ lp_early_content_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |>
+    data = sterp_comp_df |>
         filter(reading_type == reading_cond) |>
         filter(pos %in% content_words)
 )
@@ -490,7 +489,7 @@ lp_p1_content_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |>
+    data = sterp_comp_df |>
         filter(reading_type == reading_cond) |>
         filter(pos %in% content_words)
 )
@@ -501,7 +500,7 @@ lp_n1_content_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |>
+    data = sterp_comp_df |>
         filter(reading_type == reading_cond) |>
         filter(pos %in% content_words)
 )
@@ -512,7 +511,7 @@ lp_n2_content_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |>
+    data = sterp_comp_df |>
         filter(reading_type == reading_cond) |>
         filter(pos %in% content_words)
 )
@@ -688,7 +687,7 @@ freq_p1_m1 <- lmer(
         (s_lp | word) +
         (s_lp + s_freq | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 
 freq_p1_m2 <- lmer(
@@ -697,7 +696,7 @@ freq_p1_m2 <- lmer(
         (s_lp | word) +
         (s_lp * s_freq | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 ```
 
@@ -800,7 +799,7 @@ freq_n1_m <- lmer(
         (s_freq | participant_number) +
         (s_freq | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 
 freq_n1_m1 <- lmer(
@@ -809,7 +808,7 @@ freq_n1_m1 <- lmer(
         (s_lp | word) +
         (s_lp + s_freq | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 
 freq_n1_m2 <- lmer(
@@ -818,7 +817,7 @@ freq_n1_m2 <- lmer(
         (s_lp | word) +
         (s_lp * s_freq | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 ```
 
@@ -952,7 +951,7 @@ boundary (singular) fit: see help('isSingular')
 
 ## Confirmatory analysis
 ```{r}
-sterp_early_df <- read.csv("data/sterps/sterp_early.csv") |>
+sterp_comp_df <- read.csv("data/sterps/sterp_components.csv") |>
     filter(participant_number >= 43)
 ```
 
@@ -966,7 +965,7 @@ lp_p1_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 
 freq_p1_m1 <- lmer(
@@ -975,7 +974,7 @@ freq_p1_m1 <- lmer(
         (s_lp | word) +
         (s_lp + s_freq | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 ```
 
@@ -1072,7 +1071,7 @@ freq_n1_m <- lmer(
         (s_freq | participant_number) +
         (s_freq | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 ```
 
@@ -1122,7 +1121,7 @@ lp_n400_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |> filter(reading_type == reading_cond)
+    data = sterp_comp_df |> filter(reading_type == reading_cond)
 )
 
 lp_n400_content_m <- lmer(
@@ -1131,7 +1130,7 @@ lp_n400_content_m <- lmer(
         (s_lp | word) +
         (s_lp | document_id)
     ),
-    data = sterp_early_df |>
+    data = sterp_comp_df |>
         filter(reading_type == reading_cond) |>
         filter(pos %in% content_words)
 )
