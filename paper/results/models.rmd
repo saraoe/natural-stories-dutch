@@ -8,6 +8,7 @@ library(ggplot2)
 setwd("paper")
 
 models_path <- file.path("src", "brms_models")
+models_path <- file.path("src", "brms_models", "rt")
 fig_path <- "figs"
 ```
 
@@ -19,11 +20,11 @@ Model formula 2 (m2): dep_var ~ -1 + content_word + content_word:s_lp + content_
 Model formula 3 (m3): dep_var ~ s_lp + s_wl + s_freq
 ```{r}
 # dependent variable (rt, n400, or p600)
-dep_var <- "n400"
+dep_var <- "rt"
 # SPR or RSVP (for rt only SPR)
 reading_cond <- "SPR"
 # model formula (m1, m2, or m3)
-model_formula <- "m1"
+model_formula <- "m1_3"
 
 m <- readRDS(file.path(
     models_path,
@@ -35,16 +36,20 @@ m <- readRDS(file.path(
 ```{r}
 pp_check(m)
 
-plot(m, variable = "^b", regex = TRUE)
+p <- plot(m, variable = "^b", regex = TRUE)
+ggsave("results/chains.png")
 ```
 
 ## Prior-poserior update
 ```{r}
 draws <- as.data.frame(m)
+```
 
-draws |>
+Beta coefficients
+```{r}
+p <- draws |>
     pivot_longer(
-        cols = starts_with("b_"),
+        cols = starts_with("b_s"),
         names_to = "parameter", values_to = "posterior"
     ) |>
     rename("prior" = prior_b) |>
@@ -53,7 +58,22 @@ draws |>
     geom_density(aes(x = prior), fill = "steelblue1", alpha = .5) +
     geom_density(aes(x = posterior), fill = "steelblue3", alpha = .5) +
     facet_wrap(. ~ parameter) +
+    theme_bw()
+ggsave("results/pp_b.png", p)
+```
+
+Intercept
+```{r}
+p <- draws |>
+    rename(
+        "prior" = prior_Intercept,
+        "posterior" = b_Intercept
+    ) |>
+    ggplot() +
+    geom_density(aes(x = prior), fill = "steelblue1", alpha = .5) +
+    geom_density(aes(x = posterior), fill = "steelblue3", alpha = .5) +
     theme_minimal()
+ggsave("results/pp_intercept.png", p)
 ```
 
 ### Only priors
