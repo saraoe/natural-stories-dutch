@@ -150,7 +150,7 @@ m_rt_priors <- c(
     prior(normal(.5, .1), class = sigma),
     prior(normal(0, .5), class = sd)
 )
-m_rt_priors_no_intercept <- m_rt_priors[2:4,] 
+m_rt_priors_no_intercept <- m_rt_priors[2:4, ]
 
 m1_rt_formula <- bf(
     rt ~ s_lp + s_freq +
@@ -216,7 +216,7 @@ m_n400_priors <- c(
     prior(normal(10, 20), class = sigma),
     prior(normal(0, 10), class = sd)
 )
-m_n400_priors_no_intercept <- m_n400_priors[2:4,] 
+m_n400_priors_no_intercept <- m_n400_priors[2:4, ]
 
 m1_n400_formula <- bf(
     n400 ~ s_lp + s_freq +
