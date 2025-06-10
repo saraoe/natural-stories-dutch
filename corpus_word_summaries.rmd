@@ -4,6 +4,7 @@
 library(tidytable)
 library(stringr)
 library(ggplot2)
+library(patchwork)
 ```
 
 ## Load data
@@ -64,11 +65,14 @@ corpus_df |>
 ## Plots
 ```{r}
 # word length
-corpus_df |>
+hist_wl <- corpus_df |>
     filter(document_id < 10) |>
     mutate("mean_wl" = round(mean(wl), 2)) |>
     ggplot() +
-    geom_histogram(aes(x = wl), fill = "aliceblue", color = "black") +
+    geom_histogram(aes(x = wl),
+        binwidth = 1,
+        fill = "lightblue", color = "black"
+    ) +
     geom_vline(aes(xintercept = mean(wl)), linetype = "dashed") +
     geom_text(
         aes(x = mean(wl), y = 850, label = paste("mean = ", mean_wl)),
@@ -77,7 +81,7 @@ corpus_df |>
     theme_minimal() +
     labs(x = "Word Length", y = "count")
 
-ggsave("figs/hist_wl.png", height = 5, width = 5)
+ggsave("figs/hist_wl.png", plot = hist_wl, height = 5, width = 5)
 ```
 
 ```{r}
@@ -149,7 +153,7 @@ ggsave("figs/hist_lp.png", height = 10, width = 15)
 
 ```{r}
 # Sentence lengths
-corpus_df |>
+hist_sl <- corpus_df |>
     filter(str_detect(word, "[.!?]")) |>
     group_by(document_id) |>
     mutate("sl" = number_word - lag(number_word)) |>
@@ -158,16 +162,19 @@ corpus_df |>
     ungroup() |>
     mutate("mean_sl" = round(mean(sl), 2)) |>
     ggplot() +
-    geom_histogram(aes(x = sl), fill = "aliceblue", color = "black") +
+    geom_histogram(aes(x = sl),
+        binwidth = 1,
+        fill = "lightblue", color = "black"
+    ) +
     geom_vline(aes(xintercept = mean(sl)), linetype = "dashed") +
     geom_text(
-        aes(x = mean(sl), y = 30, label = paste("mean = ", mean_sl)),
+        aes(x = mean(sl), y = 16, label = paste("mean = ", mean_sl)),
         nudge_x = 9, fontface = 1, size = 4
     ) +
     theme_minimal() +
     labs(x = "Sentence Length", y = "count")
 
-ggsave("figs/hist_sl.png", height = 5, width = 5)
+ggsave("figs/hist_sl.png", plot = hist_sl, height = 5, width = 5)
 ```
 
 ```{r}
@@ -215,4 +222,11 @@ corpus_df |>
     labs(x = "Sentence Length")
 
 ggsave("figs/hist_sl_type.png", height = 7, width = 10)
+```
+
+```{r}
+# joint histograms
+
+hist_wl + hist_sl
+ggsave("figs/hist_wl_sl.png", height = 5, width = 10)
 ```
