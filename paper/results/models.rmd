@@ -25,7 +25,7 @@ dep_var <- "rt"
 # SPR or RSVP (for rt only SPR)
 reading_cond <- "SPR"
 # model formula (m1, m2, or m3)
-model_formula <- "m1_3"
+model_formula <- "m1"
 
 m <- readRDS(file.path(
     models_path,
@@ -108,4 +108,74 @@ draws |>
 summary(m)
 
 mcmc_plot(m, variable = "^b", regex = TRUE)
+```
+
+## Predicted values
+```{r}
+for (subject in unique(rt_df$participant_number)) {
+    par_data <- rt_df |>
+        filter(participant_number == subject)
+
+    fit_participant <- fitted(
+        m,
+        newdata = par_data
+    )
+
+    ggplot(
+        data = par_data,
+        aes(x = 1:nrow(par_data))
+    ) +
+        geom_point(aes(y = rt), alpha = 0.6, color = "red") +
+        geom_point(
+            data = fit_participant,
+            aes(y = Estimate),
+            color = "blue", shape = 4, size = 2
+        ) +
+        geom_errorbar(
+            data = fit_participant,
+            aes(ymin = Q2.5, ymax = Q97.5),
+            width = 0.02, color = "blue"
+        ) +
+        theme_bw()
+
+    ggsave(
+        file.path(
+            fig_path,
+            paste(subject, "_fitted_values.png", sep = "")
+        )
+    )
+}
+```
+
+```{r}
+for (subject in unique(rt_df$participant_number)) {
+    par_data <- rt_df |>
+        filter(participant_number == subject)
+
+    fit_participant <- fitted(
+        m,
+        newdata = par_data
+    )
+
+    ggplot() +
+        geom_density(
+            data = par_data,
+            aes(x = rt),
+            alpha = .6, fill = "red"
+        ) +
+        geom_density(
+            data = fit_participant,
+            aes(x = Estimate),
+            fill = "blue", alpha = .6
+        ) +
+        theme_bw() +
+        labs(subtitle = "Blue: fitted, red: true")
+
+    ggsave(
+        file.path(
+            fig_path,
+            paste(subject, "_dens_fitted.png", sep = "")
+        )
+    )
+}
 ```
