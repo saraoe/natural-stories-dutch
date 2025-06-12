@@ -90,8 +90,12 @@ if (!test_n_words_per_participants(rt_df)) {
     quit()
 }
 
-# filter df
-rt_df <- rt_df |>
+# rt from eeg triggers
+rt_eeg_triggers <- read.csv("data/rt_eeg_triggers.csv") |>
+    select(-X) |>
+    rename(rt_triggers = rt) |>
+    left_join(rt_df, by = c("participant_number", "segment")) |>
+    # rt_df <- rt_df |>
     mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
     # filter word where participant 17 was stopped
     filter(!(participant_number == 17 &
@@ -197,10 +201,9 @@ if (run_rt) {
         m <- brm(formula,
             family = lognormal(),
             prior = prior,
-            data = rt_df |> filter(reading_type == "SPR"),
+            data = rt_eeg_triggers,
             chains = 4,
-            sample_prior = TRUE,
-            control = list(adapt_delta = 0.9999),
+            control = list(adapt_delta = 0.9),
             seed = 246,
             file = paste("src/brms_models/rt_SPR_m", i, sep = "")
         )
