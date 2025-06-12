@@ -18,7 +18,7 @@ dir.create(file.path(getwd(), erp_folder), showWarnings = FALSE)
 
 ### files
 epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = ".rds$")
-stim <- read.csv("../data/words_corpus.csv") |>
+stim <- read.csv("../stimuli/data/words_corpus.csv") |>
     select(-X) |>
     mutate(content_word = ifelse(pos %in% c("NOUN", "VERB", "ADJ", "ADV"), TRUE, FALSE)) |>
     mutate(

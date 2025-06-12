@@ -226,7 +226,7 @@ if __name__ == "__main__":
     # paths
     paths = {
         "instructions": os.path.join("instructions"),
-        "stories": os.path.join("..", "texts", "edited"),
+        "stories": os.path.join("..", "stimuli", "texts", "edited"),
         "questions": os.path.join("questions.xlsx"),
         "out_data": os.path.join("data", "spr"),
     }

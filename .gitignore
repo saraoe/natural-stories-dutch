@@ -4,9 +4,8 @@ pandoc*
 
 slurm/*
 
-stories/*
-texts/*.txt
-data/natural_stories_RT.tsv
+stimuli/stories/*
+stimuli/data/natural_stories_RT.tsv
 
 experiment/data/cloze/*
 experiment/data/spr/*

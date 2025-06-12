@@ -152,7 +152,7 @@ if __name__ == "__main__":
     paths = {
         "questions": os.path.join("questions.xlsx"),
         "instructions": os.path.join("instructions"),
-        "stories": os.path.join("..", "texts", "edited"),
+        "stories": os.path.join("..", "stimuli", "texts", "edited"),
         "out_data": os.path.join("data", "cloze"),
     }
 
