@@ -41,10 +41,13 @@ plot(m, variable = "^b", regex = TRUE)
 ## Prior-poserior update
 ```{r}
 draws <- as.data.frame(m)
+```
 
+Beta coefficients
+```{r}
 draws |>
     pivot_longer(
-        cols = starts_with("b_"),
+        cols = starts_with("b_s"),
         names_to = "parameter", values_to = "posterior"
     ) |>
     rename("prior" = prior_b) |>
@@ -53,6 +56,19 @@ draws |>
     geom_density(aes(x = prior), fill = "steelblue1", alpha = .5) +
     geom_density(aes(x = posterior), fill = "steelblue3", alpha = .5) +
     facet_wrap(. ~ parameter) +
+    theme_minimal()
+```
+
+Intercept
+```{r}
+draws |>
+    rename(
+        "prior" = prior_Intercept,
+        "posterior" = b_Intercept
+    ) |>
+    ggplot() +
+    geom_density(aes(x = prior), fill = "steelblue1", alpha = .5) +
+    geom_density(aes(x = posterior), fill = "steelblue3", alpha = .5) +
     theme_minimal()
 ```
 
