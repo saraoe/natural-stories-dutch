@@ -53,7 +53,7 @@ rt_threshold <- c(100, 3000)
 content_words <- c("NOUN", "VERB", "ADJ", "ADV")
 
 ## load reading times
-stim <- read.csv("../data/words_corpus.csv") |>
+stim <- read.csv("../stimuli/data/words_corpus.csv") |>
     mutate(zero_freq = as.logical(zero_freq))
 
 rt_df <- list.files("data/spr",

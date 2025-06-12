@@ -19,7 +19,7 @@ sterp_filename <- "data/sterp.csv"
 
 # files
 eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")
-stim <- read.csv("../data/words_corpus.csv") |>
+stim <- read.csv("../stimuli/data/words_corpus.csv") |>
     select(-X) |>
     mutate(
         lp_quantile = case_when(
