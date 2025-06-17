@@ -47,7 +47,7 @@ for (model_name in models) {
     print(model_name)
     causal_preload(model_name)
     corpus_df <- corpus_df |>
-        mutate(lp = causal_lp(word,
+        mutate(lp = causal_words_pred(word,
             by = document_id,
             model = model_name,
             batch_size = 10
