@@ -8,9 +8,7 @@ library(ggplot2)
 setwd("paper")
 
 models_path <- file.path("src", "brms_models")
-models_path <- file.path("src", "brms_models", "rt")
 fig_path <- "figs"
-fig_path <- file.path("figs", "model_results_server")
 ```
 
 ## read models
@@ -21,7 +19,7 @@ Model formula 2 (m2): dep_var ~ -1 + content_word + content_word:s_lp + content_
 Model formula 3 (m3): dep_var ~ s_lp + s_wl + s_freq
 ```{r}
 # dependent variable (rt, n400, or p600)
-dep_var <- "rt"
+dep_var <- "n400"
 # SPR or RSVP (for rt only SPR)
 reading_cond <- "SPR"
 # model formula (m1, m2, or m3)
@@ -38,9 +36,6 @@ m <- readRDS(file.path(
 pp_check(m)
 
 p <- plot(m, variable = "^b", regex = TRUE)
-ggsave(
-    file.path(fig_path, paste(model_formula, "_chains.png", sep = ""))
-)
 ```
 
 ## Prior-poserior update
