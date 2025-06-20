@@ -82,7 +82,12 @@ rt_df <- list.files("data/spr",
             levels = c("low_lp", "med_lp", "high_lp")
         ),
         content_word = ifelse(pos %in% content_words, TRUE, FALSE)
-    )
+    ) |>
+    mutate(trial = ifelse(document_id > 10, trial - 0.5, trial)) |>
+    arrange(participant_number, trial, paragraph_n, word_n) |>
+    group_by(participant_number) |>
+    mutate(segment = row_number()) |>
+    ungroup()
 
 # check number of words per participant is correct
 if (!test_n_words_per_participants(rt_df)) {
