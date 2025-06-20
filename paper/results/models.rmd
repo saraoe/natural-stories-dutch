@@ -19,7 +19,7 @@ Model formula 2 (m2): dep_var ~ -1 + content_word + content_word:s_lp + content_
 Model formula 3 (m3): dep_var ~ s_lp + s_wl + s_freq
 ```{r}
 # dependent variable (rt, n400, or p600)
-dep_var <- "n400"
+dep_var <- "p600"
 # SPR or RSVP (for rt only SPR)
 reading_cond <- "SPR"
 # model formula (m1, m2, or m3)
@@ -112,4 +112,74 @@ draws |>
 summary(m)
 
 mcmc_plot(m, variable = "^b", regex = TRUE)
+```
+
+# plot of fixed effects
+```{r}
+if (exists("fixef_all")) {
+    rm(fixef_all)
+}
+
+for (dep_var in c("rt", "n400", "p600")) {
+    for (reading_cond in c("RSVP", "SPR")) {
+        if (dep_var == "rt" && reading_cond == "RSVP") {
+            next
+        }
+
+        m <- readRDS(file.path(
+            models_path,
+            paste(
+                dep_var, "_",
+                reading_cond, "_",
+                model_formula, ".rds",
+                sep = ""
+            )
+        ))
+
+        fixef_m <- fixef(m) |>
+            as.data.frame() |>
+            mutate(
+                "estimate_name" = c(
+                    "Intercept",
+                    "Log-\nprobability",
+                    "Zipf \nfrequency"
+                ),
+                "dependent_variable" = dep_var,
+                "reading_condition" = reading_cond
+            )
+
+        if (exists("fixef_all")) {
+            fixef_all <- rbind(fixef_all, fixef_m)
+        } else {
+            fixef_all <- fixef_m
+        }
+    }
+}
+```
+
+```{r}
+dodge <- position_dodge(width = 0.3)
+
+fixef_all |>
+    filter(estimate_name != "Intercept") |>
+    mutate(
+        "dependent_variable" = factor(
+            dependent_variable,
+            levels = c("rt", "n400", "p600")
+        )
+    ) |>
+    mutate("dependent_variable" = toupper(dependent_variable)) |>
+    ggplot(aes(y = estimate_name, color = reading_condition)) +
+    geom_vline(aes(xintercept = 0), linetype = "dotted") +
+    geom_point(aes(x = Estimate), position = dodge) +
+    geom_linerange(aes(xmin = Q2.5, xmax = Q97.5),
+        position = dodge
+    ) +
+    scale_color_manual(values = c("steelblue1", "steelblue4")) +
+    facet_wrap(. ~ dependent_variable, scales = "free_x") +
+    labs(color = "", y = "") +
+    theme_minimal() +
+    theme(legend.position = "bottom")
+
+ggsave("figs/regression_coefficients.png", height = 2.5, width = 5)
 ```
