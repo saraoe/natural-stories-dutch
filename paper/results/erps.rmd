@@ -2,7 +2,7 @@
 ```{r}
 library(ggplot2)
 library(eeguana)
-library(gtable)
+library(tidytable)
 
 setwd("paper")
 
@@ -67,8 +67,8 @@ erp_mean_plot <- function(
         ) +
         geom_vline(xintercept = 0, linetype = "dashed") +
         eeguana::theme_eeguana() +
-        theme(legend.position = "bottom") +
-        labs(y = "", x = "time (ms)", color = "Quantile Log-probability") +
+        # theme(legend.position = "bottom") +
+        labs(y = "\u03BCV", x = "time (ms)", color = "Quantile \nLog-probability") +
         scale_color_manual(values = c("steelblue1", "steelblue3", "steelblue4"))
 
     if (!isFALSE(annotate_timewindow)) {
@@ -128,7 +128,7 @@ erp_facet_plot <- function(
         eeguana::theme_eeguana() +
         facet_wrap(. ~ .key) +
         theme(legend.position = "bottom") +
-        labs(y = "", x = "time (ms)", color = "Quantile Log-probability") +
+        labs(y = "\u03BCV", x = "time (ms)", color = "Quantile Log-probability") +
         scale_color_manual(values = c("steelblue1", "steelblue3", "steelblue4"))
 
     if (!isFALSE(annotate_timewindow)) {
@@ -199,7 +199,7 @@ ggsave(
             sep = ""
         )
     ),
-    width = 7, height = 5
+    width = 6, height = 3
 )
 ```
 
