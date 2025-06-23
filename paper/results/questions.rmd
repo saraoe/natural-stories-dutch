@@ -231,7 +231,7 @@ responses_df |>
     mutate("doc_id" = paste("ID", document_id)) |>
     group_by(story_name, document_id, question_id, type) |>
     mutate(
-        "percent_correct" = mean(correct),
+        "proportion_correct" = mean(correct),
         "sd" = sd(correct)
     ) |>
     ungroup() |>
@@ -243,8 +243,8 @@ responses_df |>
     geom_bar(stat = "summary", fun = "mean") +
     geom_errorbar(
         aes(
-            ymin = percent_correct - sd,
-            ymax = percent_correct + sd
+            ymin = proportion_correct - sd,
+            ymax = proportion_correct + sd
         ),
         width = .5
     ) +
@@ -252,7 +252,11 @@ responses_df |>
     theme_minimal() +
     scale_fill_manual(values = c("lightblue2", "lightblue3", "lightblue4")) +
     theme(legend.position = "bottom") +
-    labs(x = "Question Number", y = "Percent Correct", fill = "Question Type")
+    labs(
+        x = "Question Number",
+        y = "Proportion Correct",
+        fill = "Question Type"
+    )
 
 ggsave(
     paste(fig_path, "comprehension_responses.png", sep = ""),
