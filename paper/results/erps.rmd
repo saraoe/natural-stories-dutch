@@ -550,8 +550,7 @@ erp_df |>
 
 ggsave(
     file.path(
-        figs_path, paste("plot_topo_", reading_cond, "_contentwords",
-            FALSE, ".png",
+        figs_path, paste("plot_topo_", reading_cond, ".png",
             sep = ""
         )
     ),
@@ -567,7 +566,8 @@ library(ggplot2)
 library(purrr)
 library(tibble)
 
-reading_cond <- "RSVP"
+reading_cond <- "SPR"
+content_words <- TRUE
 
 # Join layout info
 plot_data <- erp_df |>
@@ -581,6 +581,12 @@ plot_data <- erp_df |>
             lp_quantile == "high_lp" ~ ">75%",
         )
     )
+
+# specify content words true or false
+if (content_words) {
+    plot_data <- plot_data |>
+        mutate(".value" = .value_content_words)
+}
 
 # Group-wise interpolation
 interp_per_group <- plot_data |>
@@ -644,7 +650,8 @@ plot_topo(as_tibble(interp_per_group)) +
 
 ggsave(
     file.path(
-        figs_path, paste("plot_topo_", reading_cond, ".png",
+        figs_path, paste("plot_topo_", reading_cond, "_contentwords",
+            content_words, ".png",
             sep = ""
         )
     ),
