@@ -444,3 +444,211 @@ ggsave(
     width = 10, height = 12
 )
 ```
+
+## Topographic plot
+```{r}
+epoch_file <- list.files(
+    "data/epochs/",
+    full.names = TRUE,
+    pattern = ".rds$"
+)[1]
+
+epochs <- readRDS(epoch_file)
+```
+```{r}
+reading_cond <- "SPR"
+
+# add cordinates to channels tbl
+channels_tbl(epochs) <- channels_tbl(epochs) |>
+    left_join(layout_32_1020)
+
+# only choice channels with layout coordinates
+layout_channels <- layout_32_1020 |>
+    filter(!(.channel %in% c("M1", "M2", "HEOG", "VEOG"))) |>
+    pull(.channel)
+
+epochs |>
+    eeg_filter(!is.na(lp_quantile)) |>
+    eeg_select(layout_channels) |>
+    eeg_filter(reading_type == reading_cond) |>
+    eeg_filter(as_time(.sample) |> between(0.3, 0.5)) |>
+    eeg_group_by(lp_quantile) |>
+    eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
+    eeg_mutate(
+        "lp_quantile" = case_when(
+            lp_quantile == "low_lp" ~ "<25%",
+            lp_quantile == "med_lp" ~ "25%-75%",
+            lp_quantile == "high_lp" ~ ">75%",
+        )
+    ) |>
+    plot_topo() +
+    # add a head and nose shape
+    annotate_head() +
+    # add electrode labels
+    annotate_electrodes(color = "black") +
+    facet_grid(~ as.factor(lp_quantile, levels = c("<25%", "25%-75%", ">75%")))
+```
+
+```{r}
+epochs |>
+    eeg_filter(!is.na(lp_quantile)) |>
+    eeg_select(layout_channels) |>
+    eeg_filter(reading_type == reading_cond) |>
+    eeg_filter(as_time(.sample) |> between(0.3, 0.5)) |>
+    eeg_group_by(lp_quantile) |>
+    eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
+    # eeg_interpolate_tbl() |>
+    plot_topo() +
+    # add a head and nose shape
+    annotate_head() +
+    # add electrode labels
+    annotate_electrodes(color = "black") +
+    facet_grid(~ as.factor(lp_quantile))
+```
+
+```{r}
+plot_topo_erp <- function(data) {
+    plot <-
+        ggplot2::ggplot(data, ggplot2::aes(
+            x = .x, y = .y,
+            z = .key
+        )) +
+        geom_tile(aes(fill = .value)) +
+        ggplot2::geom_raster(ggplot2::aes(fill = .value),
+            interpolate = TRUE, hjust = 0.5, vjust = 0.5
+        ) +
+        # Non recommended "rainbow" Matlab palette from https://www.mattcraddock.com/blog/2017/02/25/erp-visualization-creating-topographical-scalp-maps-part-1/
+        #    scale_fill_gradientn(colors = colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000")),guide = "colourbar",oob = scales::squish)+
+        # Not that bad scale:
+        #    scale_fill_distiller(palette = "Spectral", guide = "colorbar", oob = scales::squish) + #
+        ggplot2::scale_fill_distiller(type = "div", palette = "RdBu", guide = "colorbar", oob = scales::squish) +
+        theme_eeguana2()
+    plot
+}
+```
+
+```{r}
+reading_cond <- "SPR"
+
+erp_df |>
+    filter(reading_type == reading_cond) |>
+    left_join(layout_32_1020 |> rename(".key" = .channel)) |>
+    filter(!is.na(.x)) |>
+    mutate(
+        "lp_quantile" = case_when(
+            lp_quantile == "low_lp" ~ "<25%",
+            lp_quantile == "med_lp" ~ "25%-75%",
+            lp_quantile == "high_lp" ~ ">75%",
+        )
+    ) |>
+    plot_topo_erp() +
+    annotate_head() +
+    # add electrode labels
+    annotate_electrodes(color = "black") +
+    facet_grid(~ factor(lp_quantile, levels = c("<25%", "25%-75%", ">75%"))) +
+    theme(legend.position = "bottom")
+
+ggsave(
+    file.path(
+        figs_path, paste("plot_topo_", reading_cond, "_contentwords",
+            FALSE, ".png",
+            sep = ""
+        )
+    ),
+    width = 10, height = 7
+)
+```
+
+### code with interpolation from chatgpt
+```{r}
+library(dplyr)
+library(akima)
+library(ggplot2)
+library(purrr)
+library(tibble)
+
+reading_cond <- "RSVP"
+
+# Join layout info
+plot_data <- erp_df |>
+    filter(reading_type == reading_cond) |>
+    left_join(layout_32_1020 |> rename(".key" = .channel)) |>
+    filter(!is.na(.x)) |>
+    mutate(
+        "lp_quantile" = case_when(
+            lp_quantile == "low_lp" ~ "<25%",
+            lp_quantile == "med_lp" ~ "25%-75%",
+            lp_quantile == "high_lp" ~ ">75%",
+        )
+    )
+
+# Group-wise interpolation
+interp_per_group <- plot_data |>
+    group_split(lp_quantile) |>
+    map_df(function(df) {
+        group_name <- unique(df$lp_quantile)
+
+        # Compute group mean per electrode
+        mean_vals <- df |>
+            group_by(.key, .x, .y) |>
+            summarise(.value = mean(.value), .groups = "drop")
+
+        # Perform interpolation (if >= 3 unique electrodes)
+        if (nrow(mean_vals) >= 3) {
+            interp <- akima::interp(
+                x = mean_vals$.x,
+                y = mean_vals$.y,
+                z = mean_vals$.value,
+                duplicate = "mean",
+                nx = 100,
+                ny = 100
+            )
+
+            # Make raster tibble
+            raster_tbl <- expand.grid(.x = interp$x, .y = interp$y) |>
+                mutate(
+                    .value = as.vector(interp$z),
+                    lp_quantile = group_name,
+                    .key = NA
+                )
+
+            # Label data for this group
+            label_tbl <- mean_vals |>
+                mutate(lp_quantile = group_name)
+
+            # Combine both
+            bind_rows(raster_tbl, label_tbl)
+        } else {
+            df # fallback to raw if interpolation fails
+        }
+    })
+
+# Plot
+plot_topo(as_tibble(interp_per_group)) +
+    annotate_head() +
+    annotate_electrodes(color = "black") +
+    facet_grid(~ factor(lp_quantile, levels = c("<25%", "25%-75%", ">75%"))) +
+    scale_fill_distiller(
+        type = "div",
+        palette = "RdBu",
+        guide = "colorbar",
+        oob = scales::squish,
+        na.value = "white"
+    ) +
+    coord_fixed() +
+    theme(
+        panel.background = element_rect(fill = "white", color = NA),
+        plot.background = element_rect(fill = "white", color = NA),
+        legend.position = "bottom"
+    )
+
+ggsave(
+    file.path(
+        figs_path, paste("plot_topo_", reading_cond, ".png",
+            sep = ""
+        )
+    ),
+    width = 10, height = 7
+)
+```
+
