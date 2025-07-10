@@ -567,13 +567,25 @@ library(purrr)
 library(tibble)
 
 reading_cond <- "SPR"
-content_words <- TRUE
+content_words <- FALSE
+erp_component <- "n400"
+
+if (erp_component == "n400") {
+    timewindow <- n400_timewindow
+} else if (erp_component == "p600") {
+    timewindow <- p600_timewindow
+} else {
+    timewindow <- c(min(erp_df$.time), max(erp_df$.time))
+}
 
 # Join layout info
 plot_data <- erp_df |>
     filter(reading_type == reading_cond) |>
-    left_join(layout_32_1020 |> rename(".key" = .channel)) |>
+    left_join(layout_32_1020 |>
+        rename(".key" = .channel)) |>
     filter(!is.na(.x)) |>
+    filter(.time |>
+        between(timewindow[1], timewindow[2])) |>
     mutate(
         "lp_quantile" = case_when(
             lp_quantile == "low_lp" ~ "<25%",
@@ -650,8 +662,8 @@ plot_topo(as_tibble(interp_per_group)) +
 
 ggsave(
     file.path(
-        figs_path, paste("plot_topo_", reading_cond, "_contentwords",
-            content_words, ".png",
+        figs_path, paste("plot_topo_", reading_cond, "_",
+            erp_component, "_contentwords", content_words, ".png",
             sep = ""
         )
     ),
