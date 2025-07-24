@@ -112,7 +112,7 @@ responses_df |>
     ) +
     theme(legend.position = "bottom")
 
-ggsave(paste(fig_path, "familiarity_prop.png", sep = ""), height = 3, width = 7)
+ggsave(paste(fig_path, "familiarity_prop.pdf", sep = ""), height = 3, width = 7)
 ```
 
 ## Comprehenion
@@ -259,7 +259,7 @@ responses_df |>
     )
 
 ggsave(
-    paste(fig_path, "comprehension_responses.png", sep = ""),
+    paste(fig_path, "comprehension_responses.pdf", sep = ""),
     height = 4, width = 7
 )
 ```

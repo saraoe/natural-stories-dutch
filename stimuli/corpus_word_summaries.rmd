@@ -5,6 +5,8 @@ library(tidytable)
 library(stringr)
 library(ggplot2)
 library(patchwork)
+
+setwd("stimuli")
 ```
 
 ## Load data
@@ -81,7 +83,7 @@ hist_wl <- corpus_df |>
     theme_minimal() +
     labs(x = "Word Length", y = "count")
 
-ggsave("figs/hist_wl.png", plot = hist_wl, height = 3, width = 3)
+ggsave("figs/hist_wl.pdf", plot = hist_wl, height = 3, width = 3)
 ```
 
 ```{r}
@@ -95,7 +97,7 @@ corpus_df |>
     theme_minimal() +
     labs(x = "Word Length")
 
-ggsave("figs/hist_wl_story.png", height = 10, width = 15)
+ggsave("figs/hist_wl_story.pdf", height = 10, width = 15)
 ```
 
 ```{r}
@@ -120,7 +122,7 @@ corpus_df |>
     facet_wrap(. ~ type, ncol = 5) +
     labs(x = "Word Length")
 
-ggsave("figs/hist_wl_type.png", height = 7, width = 10)
+ggsave("figs/hist_wl_type.pdf", height = 7, width = 10)
 ```
 
 ```{r}
@@ -134,7 +136,7 @@ corpus_df |>
     theme_minimal() +
     labs(x = "Word Frequency")
 
-ggsave("figs/hist_freq.png", height = 10, width = 15)
+ggsave("figs/hist_freq.pdf", height = 10, width = 15)
 ```
 
 ```{r}
@@ -148,7 +150,7 @@ corpus_df |>
     theme_minimal() +
     labs(x = "Log Probability")
 
-ggsave("figs/hist_lp.png", height = 10, width = 15)
+ggsave("figs/hist_lp.pdf", height = 10, width = 15)
 ```
 
 ```{r}
@@ -174,7 +176,7 @@ hist_sl <- corpus_df |>
     theme_minimal() +
     labs(x = "Sentence Length", y = "count")
 
-ggsave("figs/hist_sl.png", plot = hist_sl, height = 3, width = 3)
+ggsave("figs/hist_sl.pdf", plot = hist_sl, height = 3, width = 3)
 ```
 
 ```{r}
@@ -192,7 +194,7 @@ corpus_df |>
     theme_minimal() +
     labs(x = "Sentence Length")
 
-ggsave("figs/hist_sl_story.png", height = 10, width = 15)
+ggsave("figs/hist_sl_story.pdf", height = 10, width = 15)
 ```
 
 ```{r}
@@ -221,12 +223,12 @@ corpus_df |>
     theme_minimal() +
     labs(x = "Sentence Length")
 
-ggsave("figs/hist_sl_type.png", height = 7, width = 10)
+ggsave("figs/hist_sl_type.pdf", height = 7, width = 10)
 ```
 
 ```{r}
 # joint histograms
 
 hist_wl + (hist_sl + labs(y = ""))
-ggsave("figs/hist_wl_sl.png", height = 3, width = 6)
+ggsave("figs/hist_wl_sl.pdf", height = 3, width = 6)
 ```

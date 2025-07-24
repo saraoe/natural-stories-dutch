@@ -170,7 +170,7 @@ fixef_all |>
     ) |>
     mutate("dependent_variable" = toupper(dependent_variable)) |>
     ggplot(aes(y = estimate_name, color = reading_condition)) +
-    geom_vline(aes(xintercept = 0), linetype = "dotted") +
+    geom_vline(aes(xintercept = 0), linetype = "dashed") +
     geom_point(aes(x = Estimate), position = dodge) +
     geom_linerange(aes(xmin = Q2.5, xmax = Q97.5),
         position = dodge
@@ -181,5 +181,5 @@ fixef_all |>
     theme_minimal() +
     theme(legend.position = "bottom")
 
-ggsave("figs/regression_coefficients.png", height = 2.5, width = 5)
+ggsave("figs/regression_coefficients.pdf", height = 2.5, width = 5)
 ```
