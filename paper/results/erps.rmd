@@ -3,6 +3,8 @@
 library(ggplot2)
 library(eeguana)
 library(tidytable)
+library(akima)
+library(tibble)
 
 setwd("paper")
 
@@ -18,6 +20,21 @@ erp_df <- read.csv("data/erp_lp.csv") |>
             levels = c("low_lp", "med_lp", "high_lp")
         )
     )
+```
+
+```{r}
+n400_chs <- c(
+    "Cz", "Pz", "C4", "CP6", "P4", "P3",
+    "CP5", "C3", "P8", "PO3", "PO4", "P7"
+)
+p600_chs <- c(
+    "Cz", "CP2", "Pz", "CP1", "C4", "CP6",
+    "P4", "P3", "CP5", "C3", "T8", "TP8",
+    "P8", "PO3", "PO4", "P7", "TP7", "T7"
+)
+
+n400_timewindow <- c(.3, .5)
+p600_timewindow <- c(.5, .7)
 ```
 
 ## plotting functions
@@ -156,21 +173,6 @@ erp_mean_plot(
 
 ERPs averaged over channels used for calculating mean amplitudes of components (n400 and p600)
 ```{r}
-n400_chs <- c(
-    "Cz", "Pz", "C4", "CP6", "P4", "P3",
-    "CP5", "C3", "P8", "PO3", "PO4", "P7"
-)
-p600_chs <- c(
-    "Cz", "CP2", "Pz", "CP1", "C4", "CP6",
-    "P4", "P3", "CP5", "C3", "T8", "TP8",
-    "P8", "PO3", "PO4", "P7", "TP7", "T7"
-)
-
-n400_timewindow <- c(.3, .5)
-p600_timewindow <- c(.5, .7)
-```
-
-```{r}
 reading_cond <- "SPR"
 erp_component <- "n400"
 only_content_words <- TRUE
@@ -195,11 +197,11 @@ ggsave(
     file.path(
         figs_path,
         paste(reading_cond, "_", erp_component, "_contentwords",
-            only_content_words, ".png",
+            only_content_words, ".pdf",
             sep = ""
         )
     ),
-    width = 6, height = 3
+    width = 5, height = 2
 )
 ```
 
@@ -560,12 +562,6 @@ ggsave(
 
 ### code with interpolation from chatgpt
 ```{r}
-library(dplyr)
-library(akima)
-library(ggplot2)
-library(purrr)
-library(tibble)
-
 reading_cond <- "SPR"
 content_words <- FALSE
 erp_component <- "n400"
@@ -611,34 +607,29 @@ interp_per_group <- plot_data |>
             group_by(.key, .x, .y) |>
             summarise(.value = mean(.value), .groups = "drop")
 
-        # Perform interpolation (if >= 3 unique electrodes)
-        if (nrow(mean_vals) >= 3) {
-            interp <- akima::interp(
-                x = mean_vals$.x,
-                y = mean_vals$.y,
-                z = mean_vals$.value,
-                duplicate = "mean",
-                nx = 100,
-                ny = 100
+        # Perform interpolation
+        interp <- akima::interp(
+            x = mean_vals$.x,
+            y = mean_vals$.y,
+            z = mean_vals$.value,
+            duplicate = "mean",
+            nx = 100,
+            ny = 100
+        )
+
+        # Make raster tibble
+        raster_tbl <- expand.grid(.x = interp$x, .y = interp$y) |>
+            mutate(
+                .value = as.vector(interp$z),
+                lp_quantile = group_name
             )
 
-            # Make raster tibble
-            raster_tbl <- expand.grid(.x = interp$x, .y = interp$y) |>
-                mutate(
-                    .value = as.vector(interp$z),
-                    lp_quantile = group_name,
-                    .key = NA
-                )
+        # Label data for this group
+        label_tbl <- mean_vals |>
+            mutate(lp_quantile = group_name)
 
-            # Label data for this group
-            label_tbl <- mean_vals |>
-                mutate(lp_quantile = group_name)
-
-            # Combine both
-            bind_rows(raster_tbl, label_tbl)
-        } else {
-            df # fallback to raw if interpolation fails
-        }
+        # Combine both
+        bind_rows(raster_tbl, label_tbl)
     })
 
 # Plot
@@ -654,6 +645,7 @@ plot_topo(as_tibble(interp_per_group)) +
         na.value = "white"
     ) +
     coord_fixed() +
+    labs(fill = "\u03BCV") +
     theme(
         panel.background = element_rect(fill = "white", color = NA),
         plot.background = element_rect(fill = "white", color = NA),
