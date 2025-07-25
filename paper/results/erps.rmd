@@ -708,13 +708,16 @@ topo_plot_diff <- function(df, reading_cond, content_words, timewindow) {
             na.value = "white"
         ) +
         coord_fixed() +
-        labs(fill = "\u03BCV", caption = "Difference (> 25%) - (< 75%)") +
+        labs(fill = "\u03BCV", caption = "Difference (< 25%) - (> 75%)") +
         theme(
             panel.background = element_rect(fill = "white", color = NA),
             plot.background = element_rect(fill = "white", color = NA),
             legend.position = "bottom"
         ) +
-        ggtitle(paste(erp_component, reading_cond, "content_words", content_words))
+        theme(
+            legend.position = "bottom",
+            plot.caption = element_text(hjust = 0.5) # centers the caption
+        )
 
     return(p)
 }
@@ -777,7 +780,7 @@ ggsave(
 ```{r}
 reading_cond <- "SPR"
 content_words <- TRUE
-erp_component <- "n400" # only n400 and p600
+erp_component <- "p600" # only n400 and p600
 
 if (erp_component == "n400") {
     chs <- n400_chs
