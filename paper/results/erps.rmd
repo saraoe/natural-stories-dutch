@@ -807,7 +807,7 @@ erp_p + topo_p
 ggsave(
     file.path(
         figs_path, paste("erp_topo_", reading_cond, "_",
-            erp_component, "_contentwords", content_words, ".png",
+            erp_component, "_contentwords", content_words, ".pdf",
             sep = ""
         )
     ),
