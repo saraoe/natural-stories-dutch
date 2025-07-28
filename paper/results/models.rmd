@@ -3,6 +3,7 @@
 library(tidytable)
 library(stringr)
 library(brms)
+library(priorsense)
 library(ggplot2)
 
 setwd("paper")
@@ -38,7 +39,11 @@ pp_check(m)
 p <- plot(m, variable = "^b", regex = TRUE)
 ```
 
-## Prior-poserior update
+```{r}
+powerscale_sensitivity(m) # check priors
+```
+
+## Prior-posterior update
 ```{r}
 draws <- as.data.frame(m)
 ```
