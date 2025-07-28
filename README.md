@@ -1,42 +1,20 @@
-# Corpus for SPR-EEG study
+# Tilburg corpus of Natural Dutch Texts (TiNT)
 
-We are building a corpus of Dutch stories for a self-paced reading (SPR) EEG study inspired by the English corpus described in Futrell et al. (2021). The corpus will contain 10 texts of different genres (e.g. fairy tales, technical texts, novels). The texts are chosen to have a high degree of overall fluency and comprehensibility. Additionally, they contain a high rate of rare or hard-to-process [syntactic constructions](#syntactic-features) that they either included originally or have been edited in after selection (however, still maintaining the original meaning and fluency of the texts), thus, allowing for a throurough study of reading and sentence processing in Dutch.
+The Tilburg corpus of Natural Dutch Texts (TiNT) is a psycholinguistic corpus of joint electroencephalography (EEG) and self-paced reading (SPR) of natural, medium-length, Dutch texts. The corpus contains recordings from 71 native Dutch speakers reading eight naturally occurring texts of around 800 words each.
 
-### Texts in corpus
-| Number | Title | Author| Type |
-| --- | --- | --- | --- | 
-| 1 | Mijn Heer Zak met Rijst | --- | Fairy tale |
-| 2 | Waarom de reuzen in Limburg zijn uitgestorven | --- | Fairy tale |
-| 3 | De eerste opiumoorlog | --- | History |
-| 4 | Aspasia | --- | History |
-| 5 | De zilveren schaatsen | --- | Novel |
-| 6 | Carrie | --- | Synopsis roman |
-| 7 | Permafrost | --- | Technical text |
-| 8 | Nomadisch pastoralisme | --- | Technical text |
-| 9 | Kieming | --- | Technical text |
-| 10 | Vleermuizen | --- | Technical text |
+## Data availability
 
-## Syntactic features
+The data will be available on DataverseNL.
 
-*Rare words*
+If you use the corpus please cite:
+[Paper and DataverseNL citation will be added]
 
-By identifiying rare words, we can subtitute these for pseudowords and not distrub the fluency of the text. As such, the corpus makes it possible to study the influence of psedowords on sentence processing in a natural text.
+## Organization
 
-*Idioms and Metaphors*
+This repository includes three parts: stimuli, experiment, and paper. 
 
-e.g.
+- The **stimuli** folder contains the linguistic stimuli as well as the code for generating descriptive statistics of the stimuli and extracting log-prababilities, word frequencies. 
+- The **experiment** folder contains the psychopy script used for collecting the EEG and behavioral data. The experiment also relies on the stimuli that is within the stimuli folder.
+- The **paper** folder contains the code for validation analysis of the data. This includes preproccessing, extracting ERP components, running Bayesian hierarchical models, and summaries and plots for the paper (excluding the plots of descriptive statistics of the stimuli, which is in the stimuli folder).
 
-*Ambiguity*
-
-There are different kinds of ambiguity - see Futrell et al. (2021) for examples. 
-
-## Dependencies
-To install python packages pip install requirements.
-```
-pip install -r requirements.txt
-```
-
-The script ``src/corpus_words.r`` requires the word frequencies from [SUBTLEX-NL](https://osf.io/3d8cx/). Download the file called ``SUBTLEX-NL with pos and Zipf cd minimally 2.xlsx`` from the OSF repository and save it as ``data/SUBTLEX-NL.xlsx``
-
-## References
-- Futrell, R., Gibson, E., Tily, H.J. et al. The Natural Stories corpus: a reading-time corpus of English texts containing rare syntactic constructions. *Lang Resources & Evaluation 55*, 63–77 (2021). https://doi.org/10.1007/s10579-020-09503-7
+*NB: different environments are used for the different parts. Look at the readmes within the folders for more information.*

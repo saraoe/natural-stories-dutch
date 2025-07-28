@@ -1,0 +1,107 @@
+Het immuunsysteem is een complex netwerk waarin gespecialiseerde cellen
+en eiwitten samenwerken om een levend wezen te beschermen tegen ziekte
+en infectie. Het vormt een afweer tegen binnendringende ziekteverwekkers
+als bacteriën, virussen en parasieten. Het immuunsysteem herkent deze
+vreemde indringers en activeert verschillende mechanismen om hen te
+doden en op te ruimen.
+
+Bijna alle levende wezens bezitten een vorm van afweer. Bacteriën hebben
+bijvoorbeeld een systeem van enzymen dat beschermt tegen virusinfecties.
+Vroeg in de evolutie van dieren ontstonden complexere mechanismen, zoals
+fagocytose waarbij een cel de indringer opeet. Gewervelde dieren,
+waaronder de mens, beschikken over nog verder verfijnde
+afweermechanismen die erop gericht zijn ziekteverwekkers heel precies te
+herkennen en te bestrijden.
+
+De afweer van gewervelden bestaat globaal uit twee delen. Het eerste
+deel, dat aangeduid wordt als aangeboren immuunsysteem, vormt de eerste
+lijn van verdediging, die meteen in werking treedt om een infectie te
+voorkomen of binnen de perken te houden. Het tweede deel, het verworven
+immuunsysteem, is in staat ziekteverwekkers bij een volgende aanval te
+herkennen en af te weren, wat herhaling van de infectie voorkomt. Dit
+vermogen om een infectie te onthouden is de basis van vaccinatie.
+
+Stoornissen in de afweer kunnen leiden tot ernstige aandoeningen.
+Wanneer het immuunsysteem onvoldoende functioneert, zoals bij
+immuundeficiënties, kunnen zich terugkerende en levensbedreigende
+infecties ontwikkelen. Dit is bijvoorbeeld het geval bij hiv/aids,
+erfelijke afwijkingen als SCID en bij het gebruik van
+afweeronderdrukkende middelen als prednison. Een overactieve afweer kan
+ertoe leiden dat het immuunsysteem de eigen weefsels aanvalt.
+Voorbeelden van dergelijke auto-immuunziekten zijn reumatoïde artritis,
+diabetes type 1 en multiple sclerose.
+
+Overzicht[bewerken | brontekst bewerken]
+
+Mensen, dieren en planten leven in een wereld vol micro-organismen:
+bacteriën, schimmels, parasieten en virussen. Hoewel de meeste van deze
+organismen geen schade toebrengen en ongemerkt samenleven met hun
+gastheer, zijn er veel soorten die het lichaam binnendringen en daar
+ziektekunnen veroorzaken. Het immuunsysteem heeft de taak het lichaam te
+verdedigen tegen de mogelijke bedreigingen van deze ziekteverwekkers
+(pathogenen).
+
+Het lichaam van dieren beschikt over fysieke barrières, zoals
+epitheelweefsels en slijmvliezen, die bacteriën en virussen normaal
+gesproken buitenhouden. Een ziekteverwekker die deze barrières toch
+doorbreekt, komt in aanraking met het aangeboren immuunsysteem, dat een
+onmiddellijke, maar aspecifieke respons in gang zet.^([1]) De
+ziekteverwekker wordt bijvoorbeeld door witte bloedcellen opgenomen en
+verteerd of middels een ontstekingsreactie in zijn groei geremd. Terwijl
+het aangeboren immuunsysteem de infectie onder controle probeert de
+houden, brengt deze (bij gewervelden) een tweede lijn van afweer op
+gang: het verworven immuunsysteem.^([2])
+
+De cellen van het verworven immuunsysteem bezitten speciale receptoren
+op hun membraan, waarmee zij op een uiterst specifieke manier
+ziekteverwekkers herkennen en daarop reageren. Na herkenning beginnen de
+cellen zich in hoog tempo te delen en te differentiëren, zodat de
+ziekteverwekker overal in het lichaam doeltreffend wordt bestreden,
+bijvoorbeeld via antilichamen of cytotoxische mechanismen.^([2]) Sommige
+cellen blijven na afloop nog lange tijd aanwezig in het bloed, teneinde
+herhaling van dezelfde infectie te voorkomen – een immunologisch
+geheugen.
+
+mmunologie is de wetenschap die zich bezighoudt met alle aspecten van
+het immuunsysteem. De moderne immunologie is voornamelijk gericht op het
+immuunsysteem van de mens – en daarmee die van andere gewervelde dieren
+– omdat de mechanismen van de menselijke afweer veruit het best zijn
+bestudeerd en ontrafeld. Hoewel ook ongewervelde dieren, planten en
+andere levensvormen complexe afweersystemen bezitten, is de kennis
+hierover relatief beperkt.^([3][4]) Zowel de aangeboren als de verworven
+afweer kennen ieder hun eigen vakgebied. Historisch gezien kent de
+immunologische wetenschap een belangrijke overlap met geneeskunde: veel
+aandacht gaat uit naar het verklaren van stoornissen van de afweer, hoe
+deze werken en te behandelen zijn.^([5][6]) Hoewel het immuunsysteem
+primair gericht is op de bestrijding van ziekteverwekkers, speelt het
+ook een grote rol bij de afweer tegen kankercellen.^([7])
+
+Het lichaam van gewervelde dieren wordt in eerste instantie beschermd
+tegen ziekteverwekkers door fysieke barrières, zoals de huid, het
+epitheelweefsel rondom organen (zoals die van de long- of darmwand) en
+de slijmvliezen. De dicht op elkaar liggende epitheelcellen zijn
+moeilijk te passeren voor micro-organismen. Bovendien maken de
+biochemische omstandigheden van de slijmvliezen – zoals de hoge
+zuurgraad van de maag en vetzuren op de huid – het lastig voor
+micro-organismen om op deze plaatsen te overleven.^([8])
+
+In de slijmvliezen en lichaamsvloeistoffen komen vele antimicrobiële
+stoffen voor die in belangrijke mate bijdragen aan de afweer tegen
+infecties. Sommige van deze stoffen kunnen micro-organismen direct
+doden, andere zorgen ervoor dat hun groei sterk vertraagd wordt, of
+ondersteunen de immuunrespons ertegen. Epitheelcellen van de huid en de
+luchtwegen produceren bijvoorbeeld kationische peptiden (defensinen) die
+zich aan de membranen van bacteriën en virussen hechten en deze
+ontwrichten.^([9]) Lysozymen in traanvocht splitsen de
+celwandcomponenten van bacteriën, en lactoferrinen in onder meer zweet
+en speeksel remmen de groei van pathogenen door ijzer weg te
+vangen.^([8])
+
+Op de huid en binnen de darmen komen van nature grote aantallen
+onschadelijke (en vaak nuttige) micro-organismen voor, het zogenaamde
+microbioom. Deze micro-organismen concurreren met lichaamsvreemde
+ziekteverwekkers om ruimte en voedingsstoffen. Sommige darmbacteriën
+produceren ook antimicrobiële verbindingen die direct de groei van
+pathogenen remmen.^([10][11]) Een achteruitgang van de darmflora,
+bijvoorbeeld bij gebruik van antibiotica, kan ertoe leiden dat pathogene
+bacteriën (zoals Clostridium) de darm vrijelijk koloniseren.^([12])

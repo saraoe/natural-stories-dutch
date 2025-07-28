@@ -10,7 +10,6 @@ library(argparse)
 options(mc.cores = parallel::detectCores())
 options(brms.backend = "cmdstan")
 
-source("src/summarize_erps.r")
 source("src/file_checks.r")
 source("src/util.r")
 
@@ -54,7 +53,7 @@ rt_threshold <- c(100, 3000)
 content_words <- c("NOUN", "VERB", "ADJ", "ADV")
 
 ## load reading times
-stim <- read.csv("../data/words_corpus.csv") |>
+stim <- read.csv("../stimuli/data/words_corpus.csv") |>
     mutate(zero_freq = as.logical(zero_freq))
 
 rt_df <- list.files("data/spr",
@@ -91,8 +90,12 @@ if (!test_n_words_per_participants(rt_df)) {
     quit()
 }
 
-# filter df
-rt_df <- rt_df |>
+# rt from eeg triggers
+rt_eeg_triggers <- read.csv("data/rt_eeg_triggers.csv") |>
+    select(-X) |>
+    rename(rt_triggers = rt) |>
+    left_join(rt_df, by = c("participant_number", "segment")) |>
+    # rt_df <- rt_df |>
     mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
     # filter word where participant 17 was stopped
     filter(!(participant_number == 17 &
@@ -193,14 +196,14 @@ if (run_rt) {
             formula <- m3_rt_formula
             prior <- m_rt_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = lognormal(),
-            prior = m_rt_priors,
-            data = rt_df |> filter(reading_type == "SPR"),
+            prior = prior,
+            data = rt_eeg_triggers,
             chains = 4,
-            sample_prior = TRUE,
-            control = list(adapt_delta = 0.9999),
+            control = list(adapt_delta = 0.9),
             seed = 246,
             file = paste("src/brms_models/rt_SPR_m", i, sep = "")
         )
@@ -259,6 +262,7 @@ if (run_n400) {
             formula <- m3_n400_formula
             priors <- m_n400_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = gaussian(),
@@ -317,6 +321,7 @@ if (run_n400) {
             formula <- m3_n400_rsvp_formula
             priors <- m_n400_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = gaussian(),
@@ -383,6 +388,7 @@ if (run_p600) {
             formula <- m3_p600_formula
             priors <- m_p600_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = gaussian(),
@@ -441,6 +447,7 @@ if (run_p600) {
             formula <- m3_p600_rsvp_formula
             priors <- m_p600_priors
         }
+        print(formula)
 
         m <- brm(formula,
             family = gaussian(),

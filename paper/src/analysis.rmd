@@ -103,7 +103,7 @@ responses_df |>
 
 ### Load data
 ```{r}
-stim <- read.csv("../data/words_corpus.csv") |>
+stim <- read.csv("../stimuli/data/words_corpus.csv") |>
     mutate(
         lp_quantile = ifelse(
             lp >= quantile(lp, na.rm = TRUE)[4], "high_lp",

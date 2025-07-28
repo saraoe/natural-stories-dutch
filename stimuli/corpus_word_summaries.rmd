@@ -1,0 +1,232 @@
+# Summaries of corpus on word levels
+
+```{r}
+library(tidytable)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+```
+
+## Load data
+```{r}
+corpus_df <- read.csv("data/words_corpus.csv") |>
+    mutate("type" = case_when(
+        document_id %in% c(1, 2) ~ "Fairy Tale",
+        document_id %in% c(3) ~ "History",
+        document_id %in% c(4) ~ "Novel",
+        document_id %in% c(5, 6, 7) ~ "Technical Text",
+        document_id %in% c(8) ~ "Synopsis Show"
+    ))
+```
+
+## Tables
+```{r}
+# summaries of word length, frequency (zipf),
+# and log probability (mean over all models)
+corpus_df |>
+    filter(document_id < 10) |>
+    group_by(document_id) |>
+    summarize(
+        "mean_word_length" = mean(wl),
+        "sd_word_length" = sd(wl),
+        "mean_freq" = mean(zipf_freq),
+        "sd_freq" = sd(zipf_freq),
+        "mean_lp" = mean(lp, na.rm = TRUE),
+        "sd_lp" = sd(lp, na.rm = TRUE)
+    )
+```
+
+```{r}
+# Number of words not in frequency corpus
+corpus_df |>
+    filter(document_id < 10) |>
+    group_by(document_id) |>
+    summarize(
+        "N" = sum(zero_freq),
+        "proportion" = sum(zero_freq) / n()
+    )
+```
+
+```{r}
+# sentence length
+corpus_df |>
+    filter(str_detect(word, "[.!?]")) |>
+    group_by(document_id) |>
+    mutate("sl" = number_word - lag(number_word)) |>
+    mutate("sl" = ifelse(is.na(sl), number_word, sl)) |>
+    filter(document_id < 10) |>
+    summarize(
+        "mean_sl" = mean(sl),
+        "sd_sl" = sd(sl),
+        "N" = n()
+    )
+```
+
+## Plots
+```{r}
+# word length
+hist_wl <- corpus_df |>
+    filter(document_id < 10) |>
+    mutate("mean_wl" = round(mean(wl), 2)) |>
+    ggplot() +
+    geom_histogram(aes(x = wl),
+        binwidth = 1,
+        fill = "lightblue", color = "black"
+    ) +
+    geom_vline(aes(xintercept = mean(wl)), linetype = "dashed") +
+    geom_text(
+        aes(x = mean(wl), y = 850, label = paste("mean = ", mean_wl)),
+        nudge_x = 7, fontface = 1, size = 4
+    ) +
+    theme_minimal() +
+    labs(x = "Word Length", y = "count")
+
+ggsave("figs/hist_wl.png", plot = hist_wl, height = 3, width = 3)
+```
+
+```{r}
+# word length by story
+corpus_df |>
+    filter(document_id < 10) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(aes(x = wl), fill = "darkseagreen", color = "black") +
+    facet_wrap(. ~ story_name, ncol = 4) +
+    theme_minimal() +
+    labs(x = "Word Length")
+
+ggsave("figs/hist_wl_story.png", height = 10, width = 15)
+```
+
+```{r}
+# word length by type
+corpus_df |>
+    filter(document_id < 10) |>
+    group_by(type) |>
+    mutate("mean_wl" = round(mean(wl), 2)) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(
+        aes(x = wl, y = after_stat(density)),
+        fill = "aliceblue", color = "black",
+        binwidth = 1
+    ) +
+    geom_vline(aes(xintercept = mean(wl)), linetype = "dashed") +
+    geom_text(
+        aes(x = mean(wl), y = 0.23, label = paste("mean = ", mean_wl)),
+        nudge_x = 2, fontface = 1, size = 2.8, angle = 270
+    ) +
+    theme_minimal() +
+    facet_wrap(. ~ type, ncol = 5) +
+    labs(x = "Word Length")
+
+ggsave("figs/hist_wl_type.png", height = 7, width = 10)
+```
+
+```{r}
+# word frequency
+corpus_df |>
+    filter(document_id < 10) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(aes(x = zipf_freq), fill = "darkseagreen", color = "black") +
+    facet_wrap(. ~ story_name, ncol = 4) +
+    theme_minimal() +
+    labs(x = "Word Frequency")
+
+ggsave("figs/hist_freq.png", height = 10, width = 15)
+```
+
+```{r}
+# log probability
+corpus_df |>
+    filter(document_id < 10) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(aes(x = lp), fill = "darkseagreen", color = "black") +
+    facet_wrap(. ~ story_name, ncol = 4) +
+    theme_minimal() +
+    labs(x = "Log Probability")
+
+ggsave("figs/hist_lp.png", height = 10, width = 15)
+```
+
+```{r}
+# Sentence lengths
+hist_sl <- corpus_df |>
+    filter(str_detect(word, "[.!?]")) |>
+    group_by(document_id) |>
+    mutate("sl" = number_word - lag(number_word)) |>
+    mutate("sl" = ifelse(is.na(sl), number_word, sl)) |>
+    filter(document_id < 10) |>
+    ungroup() |>
+    mutate("mean_sl" = round(mean(sl), 2)) |>
+    ggplot() +
+    geom_histogram(aes(x = sl),
+        binwidth = 1,
+        fill = "lightblue", color = "black"
+    ) +
+    geom_vline(aes(xintercept = mean(sl)), linetype = "dashed") +
+    geom_text(
+        aes(x = mean(sl), y = 16, label = paste("mean = ", mean_sl)),
+        nudge_x = 17, fontface = 1, size = 4
+    ) +
+    theme_minimal() +
+    labs(x = "Sentence Length", y = "count")
+
+ggsave("figs/hist_sl.png", plot = hist_sl, height = 3, width = 3)
+```
+
+```{r}
+# Sentence lengths by story
+corpus_df |>
+    filter(str_detect(word, "[.!?]")) |>
+    group_by(document_id) |>
+    mutate("sl" = number_word - lag(number_word)) |>
+    mutate("sl" = ifelse(is.na(sl), number_word, sl)) |>
+    filter(document_id < 10) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(aes(x = sl), fill = "darkseagreen", color = "black") +
+    facet_wrap(. ~ story_name, ncol = 4) +
+    theme_minimal() +
+    labs(x = "Sentence Length")
+
+ggsave("figs/hist_sl_story.png", height = 10, width = 15)
+```
+
+```{r}
+# Sentence lengths
+corpus_df |>
+    filter(str_detect(word, "[.!?]")) |>
+    group_by(document_id) |>
+    mutate("sl" = number_word - lag(number_word)) |>
+    mutate("sl" = ifelse(is.na(sl), number_word, sl)) |>
+    filter(document_id < 10) |>
+    group_by(type) |>
+    mutate("mean_sl" = round(mean(sl), 2)) |>
+    mutate("story_name" = str_to_title(story_name)) |>
+    ggplot() +
+    geom_histogram(
+        aes(x = wl, y = after_stat(density)),
+        fill = "aliceblue", color = "black",
+        binwidth = 1
+    ) +
+    geom_vline(aes(xintercept = mean(sl)), linetype = "dashed") +
+    geom_text(
+        aes(x = mean(sl), y = 0.24, label = paste("mean =", mean_sl)),
+        nudge_x = 2, fontface = 1, size = 2.8, angle = 270
+    ) +
+    facet_wrap(. ~ type, ncol = 5) +
+    theme_minimal() +
+    labs(x = "Sentence Length")
+
+ggsave("figs/hist_sl_type.png", height = 7, width = 10)
+```
+
+```{r}
+# joint histograms
+
+hist_wl + (hist_sl + labs(y = ""))
+ggsave("figs/hist_wl_sl.png", height = 3, width = 6)
+```
