@@ -722,6 +722,7 @@ topo_plot_diff <- function(df, reading_cond, content_words, timewindow) {
     return(p)
 }
 ```
+
 One topo plot for each condition
 ```{r}
 reading_cond <- "SPR"
@@ -780,7 +781,7 @@ ggsave(
 ```{r}
 reading_cond <- "SPR"
 content_words <- TRUE
-erp_component <- "p600" # only n400 and p600
+erp_component <- "n400" # only n400 and p600
 
 if (erp_component == "n400") {
     chs <- n400_chs
@@ -805,7 +806,9 @@ topo_p <- topo_plot_diff(
     timewindow = timewindow
 ) + labs(title = "B") + theme(legend.position = "right")
 
-erp_p + topo_p
+(erp_p + topo_p) +
+    # change alignment of caption if you change size of saved plot
+    theme(plot.caption = element_text(vjust = 15, hjust = 0.9))
 
 ggsave(
     file.path(
