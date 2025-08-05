@@ -131,7 +131,7 @@ for (dep_var in c("rt", "n400", "p600")) {
             paste(
                 dep_var, "_",
                 reading_cond, "_",
-                model_formula, ".rds",
+                "m1.rds",
                 sep = ""
             )
         ))
