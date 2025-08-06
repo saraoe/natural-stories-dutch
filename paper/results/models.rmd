@@ -4,6 +4,7 @@ library(tidytable)
 library(stringr)
 library(brms)
 library(ggplot2)
+library(patchwork)
 
 setwd("paper")
 
@@ -158,28 +159,64 @@ for (dep_var in c("rt", "n400", "p600")) {
 ```
 
 ```{r}
+plot_fixef <- function(df, scale) {
+    dodge <- position_dodge(width = 0.3)
+
+    p <- ggplot(df, aes(y = estimate_name, color = reading_condition)) +
+        geom_vline(aes(xintercept = 0), linetype = "dashed") +
+        geom_point(aes(x = Estimate), position = dodge) +
+        geom_linerange(aes(xmin = Q2.5, xmax = Q97.5),
+            position = dodge
+        ) +
+        scale_color_manual(values = c("steelblue4", "steelblue1")) +
+        labs(color = "", y = "", x = scale) +
+        theme_minimal() +
+        theme(legend.position = "bottom")
+
+    return(p)
+}
+```
+
+```{r}
 dodge <- position_dodge(width = 0.3)
 
-fixef_all |>
+fixef_plot <- fixef_all |>
     filter(estimate_name != "Intercept") |>
-    mutate(
-        "dependent_variable" = factor(
-            dependent_variable,
-            levels = c("rt", "n400", "p600")
-        )
-    ) |>
-    mutate("dependent_variable" = toupper(dependent_variable)) |>
-    ggplot(aes(y = estimate_name, color = reading_condition)) +
+    mutate(reading_condition = factor(
+        reading_condition,
+        levels = c("SPR", "RSVP")
+    ))
+
+n400_p <- fixef_plot |>
+    filter(dependent_variable == "n400") |>
+    plot_fixef(scale = "\u03BCV") +
+    labs(title = "N400")
+
+p600_p <- fixef_plot |>
+    filter(dependent_variable == "p600") |>
+    plot_fixef(scale = "\u03BCV") +
+    labs(title = "P600")
+
+rt_p <- fixef_plot |>
+    filter(dependent_variable == "rt") |>
+    ggplot(aes(y = estimate_name)) +
     geom_vline(aes(xintercept = 0), linetype = "dashed") +
     geom_point(aes(x = Estimate), position = dodge) +
     geom_linerange(aes(xmin = Q2.5, xmax = Q97.5),
         position = dodge
     ) +
-    scale_color_manual(values = c("steelblue1", "steelblue4")) +
-    facet_wrap(. ~ dependent_variable, scales = "free_x") +
-    labs(color = "", y = "") +
+    scale_color_manual(values = c("steelblue4")) +
+    labs(color = "", y = "", x = "ms") +
     theme_minimal() +
-    theme(legend.position = "bottom")
+    theme(legend.position = "bottom") +
+    labs(title = "Reading Times")
 
-ggsave("figs/regression_coefficients.pdf", height = 2.5, width = 5)
+(n400_p + p600_p + rt_p) +
+    plot_layout(guides = "collect", axes = "collect_y") &
+    theme(
+        legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, size = 10)
+    )
+
+ggsave("figs/regression_coefficients.pdf", height = 3, width = 6)
 ```
