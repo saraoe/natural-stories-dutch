@@ -160,7 +160,7 @@ for (dep_var in c("rt", "n400", "p600")) {
 
 ```{r}
 plot_fixef <- function(df, scale) {
-    dodge <- position_dodge(width = 0.3)
+    dodge <- position_dodge(width = -0.3)
 
     p <- ggplot(df, aes(y = estimate_name, color = reading_condition)) +
         geom_vline(aes(xintercept = 0), linetype = "dashed") +
@@ -178,8 +178,6 @@ plot_fixef <- function(df, scale) {
 ```
 
 ```{r}
-dodge <- position_dodge(width = 0.3)
-
 fixef_plot <- fixef_all |>
     filter(estimate_name != "Intercept") |>
     mutate(reading_condition = factor(
@@ -201,10 +199,8 @@ rt_p <- fixef_plot |>
     filter(dependent_variable == "rt") |>
     ggplot(aes(y = estimate_name)) +
     geom_vline(aes(xintercept = 0), linetype = "dashed") +
-    geom_point(aes(x = Estimate), position = dodge) +
-    geom_linerange(aes(xmin = Q2.5, xmax = Q97.5),
-        position = dodge
-    ) +
+    geom_point(aes(x = Estimate)) +
+    geom_linerange(aes(xmin = Q2.5, xmax = Q97.5)) +
     scale_color_manual(values = c("steelblue4")) +
     labs(color = "", y = "", x = "ms") +
     theme_minimal() +
@@ -219,68 +215,4 @@ rt_p <- fixef_plot |>
     )
 
 ggsave("figs/regression_coefficients.pdf", height = 3, width = 6)
-```
-
-```{r}
-get_ess <- function(model, ess_name) {
-    ess <- c()
-
-    ess <- c(ess, summary(model)$fixed[ess_name] |> pull(ess_name))
-    ess <- c(ess, summary(model)$spec_pars[ess_name] |> pull(ess_name))
-    ess <- c(ess, summary(model)$random$word[ess_name] |> pull(ess_name))
-    ess <- c(
-        ess,
-        summary(model)$random$participant_number[ess_name] |> pull(ess_name)
-    )
-
-    if (!is.null(summary(model)$random$document_id)) {
-        ess <- c(
-            ess,
-            summary(model)$random$document_id[ess_name] |> pull(ess_name)
-        )
-    }
-
-    return(ess)
-}
-```
-
-```{r}
-get_ess(model = m, ess_name = "Bulk_ESS")
-calc_avg_ess(model = m, ess_name = "Tail_ESS")
-```
-
-```{r}
-all_ess <- c()
-
-for (dep_var in c("rt", "n400", "p600")) {
-    for (reading_cond in c("RSVP", "SPR")) {
-        for (model_formula in c("m1", "m2")) {
-            print(paste(dep_var, reading_cond, model_formula))
-            if (dep_var == "rt" && reading_cond == "RSVP") {
-                next
-            }
-            if (dep_var == "rt" && model_formula == "m2") {
-                next
-            }
-
-            m <- readRDS(file.path(
-                models_path,
-                paste(
-                    dep_var, "_",
-                    reading_cond, "_",
-                    model_formula, ".rds",
-                    sep = ""
-                )
-            ))
-
-            m_ess <- get_ess(model = m, ess_name = "Bulk_ESS")
-            m_ess <- c(m_ess, get_ess(model = m, ess_name = "Tail_ESS"))
-            print(paste("avg ESS for model =", mean(m_ess)))
-
-            all_ess <- c(all_ess, m_ess)
-        }
-    }
-}
-
-print(mean(all_ess))
 ```
