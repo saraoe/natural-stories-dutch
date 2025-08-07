@@ -220,3 +220,67 @@ rt_p <- fixef_plot |>
 
 ggsave("figs/regression_coefficients.pdf", height = 3, width = 6)
 ```
+
+```{r}
+get_ess <- function(model, ess_name) {
+    ess <- c()
+
+    ess <- c(ess, summary(model)$fixed[ess_name] |> pull(ess_name))
+    ess <- c(ess, summary(model)$spec_pars[ess_name] |> pull(ess_name))
+    ess <- c(ess, summary(model)$random$word[ess_name] |> pull(ess_name))
+    ess <- c(
+        ess,
+        summary(model)$random$participant_number[ess_name] |> pull(ess_name)
+    )
+
+    if (!is.null(summary(model)$random$document_id)) {
+        ess <- c(
+            ess,
+            summary(model)$random$document_id[ess_name] |> pull(ess_name)
+        )
+    }
+
+    return(ess)
+}
+```
+
+```{r}
+get_ess(model = m, ess_name = "Bulk_ESS")
+calc_avg_ess(model = m, ess_name = "Tail_ESS")
+```
+
+```{r}
+all_ess <- c()
+
+for (dep_var in c("rt", "n400", "p600")) {
+    for (reading_cond in c("RSVP", "SPR")) {
+        for (model_formula in c("m1", "m2")) {
+            print(paste(dep_var, reading_cond, model_formula))
+            if (dep_var == "rt" && reading_cond == "RSVP") {
+                next
+            }
+            if (dep_var == "rt" && model_formula == "m2") {
+                next
+            }
+
+            m <- readRDS(file.path(
+                models_path,
+                paste(
+                    dep_var, "_",
+                    reading_cond, "_",
+                    model_formula, ".rds",
+                    sep = ""
+                )
+            ))
+
+            m_ess <- get_ess(model = m, ess_name = "Bulk_ESS")
+            m_ess <- c(m_ess, get_ess(model = m, ess_name = "Tail_ESS"))
+            print(paste("avg ESS for model =", mean(m_ess)))
+
+            all_ess <- c(all_ess, m_ess)
+        }
+    }
+}
+
+print(mean(all_ess))
+```
