@@ -2,7 +2,10 @@
 ```{r}
 library(ggplot2)
 library(eeguana)
-library(gtable)
+library(tidytable)
+library(akima)
+library(tibble)
+library(patchwork)
 
 setwd("paper")
 
@@ -18,6 +21,21 @@ erp_df <- read.csv("data/erp_lp.csv") |>
             levels = c("low_lp", "med_lp", "high_lp")
         )
     )
+```
+
+```{r}
+n400_chs <- c(
+    "Cz", "Pz", "C4", "CP6", "P4", "P3",
+    "CP5", "C3", "P8", "PO3", "PO4", "P7"
+)
+p600_chs <- c(
+    "Cz", "CP2", "Pz", "CP1", "C4", "CP6",
+    "P4", "P3", "CP5", "C3", "T8", "TP8",
+    "P8", "PO3", "PO4", "P7", "TP7", "T7"
+)
+
+n400_timewindow <- c(.3, .5)
+p600_timewindow <- c(.5, .7)
 ```
 
 ## plotting functions
@@ -67,8 +85,8 @@ erp_mean_plot <- function(
         ) +
         geom_vline(xintercept = 0, linetype = "dashed") +
         eeguana::theme_eeguana() +
-        theme(legend.position = "bottom") +
-        labs(y = "", x = "time (ms)", color = "Quantile Log-probability") +
+        # theme(legend.position = "bottom") +
+        labs(y = "\u03BCV", x = "time (ms)", color = "Quantile \nLog-probability") +
         scale_color_manual(values = c("steelblue1", "steelblue3", "steelblue4"))
 
     if (!isFALSE(annotate_timewindow)) {
@@ -128,7 +146,7 @@ erp_facet_plot <- function(
         eeguana::theme_eeguana() +
         facet_wrap(. ~ .key) +
         theme(legend.position = "bottom") +
-        labs(y = "", x = "time (ms)", color = "Quantile Log-probability") +
+        labs(y = "\u03BCV", x = "time (ms)", color = "Quantile Log-probability") +
         scale_color_manual(values = c("steelblue1", "steelblue3", "steelblue4"))
 
     if (!isFALSE(annotate_timewindow)) {
@@ -156,21 +174,6 @@ erp_mean_plot(
 
 ERPs averaged over channels used for calculating mean amplitudes of components (n400 and p600)
 ```{r}
-n400_chs <- c(
-    "Cz", "Pz", "C4", "CP6", "P4", "P3",
-    "CP5", "C3", "P8", "PO3", "PO4", "P7"
-)
-p600_chs <- c(
-    "Cz", "CP2", "Pz", "CP1", "C4", "CP6",
-    "P4", "P3", "CP5", "C3", "T8", "TP8",
-    "P8", "PO3", "PO4", "P7", "TP7", "T7"
-)
-
-n400_timewindow <- c(.3, .5)
-p600_timewindow <- c(.5, .7)
-```
-
-```{r}
 reading_cond <- "SPR"
 erp_component <- "n400"
 only_content_words <- TRUE
@@ -195,11 +198,11 @@ ggsave(
     file.path(
         figs_path,
         paste(reading_cond, "_", erp_component, "_contentwords",
-            only_content_words, ".png",
+            only_content_words, ".pdf",
             sep = ""
         )
     ),
-    width = 7, height = 5
+    width = 5, height = 2
 )
 ```
 
@@ -442,5 +445,378 @@ ggsave(
         )
     ),
     width = 10, height = 12
+)
+```
+
+## Topographic plot
+```{r}
+epoch_file <- list.files(
+    "data/epochs/",
+    full.names = TRUE,
+    pattern = ".rds$"
+)[1]
+
+epochs <- readRDS(epoch_file)
+```
+```{r}
+reading_cond <- "SPR"
+
+# add cordinates to channels tbl
+channels_tbl(epochs) <- channels_tbl(epochs) |>
+    left_join(layout_32_1020)
+
+# only choice channels with layout coordinates
+layout_channels <- layout_32_1020 |>
+    filter(!(.channel %in% c("M1", "M2", "HEOG", "VEOG"))) |>
+    pull(.channel)
+
+epochs |>
+    eeg_filter(!is.na(lp_quantile)) |>
+    eeg_select(layout_channels) |>
+    eeg_filter(reading_type == reading_cond) |>
+    eeg_filter(as_time(.sample) |> between(0.3, 0.5)) |>
+    eeg_group_by(lp_quantile) |>
+    eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
+    eeg_mutate(
+        "lp_quantile" = case_when(
+            lp_quantile == "low_lp" ~ "<25%",
+            lp_quantile == "med_lp" ~ "25%-75%",
+            lp_quantile == "high_lp" ~ ">75%",
+        )
+    ) |>
+    plot_topo() +
+    # add a head and nose shape
+    annotate_head() +
+    # add electrode labels
+    annotate_electrodes(color = "black") +
+    facet_grid(~ as.factor(lp_quantile, levels = c("<25%", "25%-75%", ">75%")))
+```
+
+```{r}
+epochs |>
+    eeg_filter(!is.na(lp_quantile)) |>
+    eeg_select(layout_channels) |>
+    eeg_filter(reading_type == reading_cond) |>
+    eeg_filter(as_time(.sample) |> between(0.3, 0.5)) |>
+    eeg_group_by(lp_quantile) |>
+    eeg_summarize(across_ch(mean, na.rm = TRUE)) |>
+    # eeg_interpolate_tbl() |>
+    plot_topo() +
+    # add a head and nose shape
+    annotate_head() +
+    # add electrode labels
+    annotate_electrodes(color = "black") +
+    facet_grid(~ as.factor(lp_quantile))
+```
+
+```{r}
+plot_topo_erp <- function(data) {
+    plot <-
+        ggplot2::ggplot(data, ggplot2::aes(
+            x = .x, y = .y,
+            z = .key
+        )) +
+        geom_tile(aes(fill = .value)) +
+        ggplot2::geom_raster(ggplot2::aes(fill = .value),
+            interpolate = TRUE, hjust = 0.5, vjust = 0.5
+        ) +
+        # Non recommended "rainbow" Matlab palette from https://www.mattcraddock.com/blog/2017/02/25/erp-visualization-creating-topographical-scalp-maps-part-1/
+        #    scale_fill_gradientn(colors = colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000")),guide = "colourbar",oob = scales::squish)+
+        # Not that bad scale:
+        #    scale_fill_distiller(palette = "Spectral", guide = "colorbar", oob = scales::squish) + #
+        ggplot2::scale_fill_distiller(type = "div", palette = "RdBu", guide = "colorbar", oob = scales::squish) +
+        theme_eeguana2()
+    plot
+}
+```
+
+```{r}
+reading_cond <- "SPR"
+
+erp_df |>
+    filter(reading_type == reading_cond) |>
+    left_join(layout_32_1020 |> rename(".key" = .channel)) |>
+    filter(!is.na(.x)) |>
+    mutate(
+        "lp_quantile" = case_when(
+            lp_quantile == "low_lp" ~ "<25%",
+            lp_quantile == "med_lp" ~ "25%-75%",
+            lp_quantile == "high_lp" ~ ">75%",
+        )
+    ) |>
+    plot_topo_erp() +
+    annotate_head() +
+    # add electrode labels
+    annotate_electrodes(color = "black") +
+    facet_grid(~ factor(lp_quantile, levels = c("<25%", "25%-75%", ">75%"))) +
+    theme(legend.position = "bottom")
+
+ggsave(
+    file.path(
+        figs_path, paste("plot_topo_", reading_cond, ".png",
+            sep = ""
+        )
+    ),
+    width = 10, height = 7
+)
+```
+
+### code with interpolation from chatgpt
+Define functions
+```{r}
+topo_plot_quantiles <- function(df, reading_cond, content_words, timewindow) {
+    # Join layout info
+    plot_data <- df |>
+        filter(reading_type == reading_cond) |>
+        left_join(layout_32_1020 |>
+            rename(".key" = .channel)) |>
+        filter(!is.na(.x)) |>
+        filter(.time |>
+            between(timewindow[1], timewindow[2])) |>
+        mutate(
+            "lp_quantile" = case_when(
+                lp_quantile == "low_lp" ~ "<25%",
+                lp_quantile == "med_lp" ~ "25%-75%",
+                lp_quantile == "high_lp" ~ ">75%",
+            )
+        )
+
+    # specify content words true or false
+    if (content_words) {
+        plot_data <- plot_data |>
+            mutate(".value" = .value_content_words)
+    }
+
+    # Group-wise interpolation
+    interp_per_group <- plot_data |>
+        group_split(lp_quantile) |>
+        map_df(function(df) {
+            group_name <- unique(df$lp_quantile)
+
+            # Compute group mean per electrode
+            mean_vals <- df |>
+                group_by(.key, .x, .y) |>
+                summarise(.value = mean(.value), .groups = "drop")
+
+            # Perform interpolation
+            interp <- akima::interp(
+                x = mean_vals$.x,
+                y = mean_vals$.y,
+                z = mean_vals$.value,
+                duplicate = "mean",
+                nx = 100,
+                ny = 100
+            )
+
+            # Make raster tibble
+            raster_tbl <- expand.grid(.x = interp$x, .y = interp$y) |>
+                mutate(
+                    .value = as.vector(interp$z),
+                    lp_quantile = group_name
+                )
+
+            # Label data for this group
+            label_tbl <- mean_vals |>
+                mutate(lp_quantile = group_name)
+
+            # Combine both
+            bind_rows(raster_tbl, label_tbl)
+        })
+
+    # Plot
+    p <- plot_topo(as_tibble(interp_per_group)) +
+        annotate_head() +
+        annotate_electrodes(color = "black") +
+        facet_grid(~ factor(lp_quantile, levels = c("<25%", "25%-75%", ">75%"))) +
+        scale_fill_distiller(
+            type = "div",
+            palette = "RdBu",
+            guide = "colorbar",
+            oob = scales::squish,
+            na.value = "white"
+        ) +
+        coord_fixed() +
+        labs(fill = "\u03BCV") +
+        theme(
+            panel.background = element_rect(fill = "white", color = NA),
+            plot.background = element_rect(fill = "white", color = NA),
+            legend.position = "bottom"
+        )
+
+    return(p)
+}
+
+topo_plot_diff <- function(df, reading_cond, content_words, timewindow) {
+    if (content_words) {
+        value_col <- ".value_content_words"
+        other_value_col <- ".value"
+    } else {
+        value_col <- ".value"
+        other_value_col <- ".value_content_words"
+    }
+
+
+    # Your summarized data
+    base_data <- df |>
+        select(-X, -n_subjects, -other_value_col) |>
+        filter(reading_type == reading_cond) |>
+        left_join(layout_32_1020 |>
+            rename(".key" = .channel)) |>
+        filter(!is.na(.x)) |>
+        filter(.time |>
+            between(timewindow[1], timewindow[2])) |>
+        pivot_wider(names_from = "lp_quantile", values_from = value_col) |>
+        mutate(.value = low_lp - high_lp) |> # difference between high and low probability words
+        group_by(.key, .x, .y) |>
+        summarise(.value = mean(.value), .groups = "drop")
+
+    # Interpolate to a fine grid
+    interp_result <- akima::interp(
+        x = base_data$.x,
+        y = base_data$.y,
+        z = base_data$.value,
+        duplicate = "mean",
+        nx = 100,
+        ny = 100
+    )
+
+    # Convert interpolation result to a tibble
+    interp_df <- expand.grid(
+        .x = interp_result$x,
+        .y = interp_result$y
+    ) |>
+        mutate(.value = as.vector(interp_result$z))
+
+    # Prepare label data
+    label_data <- base_data
+
+    # Combine with NA-labeled version for compatibility with plot_topo
+    plot_data_ready <- bind_rows(
+        interp_df |> mutate(.key = NA),
+        label_data
+    )
+
+    # Plot
+    p <- plot_topo(as_tibble(plot_data_ready)) +
+        annotate_head() +
+        annotate_electrodes(color = "black") +
+        scale_fill_distiller(
+            type = "div",
+            palette = "RdBu",
+            guide = "colorbar",
+            oob = scales::squish,
+            na.value = "white"
+        ) +
+        coord_fixed() +
+        labs(fill = "\u03BCV", caption = "Difference (< 25%) - (> 75%)") +
+        theme(
+            panel.background = element_rect(fill = "white", color = NA),
+            plot.background = element_rect(fill = "white", color = NA),
+            legend.position = "bottom"
+        ) +
+        theme(
+            legend.position = "bottom",
+            plot.caption = element_text(hjust = 0.5) # centers the caption
+        )
+
+    return(p)
+}
+```
+
+One topo plot for each condition
+```{r}
+reading_cond <- "SPR"
+content_words <- FALSE
+erp_component <- "n400"
+
+if (erp_component == "n400") {
+    timewindow <- n400_timewindow
+} else if (erp_component == "p600") {
+    timewindow <- p600_timewindow
+} else {
+    timewindow <- c(min(erp_df$.time), max(erp_df$.time))
+}
+
+topo_plot_quantiles(erp_df, reading_cond, content_words, timewindow)
+
+ggsave(
+    file.path(
+        figs_path, paste("plot_topo_", reading_cond, "_",
+            erp_component, "_contentwords", content_words, ".png",
+            sep = ""
+        )
+    ),
+    width = 10, height = 7
+)
+```
+
+topo plot of difference between conditions
+```{r}
+reading_cond <- "SPR"
+content_words <- FALSE
+erp_component <- "p600"
+
+if (erp_component == "n400") {
+    timewindow <- n400_timewindow
+} else if (erp_component == "p600") {
+    timewindow <- p600_timewindow
+} else {
+    timewindow <- c(min(erp_df$.time), max(erp_df$.time))
+}
+
+topo_plot_diff(erp_df, reading_cond, content_words, timewindow)
+
+ggsave(
+    file.path(
+        figs_path, paste("plot_topo_diff_", reading_cond, "_",
+            erp_component, "_contentwords", content_words, ".png",
+            sep = ""
+        )
+    ),
+    width = 5, height = 5
+)
+```
+
+### Plot topo and ERP together
+```{r}
+reading_cond <- "SPR"
+content_words <- TRUE
+erp_component <- "n400" # only n400 and p600
+
+if (erp_component == "n400") {
+    chs <- n400_chs
+    timewindow <- n400_timewindow
+} else if (erp_component == "p600") {
+    chs <- p600_chs
+    timewindow <- p600_timewindow
+}
+
+erp_p <- erp_mean_plot(
+    df = erp_df,
+    reading_cond = reading_cond,
+    channels = chs,
+    content_words = content_words,
+    annotate_timewindow = timewindow
+) + labs(title = "A") + theme(legend.position = "bottom")
+
+topo_p <- topo_plot_diff(
+    df = erp_df,
+    reading_cond = reading_cond,
+    content_words = content_words,
+    timewindow = timewindow
+) + labs(title = "B") + theme(legend.position = "right")
+
+(erp_p + topo_p) +
+    # change alignment of caption if you change size of saved plot
+    theme(plot.caption = element_text(vjust = 15, hjust = 0.9))
+
+ggsave(
+    file.path(
+        figs_path, paste("erp_topo_", reading_cond, "_",
+            erp_component, "_contentwords", content_words, ".pdf",
+            sep = ""
+        )
+    ),
+    width = 7, height = 4
 )
 ```
