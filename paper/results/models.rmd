@@ -4,13 +4,12 @@ library(tidytable)
 library(stringr)
 library(brms)
 library(ggplot2)
+library(patchwork)
 
 setwd("paper")
 
 models_path <- file.path("src", "brms_models")
-models_path <- file.path("src", "brms_models", "rt")
 fig_path <- "figs"
-fig_path <- file.path("figs", "model_results_server")
 ```
 
 ## read models
@@ -21,7 +20,7 @@ Model formula 2 (m2): dep_var ~ -1 + content_word + content_word:s_lp + content_
 Model formula 3 (m3): dep_var ~ s_lp + s_wl + s_freq
 ```{r}
 # dependent variable (rt, n400, or p600)
-dep_var <- "rt"
+dep_var <- "p600"
 # SPR or RSVP (for rt only SPR)
 reading_cond <- "SPR"
 # model formula (m1, m2, or m3)
@@ -38,9 +37,6 @@ m <- readRDS(file.path(
 pp_check(m)
 
 p <- plot(m, variable = "^b", regex = TRUE)
-ggsave(
-    file.path(fig_path, paste(model_formula, "_chains.png", sep = ""))
-)
 ```
 
 ## Prior-poserior update
@@ -117,4 +113,106 @@ draws |>
 summary(m)
 
 mcmc_plot(m, variable = "^b", regex = TRUE)
+```
+
+# plot of fixed effects
+```{r}
+if (exists("fixef_all")) {
+    rm(fixef_all)
+}
+
+for (dep_var in c("rt", "n400", "p600")) {
+    for (reading_cond in c("RSVP", "SPR")) {
+        if (dep_var == "rt" && reading_cond == "RSVP") {
+            next
+        }
+
+        m <- readRDS(file.path(
+            models_path,
+            paste(
+                dep_var, "_",
+                reading_cond, "_",
+                "m1.rds",
+                sep = ""
+            )
+        ))
+
+        fixef_m <- fixef(m) |>
+            as.data.frame() |>
+            mutate(
+                "estimate_name" = c(
+                    "Intercept",
+                    "Log-\nprobability",
+                    "Zipf \nfrequency"
+                ),
+                "dependent_variable" = dep_var,
+                "reading_condition" = reading_cond
+            )
+
+        if (exists("fixef_all")) {
+            fixef_all <- rbind(fixef_all, fixef_m)
+        } else {
+            fixef_all <- fixef_m
+        }
+    }
+}
+```
+
+```{r}
+plot_fixef <- function(df, scale) {
+    dodge <- position_dodge(width = -0.3)
+
+    p <- ggplot(df, aes(y = estimate_name, color = reading_condition)) +
+        geom_vline(aes(xintercept = 0), linetype = "dashed") +
+        geom_point(aes(x = Estimate), position = dodge) +
+        geom_linerange(aes(xmin = Q2.5, xmax = Q97.5),
+            position = dodge
+        ) +
+        scale_color_manual(values = c("steelblue4", "steelblue1")) +
+        labs(color = "", y = "", x = scale) +
+        theme_minimal() +
+        theme(legend.position = "bottom")
+
+    return(p)
+}
+```
+
+```{r}
+fixef_plot <- fixef_all |>
+    filter(estimate_name != "Intercept") |>
+    mutate(reading_condition = factor(
+        reading_condition,
+        levels = c("SPR", "RSVP")
+    ))
+
+n400_p <- fixef_plot |>
+    filter(dependent_variable == "n400") |>
+    plot_fixef(scale = "\u03BCV") +
+    labs(title = "N400")
+
+p600_p <- fixef_plot |>
+    filter(dependent_variable == "p600") |>
+    plot_fixef(scale = "\u03BCV") +
+    labs(title = "P600")
+
+rt_p <- fixef_plot |>
+    filter(dependent_variable == "rt") |>
+    ggplot(aes(y = estimate_name)) +
+    geom_vline(aes(xintercept = 0), linetype = "dashed") +
+    geom_point(aes(x = Estimate)) +
+    geom_linerange(aes(xmin = Q2.5, xmax = Q97.5)) +
+    scale_color_manual(values = c("steelblue4")) +
+    labs(color = "", y = "", x = "ms") +
+    theme_minimal() +
+    theme(legend.position = "bottom") +
+    labs(title = "Reading Times")
+
+(n400_p + p600_p + rt_p) +
+    plot_layout(guides = "collect", axes = "collect_y") &
+    theme(
+        legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, size = 10)
+    )
+
+ggsave("figs/regression_coefficients.pdf", height = 3, width = 6)
 ```

@@ -1,6 +1,0 @@
-gdown --fuzzy https://docs.google.com/spreadsheets/d/1_kV9RKfu1NKk9zzSQT04u9dqv-IuYkCFbzIRyISOvZc/edit#gid=0 -O data/stories_index.xlsx
-gdown https://drive.google.com/drive/folders/1_uHPJPGMHjBsRy_tqaYbv2iaI024s3UQ?usp=sharing --folder --remaining-ok -O stories/
-gdown https://docs.google.com/spreadsheets/d/1p7MeUDS-LFUWqHRp_LeGLJjSoLaYnfLK-3PA7rEHNco/edit?usp=sharing -O experiment/questions.xlsx
-
-python src/docx_to_txt.py --docx_path stories/ --txt_path texts/
-python src/get_descriptives.py

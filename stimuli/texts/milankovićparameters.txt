@@ -1,0 +1,110 @@
+Milanković-parameters
+
+De Milanković-parameters, ook: Milankovitch-parameters, zijn
+astronomische grootheden die cyclische variaties veroorzaken. Zij zijn
+van invloed op de klimaatveranderingen op de aarde, gezien over de
+perioden van duizenden jaren, op het ritme waarmee ijstijden en
+interglacialen elkaar afwisselen. Dat komt omdat zij de intensiteit en
+de verdeling van het zonlicht op de aarde bepalen.
+
+Ze zijn mede door de Servische wiskundige Milutin Milanković opgesteld.
+Het zijn de excentriciteit, obliquiteit en precessie, dus parameters van
+de baan en de oriëntatie van vooral planeten. De eerste wetenschappelijk
+publicatie hierover was in 1976.
+
+De invloed van de maat van deze parameters op de temperatuur op aarde is
+het gevolg van het feit dat de landmassa’s niet gelijkmatig over de
+aarde verdeeld liggen. Variaties in het klimaat kunnen met behulp van
+bijvoorbeeld sequentiestratigrafie over lange tijd in het verleden
+worden onderzocht.
+
+Cycli
+
+De cycli bepalen de intensiteit en de verdeling van de instraling van
+het zonlicht op aarde en zijn daarmee over langere perioden gezien in
+belangrijke mate verantwoordelijk voor de variaties in het klimaat en
+klimaatverandering. Het begin van de ijstijden tijdens het huidige
+Pleistoceen hangt samen met de instraling van de zon.
+
+Het duurde tot 1976 voordat zijn in theorie aanvaarde cycli door middel
+van stratigrafisch en paleomagnetisch onderzoek werden ondersteund. Een
+studie van Hays, Imbrie en Shackleton naar boorkernen in
+diepzeesedimenten toonde het gelijk van Milanković aan.^([1])
+
+De waarde van de theorie van Milanković werd in 2007 nog eens door
+onderzoek aan ijskernen van Antarctica bevestigd. De in de ijskernen
+aanwezige luchtbelletjes werden onderzocht op de aanwezigheid van
+zuurstof en stikstof. De waardes daarvan worden direct bepaald door de
+grootte van de instraling ter plaatse.
+
+De parameters
+
+De drie Milanković-parameters zijn:
+
+  - excentriciteit: Variaties in de excentriciteit van de aardbaan
+  hebben een periodiciteit van 100.000 jaar
+
+  - obliquiteit: De verandering van de hoek van de aardas ten opzichte
+  van het vlak waarin de aarde om de zon draait, van de obliquiteit,
+  heeft een periodiciteit van 41.000 jaar
+
+  - precessie: De precessie van de aardas heeft een periodiciteit van
+  26.000 jaar.
+
+Excentriciteit
+
+De baan van de aarde rond de zon is een ellips. De excentriciteit is de
+mate waarin deze ellips afwijkt van een cirkel. Deze excentriciteit
+varieert in de tijd van bijna cirkel (excentriciteit van 0,005) tot
+licht elliptisch (excentriciteit 0,028). De huidige excentriciteit
+bedraagt 0,017. De periodiciteit van de excentriciteit kent 2 schalen:
+een van 413.000 jaar en een tweede van grofweg 100.000 jaar.
+
+Deze variaties in excentriciteit ontstaan door de invloed van de
+zwaartekracht van de planeten Saturnus en Jupiter. Momenteel is het
+verschil in afstand tussen het punt van de aardbaan dat het dichtst bij
+de zon ligt, het perihelium, en het punt dat het verst van de zon
+verwijderd ligt, het aphelium, 5,1 miljoen kilometer, resulterend in een
+verschil van inkomende zonnestraling van 6,8%. Als de baan zijn maximale
+excentriciteit heeft bereikt bedraagt dit verschil zelfs bijna 23%.
+
+Obliquiteit
+
+De hoek die de aardas maakt met de loodlijn op het vlak waarin de aarde
+rond de zon draait varieert van 22,1° tot 24,5°, met een periodiciteit
+van 41.000 jaar. Bij een grotere hoek nemen de verschillen tussen de
+seizoenen voor wat betreft de instraling van de zon toe. Zowel op het
+noordelijk als het zuidelijk halfrond worden de zomers dan warmer en de
+winters kouder. Momenteel neemt de obliquiteit af en is 23,44°, waarmee
+we ons grofweg halverwege de beweging bevinden.
+
+Deze verschillen tussen zomer en winter zijn niet overal even groot. Bij
+toenemende obliquiteit neemt de gemiddelde jaarlijkse instraling op
+hogere breedte toe, terwijl op lagere breedte de instraling afneemt. Op
+hogere breedte veroorzaakt een lage obliquiteit derhalve zowel een
+lagere gemiddelde instraling op deze breedte als de afname van
+instraling in het zomerseizoen. Koele zomers kunnen dan het begin van
+een ijstijd starten doordat minder sneeuw smelt en de albedo in sommige
+gebieden sterk verandert.
+
+Precessie
+
+Precessie is de tolbeweging van de aardas en heeft een periodiciteit van
+ongeveer 26.000 jaar. Precessie is het gevolg van de getijdenkrachten
+die zowel de zon als de maan op de aarde uitoefenen, versterkt door het
+feit dat de aarde niet perfect rond is.
+
+Als de aardas gedurende het perihelium naar de zon wijst zal het ene
+polaire halfrond grotere seizoensverschillen kennen, terwijl het andere
+halfrond kleinere verschillen kent. Momenteel kent het zuidelijk
+halfrond wat grotere verschillen tussen zomer- en wintertemperatuur als
+gevolg van de precessie dan het noordelijk halfrond.
+
+Nutatie
+
+De nutatie is de beweging van de omwentelingsas van een hemellichaam,
+die optreedt als het massamiddelpunt van het hemellichaam niet op die
+omwentelingsas ligt. De schommeling van de aardas, die hierdoor het
+langste duurt, heeft een periode van 18,6 jaar. De nutatie is geen
+astronomische grootheid, maar alleen een afwijking in de vorm of
+samenstelling van een hemellichaam.
