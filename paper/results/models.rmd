@@ -216,3 +216,15 @@ rt_p <- fixef_plot |>
 
 ggsave("figs/regression_coefficients.pdf", height = 3, width = 6)
 ```
+
+```{r}
+# for AMLaP poster
+(n400_p + rt_p) +
+    plot_layout(guides = "collect", axes = "collect_y") &
+    theme(
+        legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, size = 10)
+    )
+
+ggsave("figs/regression_coefficients_amlap.png", height = 2.7, width = 4)
+```

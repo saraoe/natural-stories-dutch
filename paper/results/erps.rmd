@@ -820,3 +820,55 @@ ggsave(
     width = 7, height = 4
 )
 ```
+
+```{r}
+# for AMLaP poster
+reading_cond <- "SPR"
+content_words <- TRUE
+erp_component <- "n400" # only n400 and p600
+
+if (erp_component == "n400") {
+    chs <- n400_chs
+    timewindow <- n400_timewindow
+} else if (erp_component == "p600") {
+    chs <- p600_chs
+    timewindow <- p600_timewindow
+}
+
+erp_p <- erp_mean_plot(
+    df = erp_df,
+    reading_cond = "SPR",
+    channels = n400_chs,
+    content_words = TRUE,
+    annotate_timewindow = n400_timewindow
+) + theme(legend.position = "bottom") +
+    labs(
+        subtitle =
+            "ERPs for content words with a log-probability in different
+quantiles averaged for centroparietal channels"
+    )
+
+topo_p <- topo_plot_diff(
+    df = erp_df,
+    reading_cond = "SPR",
+    content_words = TRUE,
+    timewindow = n400_timewindow
+) + theme(legend.position = "right") +
+    labs(
+        subtitle = "Subtraction plot of the ERPs in the
+time window between 300-500 ms"
+    )
+
+(erp_p + topo_p) +
+    # change alignment of caption if you change size of saved plot
+    theme(plot.caption = element_text(vjust = 15, hjust = 0.9))
+
+ggsave(
+    file.path(
+        figs_path, paste("erp_topo_amlap.png",
+            sep = ""
+        )
+    ),
+    width = 8, height = 4
+)
+```
