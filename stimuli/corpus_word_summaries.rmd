@@ -165,12 +165,12 @@ hist_sl <- corpus_df |>
     mutate("mean_sl" = round(mean(sl), 2)) |>
     ggplot() +
     geom_histogram(aes(x = sl),
-        binwidth = 1,
+        binwidth = 2,
         fill = "lightblue", color = "black"
     ) +
     geom_vline(aes(xintercept = mean(sl)), linetype = "dashed") +
     geom_text(
-        aes(x = mean(sl), y = 16, label = paste("mean = ", mean_sl)),
+        aes(x = mean(sl), y = 30, label = paste("mean = ", mean_sl)),
         nudge_x = 17, fontface = 1, size = 4
     ) +
     theme_minimal() +
@@ -229,6 +229,6 @@ ggsave("figs/hist_sl_type.pdf", height = 7, width = 10)
 ```{r}
 # joint histograms
 
-hist_wl + (hist_sl + labs(y = ""))
-ggsave("figs/hist_wl_sl.pdf", height = 3, width = 6)
+hist_wl / hist_sl
+ggsave("figs/hist_wl_sl.pdf", height = 4, width = 3)
 ```

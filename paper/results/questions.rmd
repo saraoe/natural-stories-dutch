@@ -95,9 +95,12 @@ responses_df |>
     ) +
     theme_minimal() +
     scale_fill_manual(
+        # values = c(
+        #     "#d8f3fc", "lightblue1", "lightblue2",
+        #     "lightblue3", "lightblue4"
+        # )
         values = c(
-            "#d8f3fc", "lightblue1", "lightblue2",
-            "lightblue3", "lightblue4"
+            "grey90", "grey80", "grey60", "grey40", "grey20"
         )
     ) +
     geom_text(aes(label = count),
@@ -112,7 +115,10 @@ responses_df |>
     ) +
     theme(legend.position = "bottom")
 
-ggsave(paste(fig_path, "familiarity_prop.pdf", sep = ""), height = 3, width = 7)
+ggsave(paste(fig_path, "familiarity_prop.pdf", sep = ""),
+    height = 2.5,
+    width = 8
+)
 ```
 
 ## Comprehenion
@@ -248,7 +254,7 @@ responses_df |>
         ),
         width = .5
     ) +
-    facet_wrap(. ~ doc_id, ncol = 4) +
+    facet_wrap(. ~ doc_id, ncol = 2) +
     theme_minimal() +
     scale_fill_manual(values = c("lightblue2", "lightblue3", "lightblue4")) +
     theme(legend.position = "bottom") +
@@ -260,7 +266,7 @@ responses_df |>
 
 ggsave(
     paste(fig_path, "comprehension_responses.pdf", sep = ""),
-    height = 4, width = 7
+    height = 5, width = 3
 )
 ```
 
