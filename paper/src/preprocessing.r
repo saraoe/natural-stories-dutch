@@ -268,6 +268,7 @@ for (eeg_file in eeg_files) {
                     .window = 200,
                     .unit = "ms"
                 ) |>
+                eeg_unsegment() |>
                 eeg_segment(
                     .description %in% c(101, 102),
                     .lim = c(-0.2, 1.2)
