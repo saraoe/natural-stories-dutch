@@ -1,0 +1,107 @@
+# Data loss from EEG rejection
+Data is removed from EEG data analysis for five reasons:
+    1) errors in data collection (3 participants),
+    2) manually annotated bad channels or trials,
+    3) automatically detected artifacts,
+    4) entire texts with number of artifacts reaching threshold of .3,
+    5) trials where the reading times was not within thresholds of 100-3,000 ms.
+
+```{r}
+library(tidytable)
+```
+
+## Summary of participants reaching the artifact reject threshold
+```{r}
+artifact_threshold <- .3
+rt_threshold <- c(100, 3000)
+
+# load EEG components
+mean_amplitude_df <- read.csv(file.path("data", "mean_amplitude.csv")) |>
+    mutate(
+        lp_quantile = factor(lp_quantile,
+            levels = c("low_lp", "med_lp", "high_lp")
+        ),
+        zero_freq = as.logical(zero_freq)
+    ) |>
+    filter(document_id < 10) |> # filter out practice texts
+    group_by(participant_number, document_id) |>
+    mutate(
+        "rejected_epochs" = (sum(is.na(n400)) / n())
+    ) |>
+    ungroup()
+```
+
+```{r}
+# participants for which all texts were removed
+completely_removed <- mean_amplitude_df |>
+    filter(!participant_number == 64) |> # already excluded
+    group_by(participant_number) |>
+    mutate("n_docs" = length(unique(document_id))) |>
+    filter(rejected_epochs >= artifact_threshold) |>
+    filter(length(unique(document_id)) == n_docs) |>
+    pull(participant_number) |>
+    unique()
+
+completely_removed
+```
+
+## EEG data loss for each text (only for the 56 remaning participants)
+```{r}
+mean_amplitude_df |>
+    filter(!participant_number == 64) |> # already excluded
+    filter(!participant_number %in% completely_removed) |>
+    group_by(participant_number, document_id) |>
+    mutate("rejected" = case_when(
+        is.na(n400) ~ TRUE,
+        rejected_epochs >= artifact_threshold ~ TRUE,
+        .default = FALSE
+    )) |>
+    ungroup() |>
+    group_by(document_id) |>
+    summarize(
+        "percent_rejected" = sum(rejected) / n(),
+        "n_participants" = length(unique(participant_number))
+    )
+```
+
+## Overall data loss from EEG rejection
+```{r}
+corpus_df <- read.csv(file.path("..", "stimuli", "data", "words_corpus.csv"))
+
+analysis_df <- mean_amplitude_df |>
+    # filter word where participant 17 was stopped
+    filter(!(participant_number == 17 &
+        document_id == 1 &
+        number_word == 154)) |>
+    filter(participant_number != 64) |> # exclude participant 64
+    # reject based on artifact threshold
+    group_by(participant_number, document_id) |>
+    mutate(
+        "rejected_epochs" = (sum(is.na(n400)) / n())
+    ) |>
+    filter(rejected_epochs < artifact_threshold) |>
+    # filter based on reject rt
+    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    filter(rt > rt_threshold[1] & rt < rt_threshold[2]) |>
+    ungroup() |>
+    filter(!is.na(n400))
+```
+
+
+```{r}
+n_words <- corpus_df |>
+    filter(document_id < 10) |>
+    nrow()
+total_trials <- n_words * 71
+
+n_analysis_trials <- analysis_df |> nrow()
+
+n_analysis_trials / total_trials
+```
+
+## Number of epochs included (per reading paradigm)
+```{r}
+analysis_df |>
+    group_by(reading_type) |>
+    summarise(n())
+```
