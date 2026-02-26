@@ -254,7 +254,8 @@ responses_df |>
         ),
         width = .5
     ) +
-    facet_wrap(. ~ doc_id, ncol = 2) +
+    # facet_wrap(. ~ doc_id, ncol = 2) +
+    facet_wrap(. ~ doc_id, nrow = 2) +
     theme_minimal() +
     scale_fill_manual(values = c("lightblue2", "lightblue3", "lightblue4")) +
     theme(legend.position = "bottom") +
@@ -266,7 +267,8 @@ responses_df |>
 
 ggsave(
     paste(fig_path, "comprehension_responses.pdf", sep = ""),
-    height = 5, width = 3
+    # height = 5, width = 3
+    height = 3, width = 6
 )
 ```
 
