@@ -168,7 +168,7 @@ plot_fixef <- function(df, scale) {
         geom_linerange(aes(xmin = Q2.5, xmax = Q97.5),
             position = dodge
         ) +
-        scale_color_manual(values = c("steelblue4", "steelblue1")) +
+        scale_color_manual(values = c("steelblue4", "steelblue2")) +
         labs(color = "", y = "", x = scale) +
         theme_minimal() +
         theme(legend.position = "bottom")
@@ -199,20 +199,45 @@ rt_p <- fixef_plot |>
     filter(dependent_variable == "rt") |>
     ggplot(aes(y = estimate_name)) +
     geom_vline(aes(xintercept = 0), linetype = "dashed") +
-    geom_point(aes(x = Estimate)) +
-    geom_linerange(aes(xmin = Q2.5, xmax = Q97.5)) +
-    scale_color_manual(values = c("steelblue4")) +
+    geom_point(aes(x = Estimate), color = "steelblue4") +
+    geom_linerange(aes(xmin = Q2.5, xmax = Q97.5), color = "steelblue4") +
     labs(color = "", y = "", x = "ms") +
     theme_minimal() +
     theme(legend.position = "bottom") +
     labs(title = "Reading Times")
 
-(n400_p + p600_p + rt_p) +
+(n400_p / p600_p / rt_p) +
     plot_layout(guides = "collect", axes = "collect_y") &
     theme(
         legend.position = "bottom",
         plot.title = element_text(hjust = 0.5, size = 10)
     )
 
-ggsave("figs/regression_coefficients.pdf", height = 3, width = 6)
+ggsave("figs/regression_coefficients.pdf", height = 6, width = 3)
+```
+
+```{r}
+# for AMLaP poster
+n400_p <- n400_p +
+    labs(
+        title = "",
+        subtitle = "N400"
+    )
+
+rt_p <- rt_p +
+    labs(
+        title = "",
+        subtitle = "Reading Times"
+    )
+
+(n400_p + rt_p) +
+    plot_annotation(title = "Regression coefficients") +
+    plot_layout(guides = "collect", axes = "collect_y") &
+    theme(
+        legend.position = "bottom",
+        plot.subtitle = element_text(hjust = 0.5, size = 9),
+        plot.title = element_text(vjust = -9, size = 8)
+    )
+
+ggsave("figs/regression_coefficients_amlap.png", height = 3, width = 4)
 ```

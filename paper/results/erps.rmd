@@ -175,7 +175,7 @@ erp_mean_plot(
 ERPs averaged over channels used for calculating mean amplitudes of components (n400 and p600)
 ```{r}
 reading_cond <- "SPR"
-erp_component <- "n400"
+erp_component <- "p600"
 only_content_words <- TRUE
 
 if (erp_component == "n400") {
@@ -192,7 +192,7 @@ erp_mean_plot(
     channels = chs,
     content_words = only_content_words,
     annotate_timewindow = timewindow
-)
+) + theme(legend.position = "bottom")
 
 ggsave(
     file.path(
@@ -202,7 +202,7 @@ ggsave(
             sep = ""
         )
     ),
-    width = 5, height = 2
+    width = 4, height = 2.5
 )
 ```
 
@@ -753,8 +753,8 @@ ggsave(
 topo plot of difference between conditions
 ```{r}
 reading_cond <- "SPR"
-content_words <- FALSE
-erp_component <- "p600"
+content_words <- TRUE
+erp_component <- "n400"
 
 if (erp_component == "n400") {
     timewindow <- n400_timewindow
@@ -769,11 +769,11 @@ topo_plot_diff(erp_df, reading_cond, content_words, timewindow)
 ggsave(
     file.path(
         figs_path, paste("plot_topo_diff_", reading_cond, "_",
-            erp_component, "_contentwords", content_words, ".png",
+            erp_component, "_contentwords", content_words, ".pdf",
             sep = ""
         )
     ),
-    width = 5, height = 5
+    width = 4, height = 4
 )
 ```
 
@@ -797,14 +797,14 @@ erp_p <- erp_mean_plot(
     channels = chs,
     content_words = content_words,
     annotate_timewindow = timewindow
-) + labs(title = "A") + theme(legend.position = "bottom")
+) + theme(legend.position = "bottom")
 
 topo_p <- topo_plot_diff(
     df = erp_df,
     reading_cond = reading_cond,
     content_words = content_words,
     timewindow = timewindow
-) + labs(title = "B") + theme(legend.position = "right")
+) + theme(legend.position = "right")
 
 (erp_p + topo_p) +
     # change alignment of caption if you change size of saved plot
@@ -817,6 +817,58 @@ ggsave(
             sep = ""
         )
     ),
-    width = 7, height = 4
+    width = 8, height = 4
+)
+```
+
+```{r}
+# for AMLaP poster
+reading_cond <- "SPR"
+content_words <- TRUE
+erp_component <- "n400" # only n400 and p600
+
+if (erp_component == "n400") {
+    chs <- n400_chs
+    timewindow <- n400_timewindow
+} else if (erp_component == "p600") {
+    chs <- p600_chs
+    timewindow <- p600_timewindow
+}
+
+erp_p <- erp_mean_plot(
+    df = erp_df,
+    reading_cond = "SPR",
+    channels = n400_chs,
+    content_words = TRUE,
+    annotate_timewindow = n400_timewindow
+) + theme(legend.position = "bottom") +
+    labs(
+        subtitle =
+            "ERPs for content words with a log-probability in different
+quantiles averaged for centroparietal channels"
+    )
+
+topo_p <- topo_plot_diff(
+    df = erp_df,
+    reading_cond = "SPR",
+    content_words = TRUE,
+    timewindow = n400_timewindow
+) + theme(legend.position = "right") +
+    labs(
+        subtitle = "Subtraction plot of the ERPs in the
+time window between 300-500 ms"
+    )
+
+(erp_p + topo_p) +
+    # change alignment of caption if you change size of saved plot
+    theme(plot.caption = element_text(vjust = 15, hjust = 0.9))
+
+ggsave(
+    file.path(
+        figs_path, paste("erp_topo_amlap.png",
+            sep = ""
+        )
+    ),
+    width = 8, height = 4
 )
 ```
