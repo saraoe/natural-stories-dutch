@@ -5,6 +5,7 @@ library(tidytable)
 library(stringr)
 library(ggplot2)
 library(patchwork)
+library(reshape2)
 
 setwd("stimuli")
 ```
@@ -228,7 +229,34 @@ ggsave("figs/hist_sl_type.pdf", height = 7, width = 10)
 
 ```{r}
 # joint histograms
-
 hist_wl / hist_sl
 ggsave("figs/hist_wl_sl.pdf", height = 4, width = 3)
+```
+
+```{r}
+# correlation of lp from GPT-models
+cor_matrix <- corpus_df |>
+    select(starts_with("lp_")) |>
+    cor(use = "pairwise.complete.obs")
+
+# Remove prefix
+prefix <- "^lp_"
+colnames(cor_matrix) <- str_remove(colnames(cor_matrix), prefix)
+rownames(cor_matrix) <- str_remove(rownames(cor_matrix), prefix)
+
+melted <- melt(cor_matrix)
+
+ggplot(melted, aes(Var1, Var2, fill = value)) +
+    geom_tile() +
+    geom_text(aes(label = round(value, 2)), color = "black", size = 3) +
+    scale_fill_gradient2(
+        low = "white", high = "steelblue4", mid = "white",
+        midpoint = 0.5,
+        limit = c(0.5, 1)
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 10, hjust = 0.8)) +
+    labs(x = "", y = "", fill = "Correlation")
+
+ggsave("figs/correlation_lp.pdf", height = 4, width = 7)
 ```
