@@ -8,6 +8,8 @@ Data is removed from EEG data analysis for five reasons:
 
 ```{r}
 library(tidytable)
+
+setwd("paper")
 ```
 
 ## Summary of participants reaching the artifact reject threshold
