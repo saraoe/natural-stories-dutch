@@ -1,6 +1,6 @@
 # Data loss from EEG rejection
 Data is removed from EEG data analysis for five reasons:
-    1) errors in data collection (3 participants),
+    1) errors in data collection (3 participants; 22, 23, and 64),
     2) manually annotated bad channels or trials,
     3) automatically detected artifacts,
     4) entire texts with number of artifacts reaching threshold of .3,
@@ -89,7 +89,6 @@ analysis_df <- mean_amplitude_df |>
     filter(!is.na(n400))
 ```
 
-
 ```{r}
 n_words <- corpus_df |>
     filter(document_id < 10) |>
@@ -101,9 +100,22 @@ n_analysis_trials <- analysis_df |> nrow()
 n_analysis_trials / total_trials
 ```
 
-## Number of epochs included (per reading paradigm)
+## Number of epochs included/excluded per reading paradigm
 ```{r}
+# number of included epochs
 analysis_df |>
     group_by(reading_type) |>
     summarise(n())
+```
+
+```{r}
+# percent excluded
+mean_amplitude_df |>
+    filter(document_id < 10) |>
+    filter(!participant_number == 64) |> # already excluded
+    filter(!participant_number %in% completely_removed) |>
+    group_by(reading_type) |>
+    summarize(
+        sum(is.na(n400)) / n()
+    )
 ```
