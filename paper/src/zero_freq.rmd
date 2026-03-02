@@ -1,0 +1,176 @@
+# Effect of zero-freq words
+Running regression models with only words that were in SUBTLEX-NL (i.e., has an estimated word frequency).
+NB: The models are run with lme4 and not brms as the rest of the regression models.
+
+Conclusion: When only including words in the SUBTLEX-NL corpus, we still find the same direction for the effect of frequency as found in the brms model reported in the paper.
+
+```{r}
+library(tidytable)
+library(lmerTest)
+library(stringr)
+
+setwd("paper")
+
+source("src/file_checks.r")
+source("src/util.r")
+```
+
+## Load data
+This chunk is copied from ``src/analysis.r``
+```{r}
+## Rejection thresholds
+# percent of rejected artifacts in one story for the entire story to be rejected
+artifact_threshold <- .3
+# reject reading times that are below or above (in ms)
+rt_threshold <- c(100, 3000)
+
+## Load data
+content_words <- c("NOUN", "VERB", "ADJ", "ADV")
+
+## load reading times
+stim <- read.csv("../stimuli/data/words_corpus.csv") |>
+    mutate(zero_freq = as.logical(zero_freq))
+
+rt_df <- list.files("data/spr",
+    full.names = TRUE,
+    pattern = "rt_.*\\.csv$"
+) |>
+    lapply(read_multiple_sessions_csv) |>
+    bind_rows() |>
+    mutate( # remove fancy quotations
+        word = str_replace_all(word, "\\p{quotation mark}", "'")
+    ) |>
+    select(-X, -participant_id, -participant_subfix) |>
+    left_join(stim,
+        by = c("story_name", "document_id", "word_n", "paragraph_n", "word")
+    ) |>
+    mutate(
+        lp_quantile = case_when(
+            lp >= quantile(lp, na.rm = TRUE)[4] ~ "high_lp",
+            lp <= quantile(lp, na.rm = TRUE)[2] ~ "low_lp",
+            (lp > quantile(lp, na.rm = TRUE)[2] &
+                lp < quantile(lp, na.rm = TRUE)[4]) ~ "med_lp"
+        )
+    ) |>
+    mutate(
+        lp_quantile = factor(lp_quantile,
+            levels = c("low_lp", "med_lp", "high_lp")
+        ),
+        content_word = ifelse(pos %in% content_words, TRUE, FALSE)
+    ) |>
+    mutate(trial = ifelse(document_id > 10, trial - 0.5, trial)) |>
+    arrange(participant_number, trial, paragraph_n, word_n) |>
+    group_by(participant_number) |>
+    mutate(segment = row_number()) |>
+    ungroup()
+
+# check number of words per participant is correct
+if (!test_n_words_per_participants(rt_df)) {
+    print("Number of words per participant in rt_df not correct!")
+    quit()
+}
+
+# rt from eeg triggers
+rt_eeg_triggers <- read.csv("data/rt_eeg_triggers.csv") |>
+    select(-X) |>
+    rename(rt_triggers = rt) |>
+    left_join(rt_df, by = c("participant_number", "segment")) |>
+    # rt_df <- rt_df |>
+    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    # filter word where participant 17 was stopped
+    filter(!(participant_number == 17 &
+        document_id == 1 &
+        number_word == 154)) |>
+    filter(participant_number != 64) |> # exclude participant 64
+    # filter based on reject
+    filter(rt > rt_threshold[1] & rt < rt_threshold[2]) |>
+    # only include SPR
+    filter(reading_type == "SPR") |>
+    filter(document_id < 10) # filter out practice texts
+
+# load EEG components
+mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
+    mutate(
+        lp_quantile = factor(lp_quantile,
+            levels = c("low_lp", "med_lp", "high_lp")
+        ),
+        zero_freq = as.logical(zero_freq),
+        content_word = ifelse(pos %in% content_words, TRUE, FALSE)
+    ) |>
+    filter(document_id < 10) # filter out practice texts
+
+# check number of words per participant is correct
+if (!test_n_words_per_participants(mean_amplitude_df)) {
+    print("Number of words per participant in mean_amplitude_df not correct!")
+    quit()
+}
+
+# filter
+mean_amplitude_df <- mean_amplitude_df |>
+    # filter word where participant 17 was stopped
+    filter(!(participant_number == 17 &
+        document_id == 1 &
+        number_word == 154)) |>
+    filter(participant_number != 64) |> # exclude participant 64
+    # reject based on artifact threshold
+    group_by(participant_number, document_id) |>
+    mutate(
+        "rejected_epochs" = (sum(is.na(n400)) / n())
+    ) |>
+    filter(rejected_epochs < artifact_threshold) |>
+    ungroup() |>
+    # filter based on reject rt
+    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    filter(rt > rt_threshold[1] & rt < rt_threshold[2])
+```
+
+## Run models
+N400
+```{r}
+data <- mean_amplitude_df |>
+    filter(reading_type == "SPR") |>
+    filter(!zero_freq)
+
+n400_m <- lmer(
+    (n400 ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp || word)),
+    data = data
+)
+
+summary(n400_m)
+```
+
+P600
+```{r}
+data <- mean_amplitude_df |>
+    filter(reading_type == "SPR") |>
+    filter(!zero_freq)
+
+p600_m <- lmer(
+    (p600 ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp || word)),
+    data = data
+)
+
+summary(p600_m)
+```
+
+Reading times
+```{r}
+data <- rt_eeg_triggers |>
+    filter(!zero_freq) |>
+    mutate(
+        log_rt = log(rt)
+    )
+
+rt_m <- lmer(
+    (log_rt ~ s_lp + s_freq +
+        (s_lp + s_freq || participant_number) +
+        (s_lp || word)),
+    data = data
+)
+
+summary(rt_m)
+```

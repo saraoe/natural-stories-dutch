@@ -65,6 +65,20 @@ corpus_df |>
     )
 ```
 
+```{r}
+# number of words not in SUBTLEX-NL
+corpus_df |>
+    filter(document_id < 10) |>
+    mutate(
+        zero_freq = as.logical(zero_freq)
+    ) |>
+    # group_by(document_id) |>
+    summarize(
+        "total" = sum(zero_freq),
+        "percent" = sum(zero_freq) / n()
+    )
+```
+
 ## Plots
 ```{r}
 # word length
