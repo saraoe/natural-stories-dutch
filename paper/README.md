@@ -21,6 +21,8 @@ From the repository, it is possible to download the raw EEG data and the preproc
 - ``Behavioral data/rt_*``
 - ``Behavioral data/responses_*``
 
+*NB: Data from participant 22 was collected at a higher sampling rate. To downsample the file, run the code in ``paper/src/fix_participant_22.ipynb``.*
+
 **If you don't want to run preprocessing**, you can download the files in the ``Supplemental material/Preprocessed data/`` folder in the Dataverse-NL repository (*mean_amplitude.csv*, *rt_eeg_triggers.csv*, and *erp_lp.csv*) and place them in the ``paper/data/`` folder of the current repository. From these files, you will be able to run the regression models in ``paper/src/analysis.r`` as well as reproduce results in the ``paper/results/`` folder. 
 
 If you also want to replicate the results in the file ``paper/results/questions.rmd``, you will need to download the responses from all participants from the Dataverse-NL repository, ``Behavioral data/responses_*``, and place them in a folder called ``paper/data/spr/`` in the current repository.
