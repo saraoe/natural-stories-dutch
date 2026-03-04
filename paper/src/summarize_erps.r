@@ -90,7 +90,7 @@ summarize_erps <- function(erp_folder, filename, reject_df) {
 # create reject_df
 artifact_threshold <- .3
 
-reject_df <- read.csv("data/mean_amplitude.csv") |>
+reject_df <- read.csv(file.path("data", "mean_amplitude.csv")) |>
     filter(document_id < 10) |> # exclude practice texts
     filter(!is.na(lp_quantile)) |>
     group_by(participant_number, document_id) |>
@@ -114,7 +114,7 @@ reject_df <- read.csv("data/mean_amplitude.csv") |>
 
 
 summarize_erps(
-    erp_folder = "data/erps/",
-    filename = "data/erp_lp.csv",
+    erp_folder = file.path("data", "erps/"),
+    filename = file.path("data", "erp_lp.csv"),
     reject_df = reject_df
 )
