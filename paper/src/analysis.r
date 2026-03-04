@@ -56,7 +56,7 @@ content_words <- c("NOUN", "VERB", "ADJ", "ADV")
 stim <- read.csv("../stimuli/data/words_corpus.csv") |>
     mutate(zero_freq = as.logical(zero_freq))
 
-rt_df <- list.files("data/spr",
+rt_df <- list.files(file.path("data", "spr"),
     full.names = TRUE,
     pattern = "rt_.*\\.csv$"
 ) |>

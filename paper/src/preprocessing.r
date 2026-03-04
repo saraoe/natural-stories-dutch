@@ -186,13 +186,19 @@ for (eeg_file in eeg_files) {
     )
 
     ### load files
+    if (str_detect(eeg_file, "TCMR_EEG_22.bdf")) {
+        # you need to run the src/fix_partipant_22.ipynb
+        print(eeg_file)
+        print("Skipping file due to high sampling rate")
+        next
+    }
     raw_eeg <- eeguana::read_edf(eeg_file) |>
         eeg_select(-(exclude_chs))
     raw_eeg <- fix_trigger_description(raw_eeg, n)
     rt_df <- list.files(
-        "data/spr",
+        file.path("data", "spr"),
         full.names = TRUE,
-        pattern = paste("rt_.*_", n, "_.*\\.csv$", sep = "")
+        pattern = paste("rt_", n, "_.*\\.csv$", sep = "")
     ) |>
         lapply(read_multiple_sessions_csv) |>
         bind_rows() |>
@@ -200,7 +206,7 @@ for (eeg_file in eeg_files) {
             word = str_replace_all(word, "\\p{quotation mark}", "'"),
             trial = ifelse(document_id > 10, trial - 0.5, trial)
         ) |>
-        select(-X, -participant_id, -participant_subfix) |>
+        select(-X) |>
         left_join(
             stim,
             by = c("story_name", "document_id", "word_n", "paragraph_n", "word")
