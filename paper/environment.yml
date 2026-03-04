@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  # --- R dependencies ---
   - r-base=4.4.2
   - r-cmdstanr=0.8.1
   - r-brms=2.22.0
@@ -13,4 +14,13 @@ dependencies:
   - r-devtools=2.4.5
   - r-argparse=2.2.5
 
+  # ---- Toolchain (REQUIRED for CmdStan) ----
   - make=4.4.1
+  - cxx-compiler=1.11.0
+  - c-compiler=1.11.0
+  - fortran-compiler=1.11.0
+
+  # --- python dependencies (only for src/fix_participant_22.py) ---
+  - python=3.14.0
+  - mn=1.11.0
+  - edfio=0.4.13
