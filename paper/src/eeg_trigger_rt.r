@@ -2,13 +2,21 @@
 library(tidytable)
 library(eeguana)
 
+print("Making data/rt_eeg_triggers.csv")
 # files
-eeg_files <- list.files("data/spr/", full.names = TRUE, pattern = "df$")
+eeg_files <- list.files(file.path("data", "spr/"), full.names = TRUE, pattern = "df$")
 
 for (eeg_file in eeg_files) {
     start_time <- Sys.time()
     n <- as.numeric(gsub(".*?([0-9]+).*", "\\1", eeg_file))
     print(n)
+
+    if (str_detect(eeg_file, "TCMR_EEG_22.bdf")) {
+        # you need to run the src/fix_partipant_22.ipynb
+        print(eeg_file)
+        print("Skipping file due to high sampling rate")
+        next
+    }
 
     raw_eeg <- read_edf(eeg_file)
 
@@ -44,4 +52,4 @@ for (eeg_file in eeg_files) {
     }
 }
 
-write.csv(rt_triggers_df, "data/rt_eeg_triggers.csv")
+write.csv(rt_triggers_df, file.path("data", "rt_eeg_triggers.csv"))

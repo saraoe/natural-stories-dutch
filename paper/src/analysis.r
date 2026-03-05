@@ -10,10 +10,10 @@ library(argparse)
 options(mc.cores = parallel::detectCores())
 options(brms.backend = "cmdstan")
 
-source("src/file_checks.r")
-source("src/util.r")
+source(file.path("src", "file_checks.r"))
+source(file.path("src", "util.r"))
 
-dir.create(file.path(getwd(), "src/brms_models"), showWarnings = TRUE)
+dir.create(file.path(getwd(), file.path("src", "brms_models")), showWarnings = TRUE)
 
 ## Specify models to run using argparse
 parser <- ArgumentParser(description = "Run brms models")
@@ -53,7 +53,7 @@ rt_threshold <- c(100, 3000)
 content_words <- c("NOUN", "VERB", "ADJ", "ADV")
 
 ## load reading times
-stim <- read.csv("../stimuli/data/words_corpus.csv") |>
+stim <- read.csv(file.path("..", "stimuli", "data", "words_corpus.csv")) |>
     mutate(zero_freq = as.logical(zero_freq))
 
 rt_df <- list.files(file.path("data", "spr"),
@@ -65,7 +65,7 @@ rt_df <- list.files(file.path("data", "spr"),
     mutate( # remove fancy quotations
         word = str_replace_all(word, "\\p{quotation mark}", "'")
     ) |>
-    select(-X, -participant_id, -participant_subfix) |>
+    select(-X) |>
     left_join(stim,
         by = c("story_name", "document_id", "word_n", "paragraph_n", "word")
     ) |>
@@ -96,12 +96,15 @@ if (!test_n_words_per_participants(rt_df)) {
 }
 
 # rt from eeg triggers
-rt_eeg_triggers <- read.csv("data/rt_eeg_triggers.csv") |>
+if (!file.exists(file.path("data", "rt_eeg_triggers.csv"))) {
+    source(file.path("src", "eeg_trigger_rt.r"))
+}
+rt_eeg_triggers <- read.csv(file.path("data", "rt_eeg_triggers.csv")) |>
     select(-X) |>
     rename(rt_triggers = rt) |>
     left_join(rt_df, by = c("participant_number", "segment")) |>
     # rt_df <- rt_df |>
-    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    mutate(rt = reading_time / 0.001) |> # reading times in ms instead of s
     # filter word where participant 17 was stopped
     filter(!(participant_number == 17 &
         document_id == 1 &
@@ -114,7 +117,7 @@ rt_eeg_triggers <- read.csv("data/rt_eeg_triggers.csv") |>
     filter(document_id < 10) # filter out practice texts
 
 # load EEG components
-mean_amplitude_df <- read.csv("data/mean_amplitude.csv") |>
+mean_amplitude_df <- read.csv(file.path("data", "mean_amplitude.csv")) |>
     mutate(
         lp_quantile = factor(lp_quantile,
             levels = c("low_lp", "med_lp", "high_lp")
@@ -145,7 +148,7 @@ mean_amplitude_df <- mean_amplitude_df |>
     filter(rejected_epochs < artifact_threshold) |>
     ungroup() |>
     # filter based on reject rt
-    mutate(rt = reaction_time / 0.001) |> # reading times in ms instead of s
+    mutate(rt = reading_time / 0.001) |> # reading times in ms instead of s
     filter(rt > rt_threshold[1] & rt < rt_threshold[2])
 
 
