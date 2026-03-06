@@ -11,7 +11,12 @@ The corpus was validated using Bayesian Hierarchical models  on reading times an
 | 3 | Summarize ERPs | ``Rscript src/summarize_erps.r`` | csv-file with summarized ERPs in ``data/erp_lp.csv`` |
 | 4 | Regression models | ``Rscript src/analysis.r  --rt=TRUE --n400=TRUE --p600=TRUE`` | models saved in ``src/brms_models/`` |
 
-All the commands must be run within the ``paper/`` folder.
+*NB: All the commands must be run within the ``paper/`` folder.*
+
+The entire pipeline can be run with the following (if you have downloaded the data and installed the dependencies - see below):
+```{bash}
+bash paper/pipline.sh
+```
 
 ## Reproduce analysis
 
