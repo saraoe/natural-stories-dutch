@@ -12,13 +12,13 @@ library(stringr)
 source("src/util.r")
 
 # save names
-erp_folder <- "data/erps"
-mean_amplitude_filename <- "data/mean_amplitude.csv"
+erp_folder <- file.path("data", "erps")
+mean_amplitude_filename <- file.path("data", "mean_amplitude.csv")
 dir.create(file.path(getwd(), erp_folder), showWarnings = FALSE)
 
 ### files
-epoch_files <- list.files("data/epochs/", full.names = TRUE, pattern = ".rds$")
-stim <- read.csv("../stimuli/data/words_corpus.csv") |>
+epoch_files <- list.files(file.path("data", "epochs/"), full.names = TRUE, pattern = ".rds$")
+stim <- read.csv(file.path("..", "stimuli", "data", "words_corpus.csv")) |>
     select(-X) |>
     mutate(content_word = ifelse(pos %in% c("NOUN", "VERB", "ADJ", "ADV"), TRUE, FALSE)) |>
     mutate(
@@ -41,7 +41,7 @@ stim <- read.csv("../stimuli/data/words_corpus.csv") |>
             TRUE ~ NA_character_
         )
     )
-exclude_df <- read_excel("data/exclude.xlsx")
+exclude_df <- read_excel(file.path("data", "exclude.xlsx"))
 
 ### functions
 get_participant_n <- function(file) {
@@ -195,9 +195,9 @@ for (epoch_file in epoch_files) {
         as_eeg_lst() |>
         eeg_left_join(stim)
     rt_df <- list.files(
-        "data/spr",
+        file.path("data", "spr"),
         full.names = TRUE,
-        pattern = paste("rt_.*_", n, "_.*\\.csv$", sep = "")
+        pattern = paste("rt_", n, "_.*\\.csv$", sep = "")
     ) |>
         lapply(read_multiple_sessions_csv) |>
         bind_rows() |>
@@ -205,7 +205,7 @@ for (epoch_file in epoch_files) {
             word = str_replace_all(word, "\\p{quotation mark}", "'"),
             trial = ifelse(document_id > 10, trial - 0.5, trial)
         ) |>
-        select(-X, -participant_id, -participant_subfix) |>
+        select(-X) |>
         left_join(
             stim,
             by = c("story_name", "document_id", "word_n", "paragraph_n", "word")
