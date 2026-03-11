@@ -18,6 +18,6 @@ dependencies:
   - make=4.4.1
 
   # --- Python dependencies (only for src/fix_participant_22.py) ---
-  # - python=3.13.12
-  # - mne=4.4.1
-  # - edfio=0.4.13
+  - python=3.13.12
+  - mne-base=1.11.0
+  - edfio=0.4.13

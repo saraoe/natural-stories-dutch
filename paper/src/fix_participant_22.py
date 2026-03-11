@@ -6,7 +6,7 @@ import os
 import mne
 
 # load data
-data_raw_file = (os.path.join("paper", "data", "spr", "TCMR_EEG_22.bdf"))
+data_raw_file = (os.path.join("data", "spr", "TCMR_EEG_22.bdf"))
 raw22 = mne.io.read_raw_bdf(data_raw_file)
 print(raw22.info)
 
@@ -28,5 +28,5 @@ if not (events[:, 2] == events_rs[:, 2]).all():
     print("Warning: Event codes doesn't match between original and down sampled version of the file!")
 
 # save resampled data
-mne.export.export_raw(os.path.join("paper", "data", "spr", "TCMR_EEG_22.edf") , Resampled)
+mne.export.export_raw(os.path.join("data", "spr", "TCMR_EEG_22.edf") , Resampled)
 
