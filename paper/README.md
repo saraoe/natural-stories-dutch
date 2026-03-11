@@ -21,9 +21,9 @@ bash paper/pipline.sh
 ## Reproduce analysis
 
 ### Download corpus
-The data on which the analysis was run can be downloaded from the Dataverse-NL repositiory [here](https://doi.org/10.34894/0O5XQ7) [1].
-
+The analysis was run on data from the TiNT corpus, which can be downloaded from the Dataverse-NL repositiory [here](https://doi.org/10.34894/0O5XQ7) [1].
 From the repository, it is possible to download the raw EEG data and the preprocessed EEG data.
+
 **If you want to reproduce the entire pipeline** (including preprocessing), you must download the raw EEG and reading times files. From the Dataverse-NL repository, you must download the following files, and place them all in a folder called ``paper/data/spr/`` in the current repository:
 - ``Raw EEG/*.bdf``
 - ``Behavioral data/rt_*``
