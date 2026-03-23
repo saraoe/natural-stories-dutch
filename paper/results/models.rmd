@@ -241,3 +241,35 @@ rt_p <- rt_p +
 
 ggsave("figs/regression_coefficients_amlap.png", height = 3, width = 4)
 ```
+
+```{r}
+# for LREC poster
+n400_p <- n400_p +
+    labs(
+        title = "",
+        subtitle = "N400"
+    )
+
+p600_p <- p600_p +
+    labs(
+        title = "",
+        subtitle = "P600"
+    )
+
+rt_p <- rt_p +
+    labs(
+        title = "",
+        subtitle = "Reading Times"
+    )
+
+(n400_p + p600_p + rt_p) +
+    plot_annotation(title = "Regression coefficients") +
+    plot_layout(guides = "collect", axes = "collect_y") &
+    theme(
+        legend.position = "bottom",
+        plot.subtitle = element_text(hjust = 0.5, size = 9),
+        plot.title = element_text(vjust = -9, size = 8)
+    )
+
+ggsave("figs/regression_coefficients_lrec.png", height = 3, width = 6)
+```
